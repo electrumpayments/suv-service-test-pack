@@ -5,8 +5,8 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.electrum.airtime.api.model.Product;
-import io.electrum.airtime.api.model.Voucher;
+//import io.electrum.airtime.api.model.Product;
+//import io.electrum.airtime.api.model.Voucher;
 import io.electrum.vas.Utils;
 import io.electrum.vas.model.Institution;
 import io.electrum.vas.model.Originator;
@@ -21,7 +21,7 @@ public class DetailMessage {
    protected String reversalId = null;
    protected String confirmationId = null;
    protected String voidId = null;
-   protected Product product = null;
+//   protected Product product = null;
    protected String requestTime = null;
    protected String reversalTime = null;
    protected String confirmDate = null;
@@ -30,7 +30,7 @@ public class DetailMessage {
    protected Originator originator = null;
    protected Institution settlementEntity = null;
    protected Institution receiver = null;
-   protected Voucher voucher = null;
+//   protected Voucher voucher = null;
    protected SlipData slipData = null;
    protected String freeString = null;
    protected List<ThirdPartyIdentifier> thirdPartyIdentifiers = null;
@@ -134,20 +134,20 @@ public class DetailMessage {
    /**
     * The product for which the voucher should be provisioned.
     **/
-   public DetailMessage product(Product product) {
-      this.product = product;
-      return this;
-   }
+//   public DetailMessage product(Product product) {
+//      this.product = product;
+//      return this;
+//   }
 
    @ApiModelProperty(value = "The product for which the voucher should be provisioned.")
    @JsonProperty("product")
-   public Product getProduct() {
-      return product;
-   }
-
-   public void setProduct(Product product) {
-      this.product = product;
-   }
+//   public Product getProduct() {
+//      return product;
+//   }
+//
+//   public void setProduct(Product product) {
+//      this.product = product;
+//   }
 
    /**
     * The date and time of the request as recorded by the sender. The format shall be as defined for date-time in [RFC
@@ -304,20 +304,20 @@ public class DetailMessage {
    /**
     * The voucher provisioned if the vendor processed the request successfully.
     **/
-   public DetailMessage voucher(Voucher voucher) {
-      this.voucher = voucher;
-      return this;
-   }
+//   public DetailMessage voucher(Voucher voucher) {
+//      this.voucher = voucher;
+//      return this;
+//   }
 
    @ApiModelProperty(value = "The voucher provisioned if the vendor processed the request successfully.")
    @JsonProperty("voucher")
-   public Voucher getVoucher() {
-      return voucher;
-   }
-
-   public void setVoucher(Voucher voucher) {
-      this.voucher = voucher;
-   }
+//   public Voucher getVoucher() {
+//      return voucher;
+//   }
+//
+//   public void setVoucher(Voucher voucher) {
+//      this.voucher = voucher;
+//   }
 
    /**
     * Data to be printed on the slip in addition to the voucher instructions.
@@ -406,14 +406,14 @@ public class DetailMessage {
       return Objects.equals(pathId, detailMessage.pathId) && Objects.equals(voucherId, detailMessage.voucherId)
             && Objects.equals(reversalId, detailMessage.reversalId)
             && Objects.equals(confirmationId, detailMessage.confirmationId)
-            && Objects.equals(voidId, detailMessage.voidId) && Objects.equals(product, detailMessage.product)
+//            && Objects.equals(voidId, detailMessage.voidId) && Objects.equals(product, detailMessage.product)
             && Objects.equals(requestTime, detailMessage.requestTime)
             && Objects.equals(reversalTime, detailMessage.reversalTime)
             && Objects.equals(confirmDate, detailMessage.confirmDate)
             && Objects.equals(voidDate, detailMessage.voidDate) && Objects.equals(originator, detailMessage.originator)
             && Objects.equals(client, detailMessage.client)
             && Objects.equals(settlementEntity, detailMessage.settlementEntity)
-            && Objects.equals(receiver, detailMessage.receiver) && Objects.equals(voucher, detailMessage.voucher)
+//            && Objects.equals(receiver, detailMessage.receiver) && Objects.equals(voucher, detailMessage.voucher)
             && Objects.equals(slipData, detailMessage.slipData) && Objects.equals(freeString, detailMessage.freeString)
             && Objects.equals(formatErrors, detailMessage.formatErrors);
    }
@@ -426,7 +426,7 @@ public class DetailMessage {
             reversalId,
             confirmationId,
             voidId,
-            product,
+//            product,
             requestTime,
             reversalTime,
             confirmDate,
@@ -435,7 +435,7 @@ public class DetailMessage {
             client,
             settlementEntity,
             receiver,
-            voucher,
+//            voucher,
             slipData,
             freeString,
             formatErrors);
@@ -451,7 +451,7 @@ public class DetailMessage {
       sb.append("    reversalId: ").append(Utils.toIndentedString(reversalId)).append("\n");
       sb.append("    confirmationId: ").append(Utils.toIndentedString(confirmationId)).append("\n");
       sb.append("    voidId: ").append(Utils.toIndentedString(voidId)).append("\n");
-      sb.append("    product: ").append(Utils.toIndentedString(product)).append("\n");
+//      sb.append("    product: ").append(Utils.toIndentedString(product)).append("\n");
       sb.append("    requestTime: ").append(Utils.toIndentedString(requestTime)).append("\n");
       sb.append("    reversalTime: ").append(Utils.toIndentedString(reversalTime)).append("\n");
       sb.append("    confirmDate: ").append(Utils.toIndentedString(confirmDate)).append("\n");
@@ -460,7 +460,7 @@ public class DetailMessage {
       sb.append("    sender: ").append(Utils.toIndentedString(client)).append("\n");
       sb.append("    processor: ").append(Utils.toIndentedString(settlementEntity)).append("\n");
       sb.append("    vendor: ").append(Utils.toIndentedString(receiver)).append("\n");
-      sb.append("    voucher: ").append(Utils.toIndentedString(voucher)).append("\n");
+//      sb.append("    voucher: ").append(Utils.toIndentedString(voucher)).append("\n");
       sb.append("    slipData: ").append(Utils.toIndentedString(slipData)).append("\n");
       sb.append("    thirdPartyIdentifiers: ").append(Utils.toIndentedString(thirdPartyIdentifiers)).append("\n");
       sb.append("    freeString: ").append(Utils.toIndentedString(freeString)).append("\n");

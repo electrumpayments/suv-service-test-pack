@@ -15,7 +15,7 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 //TODO Implement methods correctly
-public class IRefundsResourceImpl implements IRefundsResource {
+public class RefundsResourceInterfaceImpl implements IRefundsResource {
     private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
 
     @Override

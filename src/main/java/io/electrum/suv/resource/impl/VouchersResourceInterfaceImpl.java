@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.*;
 
-public class IVouchersResourceImpl implements IVouchersResource {
+public class VouchersResourceInterfaceImpl implements IVouchersResource {
    private static final Logger log = LoggerFactory.getLogger(IVouchersResource.class);
 
    @Override
@@ -30,8 +30,8 @@ public class IVouchersResourceImpl implements IVouchersResource {
    @Override
    public void provisionVoucher(
          ProvisionRequest body,
-         SecurityContext securityContext,
-         Request request,
+         SecurityContext securityContext, // unused
+         Request request, // unused?
          AsyncResponse asyncResponse,
          HttpHeaders httpHeaders,
          UriInfo uriInfo,
@@ -41,7 +41,7 @@ public class IVouchersResourceImpl implements IVouchersResource {
       log.debug(String.format("%s %s\n%s", httpServletRequest.getMethod(), uriInfo.getPath(), body));
       Response rsp =
             SUVMessageHandlerFactory.getVoucherProvisionHandler(httpHeaders)
-                  .handle(/* requestId, confirmationId, */ body);
+                  .handle(/* requestId, confirmationId, */ body, uriInfo);
       log.debug(String.format("Entity returned:\n%s", rsp.getEntity()));
 
       asyncResponse.resume(rsp);

@@ -10,17 +10,17 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.Path;
 
-//TODO Are PATHS necessary
-@Path(Paths.BASE_PATH + Paths.PROVISION_VOUCHER)
-@Api(description = "the Airtime API", authorizations = { @Authorization("httpBasic") })
+//TODO THIS IS ACTUALLY WORKING (PATH)
+@Path("suv/v1")
+@Api(description = "the SUV API", authorizations = { @Authorization("httpBasic") })
 public class VouchersResourceImpl extends VouchersResource {
-   static IVouchersResourceImpl instance = null;
+   static VouchersResourceInterfaceImpl instance = null;
    private static final Logger log = LoggerFactory.getLogger(VouchersResourceImpl.class);
 
    @Override
    protected IVouchersResource getResourceImplementation() {
       if (instance == null) {
-         instance = new IVouchersResourceImpl();
+         instance = new VouchersResourceInterfaceImpl();
       }
       return instance;
    }
