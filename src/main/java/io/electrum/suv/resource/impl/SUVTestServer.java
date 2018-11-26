@@ -71,7 +71,7 @@ public class SUVTestServer extends ResourceConfig {
 
       // TODO Convert these to the new hashmaps
       // provisionVoucherRecords = new ConcurrentHashMap<>();
-      // log.debug("Initialising new TestServer");
+       log.debug("Initialising new TestServer");
       // voucherResponseRecords = new ConcurrentHashMap<>();
       // voucherReversalRecords = new ConcurrentHashMap<>();
       // voucherConfirmationRecords = new ConcurrentHashMap<>();

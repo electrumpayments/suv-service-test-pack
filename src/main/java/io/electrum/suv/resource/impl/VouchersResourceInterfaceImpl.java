@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.*;
 
-public class IVouchersResourceImpl implements IVouchersResource {
+public class VouchersResourceInterfaceImpl implements IVouchersResource {
    private static final Logger log = LoggerFactory.getLogger(IVouchersResource.class);
 
    @Override

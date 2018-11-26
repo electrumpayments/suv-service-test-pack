@@ -15,13 +15,13 @@ import javax.ws.rs.Path;
 @Path(Paths.BASE_PATH + Paths.REFUND_VOUCHER)
 @Api(description = "the Single Use Voucher API", authorizations = { @Authorization("httpBasic") })
 public class RefundsResourceImpl extends RefundsResource {
-   static IRefundsResourceImpl instance = null;
+   static RefundsResourceInterfaceImpl instance = null;
    private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
 
    @Override
    protected IRefundsResource getResourceImplementation() {
       if (instance == null) {
-         instance = new IRefundsResourceImpl();
+         instance = new RefundsResourceInterfaceImpl();
       }
       return instance;
    }

@@ -13,8 +13,8 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.*;
 
 //TODO Implement methods correctly
-public class IRedemptionsResourceImpl implements IRedemptionsResource {
-   private static final Logger log = LoggerFactory.getLogger(IRedemptionsResourceImpl.class);
+public class RedemptionsResourceInterfaceImpl implements IRedemptionsResource {
+   private static final Logger log = LoggerFactory.getLogger(RedemptionsResourceInterfaceImpl.class);
 
    @Override
    public void redeemVoucher(

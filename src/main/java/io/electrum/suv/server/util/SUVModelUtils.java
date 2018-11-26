@@ -11,8 +11,8 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.electrum.airtime.api.model.ErrorDetail;
-import io.electrum.airtime.api.model.Voucher;
+//import io.electrum.airtime.api.model.ErrorDetail;
+//import io.electrum.airtime.api.model.Voucher;
 import io.electrum.suv.server.model.DetailMessage;
 import io.electrum.vas.model.Amounts;
 import io.electrum.vas.model.BasicAdvice;
@@ -25,7 +25,7 @@ import io.electrum.vas.model.ThirdPartyIdentifier;
 import io.electrum.vas.model.Transaction;
 
 //TODO This probably needs to be changed to work with all the new suv things.
-public class AirtimeModelUtils {
+public class SUVModelUtils {
 /*   protected static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
 
    protected static List<String> redeemInstructions = new ArrayList<String>();

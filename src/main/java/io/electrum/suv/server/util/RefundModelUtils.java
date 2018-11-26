@@ -1,25 +1,6 @@
 package io.electrum.suv.server.util;
 
-import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.ws.rs.core.Response;
-
-import io.electrum.airtime.api.PurchaseResource;
-import io.electrum.airtime.api.model.ErrorDetail;
-import io.electrum.airtime.api.model.Msisdn;
-import io.electrum.airtime.api.model.Product;
-import io.electrum.airtime.api.model.PurchaseConfirmation;
-import io.electrum.airtime.api.model.PurchaseRequest;
-import io.electrum.airtime.api.model.PurchaseResponse;
-import io.electrum.airtime.api.model.PurchaseReversal;
-import io.electrum.suv.server.SUVTestServerRunner;
-import io.electrum.suv.server.model.DetailMessage;
-import io.electrum.vas.JsonUtil;
-import io.electrum.vas.model.BasicReversal;
-import io.electrum.vas.model.Institution;
-
-public class RefundModelUtils extends AirtimeModelUtils {
+public class RefundModelUtils extends SUVModelUtils {
 
    // TODO Reimplement all these for new values
    //<editor-fold desc="error and validation checks on data storage">
