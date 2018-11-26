@@ -62,6 +62,7 @@ public class SUVTestServer extends ResourceConfig {
 
       register(MyObjectMapperProvider.class);
       register(JacksonFeature.class);
+      register(VouchersResourceImpl.class);
 
       //TODO Figure out what this does
 //      register(

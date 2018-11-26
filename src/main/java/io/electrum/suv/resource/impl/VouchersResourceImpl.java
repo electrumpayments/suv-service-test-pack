@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.Path;
 
 //TODO Are PATHS necessary
-@Path("suv/v1/vouchers")
+@Path("/suv/v1/vouchers")
 @Api(description = "the SUV API", authorizations = { @Authorization("httpBasic") })
 public class VouchersResourceImpl extends VouchersResource {
    static VouchersResourceInterfaceImpl instance = null;
