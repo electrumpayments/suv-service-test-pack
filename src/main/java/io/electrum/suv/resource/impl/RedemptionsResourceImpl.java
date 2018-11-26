@@ -26,7 +26,7 @@ import io.swagger.annotations.Authorization;
 @Api(description = "the Single Use Voucher API", authorizations = { @Authorization("httpBasic") })
 public class RedemptionsResourceImpl extends RedemptionsResource {
    static IRedemptionsResourceImpl instance = null;
-   private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
+   private static final Logger log = LoggerFactory.getLogger(RedemptionsResourceImpl.class);
 
    @Override
    protected IRedemptionsResource getResourceImplementation() {

@@ -255,7 +255,7 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>io.electrum.suv.server.AirtimeTestServerRunner</mainClass>
+                                    <mainClass>io.electrum.suv.server.SUVTestServerRunner</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>

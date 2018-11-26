@@ -15,7 +15,7 @@ import javax.ws.rs.Path;
 @Api(description = "the Airtime API", authorizations = { @Authorization("httpBasic") })
 public class VouchersResourceImpl extends VouchersResource {
    static IVouchersResourceImpl instance = null;
-   private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
+   private static final Logger log = LoggerFactory.getLogger(VouchersResourceImpl.class);
 
    @Override
    protected IVouchersResource getResourceImplementation() {
