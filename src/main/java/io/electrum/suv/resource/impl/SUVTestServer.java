@@ -42,17 +42,17 @@ public class SUVTestServer extends ResourceConfig {
    // The value of the hashmap is a class in the models,
    // can be found (with its record name pair) in the docs under params/schema for each request type.
    private ConcurrentHashMap<RequestKey, ProvisionRequest> voucherProvisionRecords;
-   private ConcurrentHashMap<RequestKey, RedemptionRequest> voucherRedemptionRecords;
-   private ConcurrentHashMap<RequestKey, RefundRequest> voucherRefundRecords;
+    private ConcurrentHashMap<RequestKey, RedemptionRequest> voucherRedemptionRecords;
+    private ConcurrentHashMap<RequestKey, RefundRequest> voucherRefundRecords;
 
-   private ConcurrentHashMap<RequestKey, TenderAdvice> voucherConfirmationRecords;
-   private ConcurrentHashMap<RequestKey, BasicReversal> voucherReversalRecords;
+    private ConcurrentHashMap<RequestKey, TenderAdvice> voucherConfirmationRecords;
+    private ConcurrentHashMap<RequestKey, BasicReversal> voucherReversalRecords;
 
-   private ConcurrentHashMap<RequestKey, BasicAdvice> redemptionConfirmationRecourds;
-   private ConcurrentHashMap<RequestKey, BasicReversal> redemptionReversalRecourds;
+    private ConcurrentHashMap<RequestKey, BasicAdvice> redemptionConfirmationRecourds;
+    private ConcurrentHashMap<RequestKey, BasicReversal> redemptionReversalRecourds;
 
-   private ConcurrentHashMap<RequestKey, BasicAdvice> refundConfirmationRecords;
-   private ConcurrentHashMap<RequestKey, BasicReversal> refundReversalRecords;
+    private ConcurrentHashMap<RequestKey, BasicAdvice> refundConfirmationRecords;
+    private ConcurrentHashMap<RequestKey, BasicReversal> refundReversalRecords;
 
 
    // This hashmap stores the relationship between purchase references and purchase request id's so a purchase reference
@@ -74,18 +74,18 @@ public class SUVTestServer extends ResourceConfig {
 //      register(new AirtimeViolationExceptionMapper());
 
       // TODO Convert these to the new hashmaps
-      // provisionVoucherRecords = new ConcurrentHashMap<>();
-       log.debug("Initialising new TestServer");
-      // voucherResponseRecords = new ConcurrentHashMap<>();
-      // voucherReversalRecords = new ConcurrentHashMap<>();
-      // voucherConfirmationRecords = new ConcurrentHashMap<>();
-      //
-      // purchaseRequestRecords = new ConcurrentHashMap<>();
-      // purchaseResponseRecords = new ConcurrentHashMap<>();
-      // purchaseReversalRecords = new ConcurrentHashMap<>();
-      // purchaseConfirmationRecords = new ConcurrentHashMap<>();
-      //
-      // purchaseReferenceRecords = new ConcurrentHashMap<>();
+      voucherRedemptionRecords = new ConcurrentHashMap<>();
+      redemptionConfirmationRecourds = new ConcurrentHashMap<>();
+      redemptionReversalRecourds = new ConcurrentHashMap<>();
+      voucherRefundRecords = new ConcurrentHashMap<>();
+      refundConfirmationRecords = new ConcurrentHashMap<>();
+      refundReversalRecords = new ConcurrentHashMap<>();
+      voucherProvisionRecords = new ConcurrentHashMap<>();
+      voucherConfirmationRecords = new ConcurrentHashMap<>();
+      voucherReversalRecords = new ConcurrentHashMap<>();
+      purchaseReferenceRecords = new ConcurrentHashMap<>();
+
+      log.debug("Initialising new TestServer");
    }
 
    // TODO CodeStyle reorder methods
