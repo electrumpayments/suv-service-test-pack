@@ -71,18 +71,18 @@ public class SUVTestServer extends ResourceConfig {
 //      register(new AirtimeViolationExceptionMapper());
 
       // TODO Convert these to the new hashmaps
-      // provisionVoucherRecords = new ConcurrentHashMap<>();
-       log.debug("Initialising new TestServer");
-      // voucherResponseRecords = new ConcurrentHashMap<>();
-      // voucherReversalRecords = new ConcurrentHashMap<>();
-      // voucherConfirmationRecords = new ConcurrentHashMap<>();
-      //
-      // purchaseRequestRecords = new ConcurrentHashMap<>();
-      // purchaseResponseRecords = new ConcurrentHashMap<>();
-      // purchaseReversalRecords = new ConcurrentHashMap<>();
-      // purchaseConfirmationRecords = new ConcurrentHashMap<>();
-      //
-      // purchaseReferenceRecords = new ConcurrentHashMap<>();
+      voucherRedemptionRecords = new ConcurrentHashMap<>();
+      redemptionConfirmationRecourds = new ConcurrentHashMap<>();
+      redemptionReversalRecourds = new ConcurrentHashMap<>();
+      voucherRefundRecords = new ConcurrentHashMap<>();
+      refundConfirmationRecords = new ConcurrentHashMap<>();
+      refundReversalRecords = new ConcurrentHashMap<>();
+      voucherProvisionRecords = new ConcurrentHashMap<>();
+      voucherConfirmationRecords = new ConcurrentHashMap<>();
+      voucherReversalRecords = new ConcurrentHashMap<>();
+      purchaseReferenceRecords = new ConcurrentHashMap<>();
+
+      log.debug("Initialising new TestServer");
    }
 
    // TODO Generate getters/setters
