@@ -42,18 +42,18 @@ public class SUVTestServer extends ResourceConfig {
    // The value of the hashmap is a class in the models,
    // can be found (with its record name pair) in the docs under params/schema for each request type.
    private ConcurrentHashMap<RequestKey, ProvisionRequest> voucherProvisionRecords;
-    private ConcurrentHashMap<RequestKey, RedemptionRequest> voucherRedemptionRecords;
-    private ConcurrentHashMap<RequestKey, RefundRequest> voucherRefundRecords;
+   private ConcurrentHashMap<RequestKey, RedemptionRequest> voucherRedemptionRecords;
+   private ConcurrentHashMap<RequestKey, RefundRequest> voucherRefundRecords;
+   private ConcurrentHashMap<RequestKey, ProvisionResponse> voucherResponseRecords;
 
-    private ConcurrentHashMap<RequestKey, TenderAdvice> voucherConfirmationRecords;
-    private ConcurrentHashMap<RequestKey, BasicReversal> voucherReversalRecords;
+   private ConcurrentHashMap<RequestKey, TenderAdvice> voucherConfirmationRecords;
+   private ConcurrentHashMap<RequestKey, BasicReversal> voucherReversalRecords;
 
-    private ConcurrentHashMap<RequestKey, BasicAdvice> redemptionConfirmationRecourds;
-    private ConcurrentHashMap<RequestKey, BasicReversal> redemptionReversalRecourds;
+   private ConcurrentHashMap<RequestKey, BasicAdvice> redemptionConfirmationRecourds;
+   private ConcurrentHashMap<RequestKey, BasicReversal> redemptionReversalRecourds;
 
-    private ConcurrentHashMap<RequestKey, BasicAdvice> refundConfirmationRecords;
-    private ConcurrentHashMap<RequestKey, BasicReversal> refundReversalRecords;
-
+   private ConcurrentHashMap<RequestKey, BasicAdvice> refundConfirmationRecords;
+   private ConcurrentHashMap<RequestKey, BasicReversal> refundReversalRecords;
 
    // This hashmap stores the relationship between purchase references and purchase request id's so a purchase reference
    // can be used to retrieve the correlated purchase request id
@@ -67,22 +67,26 @@ public class SUVTestServer extends ResourceConfig {
       register(MyObjectMapperProvider.class);
       register(JacksonFeature.class);
 
-      //TODO Figure out what this does
-//      register(
-//            new HibernateValidationFeature(
-//                  new DropwizardConfiguredValidator(Validators.newValidatorFactory().getValidator())));
-//      register(new AirtimeViolationExceptionMapper());
+      // TODO Figure out what this does
+      // register(
+      // new HibernateValidationFeature(
+      // new DropwizardConfiguredValidator(Validators.newValidatorFactory().getValidator())));
+      // register(new AirtimeViolationExceptionMapper());
 
-      // TODO Convert these to the new hashmaps
-      voucherRedemptionRecords = new ConcurrentHashMap<>();
-      redemptionConfirmationRecourds = new ConcurrentHashMap<>();
-      redemptionReversalRecourds = new ConcurrentHashMap<>();
-      voucherRefundRecords = new ConcurrentHashMap<>();
-      refundConfirmationRecords = new ConcurrentHashMap<>();
-      refundReversalRecords = new ConcurrentHashMap<>();
       voucherProvisionRecords = new ConcurrentHashMap<>();
+      voucherRedemptionRecords = new ConcurrentHashMap<>();
+      voucherRefundRecords = new ConcurrentHashMap<>();
+      voucherResponseRecords = new ConcurrentHashMap<>();
+
       voucherConfirmationRecords = new ConcurrentHashMap<>();
       voucherReversalRecords = new ConcurrentHashMap<>();
+
+      redemptionConfirmationRecourds = new ConcurrentHashMap<>();
+      redemptionReversalRecourds = new ConcurrentHashMap<>();
+
+      refundConfirmationRecords = new ConcurrentHashMap<>();
+      refundReversalRecords = new ConcurrentHashMap<>();
+
       purchaseReferenceRecords = new ConcurrentHashMap<>();
 
       log.debug("Initialising new TestServer");
@@ -90,6 +94,11 @@ public class SUVTestServer extends ResourceConfig {
 
    // TODO CodeStyle reorder methods
    // TODO Generate setters as needed
+
+   public ConcurrentHashMap<RequestKey, ProvisionResponse> getVoucherResponseRecords() {
+      return voucherResponseRecords;
+   }
+
    public ConcurrentHashMap<RequestKey, RedemptionRequest> getVoucherRedemptionRecords() {
       return voucherRedemptionRecords;
    }

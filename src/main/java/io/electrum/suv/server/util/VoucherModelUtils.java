@@ -67,6 +67,7 @@ public class VoucherModelUtils extends SUVModelUtils {
    }
 
    // TODO Ensure method actually does what it should do
+   /** Creates a corresponding ProvisionResponse from a ProvisionRequest */
    public static ProvisionResponse voucherRspFromReq(ProvisionRequest req) throws IOException {
       ProvisionResponse voucherResponse =
             JsonUtil.deserialize(JsonUtil.serialize(req, ProvisionRequest.class), ProvisionResponse.class);
@@ -74,8 +75,8 @@ public class VoucherModelUtils extends SUVModelUtils {
       updateWithRandomizedIdentifiers(voucherResponse);
       voucherResponse.setVoucher(createRandomizedVoucher());
       voucherResponse.setSlipData(createRandomizedSlipData());
-      voucherResponse.setResponseProduct(req.getProduct().name("TalkALot").type(Product.ProductType.AIRTIME_FIXED));
-
+      // voucherResponse.setResponseProduct(req.getProduct().name("TalkALot").type(Product.ProductType.AIRTIME_FIXED));
+      // TODO Voucher.amounts never appears to be set from null
       return voucherResponse;
    }
 }

@@ -55,6 +55,7 @@ public class VoucherProvisionHandler extends BaseHandler {
          // todo fill method
          RequestKey key = addVoucherRequestToCache(provisionRequest.getId(), provisionRequest);
 
+         // TODO See Giftcard, should this all be done differently
          ProvisionResponse provisionRsp = VoucherModelUtils.voucherRspFromReq(provisionRequest);
 
          addVoucherResponseToCache(key, provisionRsp);
@@ -76,7 +77,7 @@ public class VoucherProvisionHandler extends BaseHandler {
 
    // Todo confirm correct function of method
    /**
-    * Adds the voucher request to the VoucherProvisionRecords
+    * Adds the voucher provision request to the VoucherProvisionRecords
     *
     * @param voucherId
     *           the unique identifier for this request
@@ -92,10 +93,17 @@ public class VoucherProvisionHandler extends BaseHandler {
       return key;
    }
 
+   /**
+    * Adds the voucher provision response to the VoucherResponseRecords
+    * 
+    * @param key
+    *           The unique key of this response, the same key as the corresponding VoucherRequest
+    * @param provisionRsp
+    *           //TODO Fill params
+    */
    private void addVoucherResponseToCache(RequestKey key, ProvisionResponse provisionRsp) {
-      ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords =
-            SUVTestServerRunner.getTestServer().getVoucherProvisionRecords();
-      provisionRecords.put(key, request);
-      return key;
+      ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords =
+            SUVTestServerRunner.getTestServer().getVoucherResponseRecords();
+      responseRecords.put(key, provisionRsp);
    }
 }
