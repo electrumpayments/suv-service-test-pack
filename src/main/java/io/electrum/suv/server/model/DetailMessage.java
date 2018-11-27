@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 //import io.electrum.airtime.api.model.Product;
 //import io.electrum.airtime.api.model.Voucher;
+import io.electrum.suv.api.models.Voucher;
 import io.electrum.vas.Utils;
 import io.electrum.vas.model.Institution;
 import io.electrum.vas.model.Originator;
@@ -30,7 +31,7 @@ public class DetailMessage {
    protected Originator originator = null;
    protected Institution settlementEntity = null;
    protected Institution receiver = null;
-//   protected Voucher voucher = null;
+   protected Voucher voucher = null;
    protected SlipData slipData = null;
    protected String freeString = null;
    protected List<ThirdPartyIdentifier> thirdPartyIdentifiers = null;
@@ -304,20 +305,20 @@ public class DetailMessage {
    /**
     * The voucher provisioned if the vendor processed the request successfully.
     **/
-//   public DetailMessage voucher(Voucher voucher) {
-//      this.voucher = voucher;
-//      return this;
-//   }
+   public DetailMessage voucher(Voucher voucher) {
+      this.voucher = voucher;
+      return this;
+   }
 
    @ApiModelProperty(value = "The voucher provisioned if the vendor processed the request successfully.")
    @JsonProperty("voucher")
-//   public Voucher getVoucher() {
-//      return voucher;
-//   }
-//
-//   public void setVoucher(Voucher voucher) {
-//      this.voucher = voucher;
-//   }
+   public Voucher getVoucher() {
+      return voucher;
+   }
+
+   public void setVoucher(Voucher voucher) {
+      this.voucher = voucher;
+   }
 
    /**
     * Data to be printed on the slip in addition to the voucher instructions.

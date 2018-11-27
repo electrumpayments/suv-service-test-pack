@@ -6,6 +6,7 @@ import java.util.Objects;
 public class RequestKey {
    //TODO Enum?
    public static final String VOUCHERS_RESOURCE = "vouchers";
+   public static final String REVERSALS_RESOURCE = "reversals";
    public static final String REDEMPTIONS_RESOURCE = "redemptions";
    public static final String REFUNDS_RESOURCE = "refunds";
 

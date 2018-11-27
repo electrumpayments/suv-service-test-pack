@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
+import io.electrum.suv.api.models.ErrorDetail;
 import io.electrum.suv.api.models.Voucher;
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.model.FormatError;
@@ -41,13 +42,20 @@ public class SUVModelUtils {
       messageLines.add(new SlipLine().text("operator."));
    }
 
+   public static ErrorDetail buildFormatErrorRsp(List<String> errors) {
+      if (errors.size() == 0) {
+         return null;
+      }
+      List<FormatError> formatErrors = new ArrayList<>(errors.size());
+      for (String error : errors) {
+         formatErrors.add(new FormatError().msg(error));
+      }
+      return new ErrorDetail().errorType(ErrorDetail.ErrorType.FORMAT_ERROR)
+            .errorMessage("Bad formatting.")
+            .detailMessage(new DetailMessage().formatErrors(formatErrors));
+   }
+
    /*
-    * public static ErrorDetail buildFormatErrorRsp(List<String> errors) { if (errors.size() == 0) { return null; }
-    * List<FormatError> formatErrors = new ArrayList<>(errors.size()); for (String error : errors) {
-    * formatErrors.add(new FormatError().msg(error)); } return new
-    * ErrorDetail().errorType(ErrorDetail.ErrorType.FORMAT_ERROR) .errorMessage("Bad formatting.") .detailMessage(new
-    * DetailMessage().formatErrors(formatErrors)); }
-    * 
     * public static BasicAdviceResponse buildAdviceResponseFromAdvice(BasicAdvice basicAdvice) { return new
     * BasicAdviceResponse().id(basicAdvice.getId()) .requestId(basicAdvice.getRequestId()) .time(basicAdvice.getTime())
     * .transactionIdentifiers(basicAdvice.getThirdPartyIdentifiers()); }
@@ -115,34 +123,69 @@ public class SUVModelUtils {
     * DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage(); detailMessage.setPathId(pathId);
     * 
     * return errorDetail; }
-    * 
-    * public static ErrorDetail buildDuplicateErrorDetail( String objectId, String originalMsgId,
-    * ErrorDetail.RequestType requestType, Transaction transaction) {
-    * 
-    * ErrorDetail errorDetail = buildErrorDetail( objectId, "Duplicate UUID.",
-    * "Request with String already processed with the associated fields.", originalMsgId, requestType,
-    * ErrorDetail.ErrorType.DUPLICATE_RECORD);
-    * 
-    * DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-    * detailMessage.setVoucherId(objectId); detailMessage.setRequestTime(transaction.getTime().toString()); //
-    * detailMessage.setProduct(transaction.getProduct()); detailMessage.setReceiver(transaction.getReceiver());
-    * 
-    * return errorDetail; }
-    * 
-    * public static ErrorDetail buildErrorDetail( String objectId, String errorMessage, String detailMessageFreeString,
-    * String originalMsgId, ErrorDetail.RequestType requestType, ErrorDetail.ErrorType errorType) {
-    * 
-    * ErrorDetail errorDetail = new ErrorDetail().errorType(errorType) .errorMessage(errorMessage) .id(objectId)
-    * .originalId(originalMsgId) .requestType(requestType);
-    * 
-    * DetailMessage detailMessage = new DetailMessage(); detailMessage.setFreeString(detailMessageFreeString);
-    * detailMessage.setReversalId(originalMsgId);
-    * 
-    * errorDetail.setDetailMessage(detailMessage);
-    * 
-    * return errorDetail; }
-    * 
-    * public static boolean isUuidConsistent(String pathId, String serviceId) { return pathId.equals(serviceId); }
     */
+
+   public static ErrorDetail buildDuplicateErrorDetail(
+         String objectId,
+         String originalMsgId,
+         // ErrorDetail.RequestType requestType,
+         Transaction transaction) {
+
+      ErrorDetail errorDetail =
+            buildErrorDetail(
+                  objectId,
+                  "Duplicate UUID.",
+                  "Request with String already processed with the associated fields.",
+                  originalMsgId,
+                  // requestType,
+                  ErrorDetail.ErrorType.DUPLICATE_RECORD);
+
+      DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+      detailMessage.setVoucherId(objectId);
+      detailMessage.setRequestTime(transaction.getTime().toString()); //
+      // detailMessage.setProduct(transaction.getProduct()); //TODO This was removed in airtime, important? Check
+      // giftcard
+      detailMessage.setReceiver(transaction.getReceiver());
+
+      return errorDetail;
+   }
+
+   public static ErrorDetail buildErrorDetail(
+         String objectId,
+         String errorMessage,
+         String detailMessageFreeString,
+         String originalMsgId,
+         // ErrorDetail.RequestType requestType,
+         ErrorDetail.ErrorType errorType) {
+
+      ErrorDetail errorDetail =
+            new ErrorDetail().errorType(errorType).errorMessage(errorMessage).id(objectId).originalId(originalMsgId);
+      // .requestType(requestType);
+
+      DetailMessage detailMessage = new DetailMessage();
+      detailMessage.setFreeString(detailMessageFreeString);
+      detailMessage.setReversalId(originalMsgId);
+
+      errorDetail.setDetailMessage(detailMessage);
+
+      return errorDetail;
+   }
+
+   // TODO This is unusable in the SUV interface
+   public static boolean isUuidConsistent(String pathId, String serviceId) {
+      return pathId.equals(serviceId);
+   }
+
+   // TODO Can this be converted to Hibernate?
+
+   /**
+    * Ensures the uuid conforms to
+    * 
+    * @param uuid
+    * @return
+    */
+   public static boolean isUuidConsistent(String uuid) {
+      return uuid.matches("([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}");
+   }
 
 }

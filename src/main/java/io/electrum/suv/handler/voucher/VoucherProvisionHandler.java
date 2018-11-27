@@ -1,5 +1,6 @@
 package io.electrum.suv.handler.voucher;
 
+import io.dropwizard.jersey.validation.JerseyViolationException;
 import io.electrum.suv.api.models.ErrorDetail;
 import io.electrum.suv.api.models.ProvisionRequest;
 import io.electrum.suv.api.models.ProvisionResponse;
@@ -10,6 +11,7 @@ import io.electrum.suv.server.util.VoucherModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.validation.constraints.Null;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -17,6 +19,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class VoucherProvisionHandler extends BaseHandler {
    private static final Logger log = LoggerFactory.getLogger(VoucherProvisionHandler.class);
+
+   @Null
+   String uuid;
 
    public VoucherProvisionHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
@@ -35,25 +40,32 @@ public class VoucherProvisionHandler extends BaseHandler {
          Response rsp;
          // TODO Actually implement this method
          // TODO Validate parameters are consistent and correct
-         if (!VoucherModelUtils.isUuidConsistent(provisionRequest.getId())) {
-            return Response.status(400).entity((buildVoucherRequestErrorResponse(provisionRequest.getId()))).build();
+         //TODO Actually vvalidate these
+         if (provisionRequest.getId().equals("somethingstupid"))
+            throw new JerseyViolationException(null, null);
+         uuid = provisionRequest.getId();
+
+         if (!VoucherModelUtils.isUuidConsistent(uuid)) {
+            return Response.status(400).entity((buildVoucherRequestErrorResponse(uuid))).build();
          }
 
          if (!provisionRequest.getClient().getId().equals(username)) {
             return VoucherModelUtils.buildIncorrectUsernameErrorResponse(
-                  provisionRequest.getId(),
+                    uuid,
                   provisionRequest.getClient(),
                   username,
                   ErrorDetail.ErrorType.AUTHENTICATION_ERROR);
          }
 
+         // Check voucher
          // TODO canProvisionVoucher?
-         /*
-          * rsp = VoucherModelUtils.canProvisionVoucher(voucherId, username, password); if(rsp!=null){ return rsp; }
-          */
+         rsp = VoucherModelUtils.canProvisionVoucher(uuid, username, password);
+         if (rsp != null) {
+            return rsp;
+         }
 
          // todo fill method
-         RequestKey key = addVoucherRequestToCache(provisionRequest.getId(), provisionRequest);
+         RequestKey key = addVoucherRequestToCache(uuid, provisionRequest);
 
          // TODO See Giftcard, should this all be done differently
          ProvisionResponse provisionRsp = VoucherModelUtils.voucherRspFromReq(provisionRequest);

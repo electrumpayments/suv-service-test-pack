@@ -8,7 +8,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
+import io.dropwizard.jersey.validation.DropwizardConfiguredValidator;
+import io.dropwizard.jersey.validation.HibernateValidationFeature;
+import io.dropwizard.jersey.validation.Validators;
 import io.electrum.suv.api.models.*;
+import io.electrum.suv.server.SUVViolationExceptionMapper;
 import io.electrum.vas.model.BasicAdvice;
 import io.electrum.vas.model.TenderAdvice;
 import org.glassfish.jersey.jackson.JacksonFeature;
@@ -68,10 +72,10 @@ public class SUVTestServer extends ResourceConfig {
       register(JacksonFeature.class);
 
       // TODO Figure out what this does
-      // register(
-      // new HibernateValidationFeature(
-      // new DropwizardConfiguredValidator(Validators.newValidatorFactory().getValidator())));
-      // register(new AirtimeViolationExceptionMapper());
+       register(
+       new HibernateValidationFeature(
+       new DropwizardConfiguredValidator(Validators.newValidatorFactory().getValidator())));
+       register(new SUVViolationExceptionMapper());
 
       voucherProvisionRecords = new ConcurrentHashMap<>();
       voucherRedemptionRecords = new ConcurrentHashMap<>();
