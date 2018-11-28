@@ -26,7 +26,6 @@ import io.electrum.vas.model.SlipLine;
 import io.electrum.vas.model.ThirdPartyIdentifier;
 import io.electrum.vas.model.Transaction;
 
-//TODO This probably needs to be changed to work with all the new suv things.
 public class SUVModelUtils {
    protected static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
 
@@ -42,6 +41,7 @@ public class SUVModelUtils {
       messageLines.add(new SlipLine().text("operator."));
    }
 
+   /** Builds list of format errors to be returned as part of a detail message in an errorDetail. */
    public static ErrorDetail buildFormatErrorRsp(List<String> errors) {
       if (errors.size() == 0) {
          return null;
@@ -61,6 +61,11 @@ public class SUVModelUtils {
     * .transactionIdentifiers(basicAdvice.getThirdPartyIdentifiers()); }
     */
 
+   /**
+    * Create a new voucher with randomized values
+    * 
+    * @return
+    */
    protected static Voucher createRandomizedVoucher() {
       Voucher voucher = new Voucher();
       voucher.setCode(RandomData.random09((int) ((Math.random() * 20) + 1)));
@@ -71,17 +76,27 @@ public class SUVModelUtils {
       return voucher;
    }
 
+   /** Returns a new randomized {@link SlipData} with message lines populated. */
    protected static SlipData createRandomizedSlipData() {
       SlipData slipData = new SlipData();
       slipData.setMessageLines(messageLines);
       return slipData;
    }
 
-   //todo why randomise these instead of using the ones sent by the requests?
+   // todo why randomise these instead of using the ones sent by the requests?
+
+   /**
+    * Updates a given {@link Transaction transaction} with randomized 3rd party IDs. Inserts placeholder settlement
+    * entity if transaction does not include one.
+    * 
+    * @param transaction
+    *           to be updated
+    */
    protected static void updateWithRandomizedIdentifiers(Transaction transaction) {
       List<ThirdPartyIdentifier> thirdPartyIds = transaction.getThirdPartyIdentifiers();
       Institution settlementEntity = transaction.getSettlementEntity();
       if (settlementEntity == null) {
+         log.debug("Settlement Entity not found, creating placeholder.");
          settlementEntity = new Institution();
          settlementEntity.setId("33333333");
          settlementEntity.setName("TransactionsRUs");
@@ -126,6 +141,7 @@ public class SUVModelUtils {
     * return errorDetail; }
     */
 
+   /** Builds an {@link ErrorDetail} for duplicate UUID errors */
    public static ErrorDetail buildDuplicateErrorDetail(
          String objectId,
          String originalMsgId,
@@ -144,13 +160,13 @@ public class SUVModelUtils {
       DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
       detailMessage.setVoucherId(objectId);
       detailMessage.setRequestTime(transaction.getTime().toString()); //
-      // detailMessage.setProduct(transaction.getProduct()); //TODO This was removed in airtime, important? Check
-      // giftcard
+      // detailMessage.setProduct(transaction.getProduct()); //TODO This was removed in airtime, important? See giftcard
       detailMessage.setReceiver(transaction.getReceiver());
 
       return errorDetail;
    }
 
+   /** Builds a new error detail (including a detail message) from specific messages. */
    public static ErrorDetail buildErrorDetail(
          String objectId,
          String errorMessage,
@@ -172,20 +188,10 @@ public class SUVModelUtils {
       return errorDetail;
    }
 
-   // TODO This is unusable in the SUV interface
-   public static boolean isValidUuid(String pathId, String serviceId) {
-      return pathId.equals(serviceId);
-   }
-
    // TODO Can this be converted to Hibernate?
-
-   /**
-    * Ensures the uuid conforms to
-    * 
-    * @param uuid
-    * @return
-    */
+   /** Confirms UUID format valid using regex (8-4-4-4-12 hexadecimal) */
    public static boolean isValidUuid(String uuid) {
+       if(uuid == null) return false; //TODO this should no longer be necessary
       return uuid.matches("([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}");
    }
 

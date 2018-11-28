@@ -19,16 +19,30 @@ import java.util.concurrent.ConcurrentHashMap;
 public class VoucherModelUtils extends SUVModelUtils {
    static Logger log = LoggerFactory.getLogger(VoucherModelUtils.class);
 
-
    // TODO confirm correct function
    // TODO documentation
+
+   /**
+    * Determine whether a given {@link io.electrum.suv.api.models.Voucher voucher} provision request is able to be
+    * completed. Ensures voucher is not already provisioned, reversed, or redeemed:
+    * 
+    * 
+    * @param voucherId
+    *           the unique identifier of this voucher
+    * @param username
+    *           from BasicAuth
+    * @param password
+    *           from BasicAuth
+    * @return A 400 error response indicating the voucher could not be provisioned, null if able to provision.
+    */
    public static Response canProvisionVoucher(String voucherId, String username, String password) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
 
       ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getVoucherProvisionRecords();
+      // TODO Could make requestKey part of method args
       RequestKey requestKey = new RequestKey(username, password, RequestKey.VOUCHERS_RESOURCE, voucherId);
-      ProvisionRequest originalRequest = provisionRecords.get(requestKey); // check the voucher is not already
-                                                                           // provisioned
+      ProvisionRequest originalRequest = provisionRecords.get(requestKey);
+
       // If Voucher already provisioned
       if (originalRequest != null) {
          ErrorDetail errorDetail =
@@ -75,11 +89,15 @@ public class VoucherModelUtils extends SUVModelUtils {
       }
 
       // TODO Validate Voucher not Redeemed
-      // TODO Validate Voucher not provisioned?
       return null;
    }
 
    // TODO Ensure method is correct
+
+   /**
+    * Builds a 400 error response indicating the BasicAuth username is inconsistent with the username in the body of the
+    * request.
+    */
    public static Response buildIncorrectUsernameErrorResponse(
          String objectId,
          Institution client,
@@ -102,6 +120,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       return Response.status(400).entity(errorDetail).build();
    }
 
+   /** Build a 400 error response indicating the UUID format is invalid. Provides details of expected format. */
    public static Response buildInvalidUuidErrorResponse(
          String objectId,
          Institution client,
@@ -112,9 +131,9 @@ public class VoucherModelUtils extends SUVModelUtils {
             buildErrorDetail(
                   objectId,
                   "Invalid UUID",
-                  "The UUID in the request body is not a vail UUID format." +
-                          "\nUUID must conform to the format 8-4-4-4-12 hexedecimal values." +
-                          "\nExample: 58D5E212-165B-4CA0-909B-C86B9CEE0111",
+                  "The UUID in the request body is not a vail UUID format."
+                        + "\nUUID must conform to the format 8-4-4-4-12 hexedecimal values."
+                        + "\nExample: 58D5E212-165B-4CA0-909B-C86B9CEE0111",
                   null,
 
                   ErrorDetail.ErrorType.FORMAT_ERROR);
@@ -153,7 +172,6 @@ public class VoucherModelUtils extends SUVModelUtils {
       voucherResponse.setVoucher(createRandomizedVoucher());
       voucherResponse.setSlipData(createRandomizedSlipData());
       // voucherResponse.setResponseProduct(req.getProduct().name("TalkALot").type(Product.ProductType.AIRTIME_FIXED));
-      // TODO Voucher.amounts never appears to be set from null
       return voucherResponse;
    }
 }

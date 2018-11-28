@@ -140,8 +140,8 @@ public class DetailMessage {
 //      return this;
 //   }
 
-   @ApiModelProperty(value = "The product for which the voucher should be provisioned.")
-   @JsonProperty("product")
+//   @ApiModelProperty(value = "The product for which the voucher should be provisioned.")
+//   @JsonProperty("product")
 //   public Product getProduct() {
 //      return product;
 //   }
@@ -154,7 +154,7 @@ public class DetailMessage {
     * The date and time of the request as recorded by the sender. The format shall be as defined for date-time in [RFC
     * 3339 section 5.6](https://tools.ietf.org/html/rfc3339#section-5.6). It is recommended that the optional
     * time-secfrac be included up to millisecond precision.
-    **/
+    */
    public DetailMessage requestTime(String requestTime) {
       this.requestTime = requestTime;
       return this;

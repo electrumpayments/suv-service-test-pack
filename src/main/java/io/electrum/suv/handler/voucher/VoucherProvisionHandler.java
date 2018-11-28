@@ -10,7 +10,7 @@ import io.electrum.suv.server.util.VoucherModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.constraints.Null;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class VoucherProvisionHandler extends BaseHandler {
    private static final Logger log = LoggerFactory.getLogger(VoucherProvisionHandler.class);
 
-   @Null
+   @NotNull
    String uuid;
 
    public VoucherProvisionHandler(HttpHeaders httpHeaders) {
@@ -35,7 +35,7 @@ public class VoucherProvisionHandler extends BaseHandler {
     * Handle the response to a provisionVoucher request.
     *
     * See <a href=
-    * "https://electrumpayments.github.io/suv-service-interface-docs/specification/operations/#provisionVoucher">SUV
+    * "https://electrumpayments.github.io/suv-service-interface-docs/specification/operations/#provisionvoucher">SUV
     * Interface docs</a> for details.
     *
     * @param provisionRequest
@@ -55,12 +55,14 @@ public class VoucherProvisionHandler extends BaseHandler {
          // if (provisionRequest.getId().equals("somethingstupid"))
          // throw new JerseyViolationException(null, null);
          // uuid = provisionRequest.getId();
-//      <--------------------------------------------------------------->
+         // <--------------------------------------------------------------->
          // if (!VoucherModelUtils.isValidUuid(uuid)) {
          // return Response.status(400).entity((buildVoucherRequestErrorResponse(uuid, provisionRequest))).build();
          // }
 
+         uuid = provisionRequest.getId();
          if (!VoucherModelUtils.isValidUuid(uuid)) {
+//             if(uuid == null) return VoucherModelUtils.build
             return VoucherModelUtils.buildInvalidUuidErrorResponse(
                   uuid,
                   provisionRequest.getClient(),
@@ -68,7 +70,7 @@ public class VoucherProvisionHandler extends BaseHandler {
                   ErrorDetail.ErrorType.FORMAT_ERROR);
          }
 
-         // Confirm that the basicAuth ID matches clientID in message body
+         // Confirm that the basicAuth ID matches clientID inÒ message body
          if (!provisionRequest.getClient().getId().equals(username)) {
             return VoucherModelUtils.buildIncorrectUsernameErrorResponse(
                   uuid,
@@ -94,11 +96,6 @@ public class VoucherProvisionHandler extends BaseHandler {
       } catch (Exception e) {
          return logAndBuildException(e);
       }
-   }
-
-   // TODO can remove potentially
-   private ErrorDetail buildVoucherRequestErrorResponse(String voucherId, ProvisionRequest request) {
-      return VoucherModelUtils.buildInconsistentIdErrorDetail(voucherId, request.getId(), null);
    }
 
    // Todo confirm correct function of method
