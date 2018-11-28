@@ -77,6 +77,7 @@ public class SUVModelUtils {
       return slipData;
    }
 
+   //todo why randomise these instead of using the ones sent by the requests?
    protected static void updateWithRandomizedIdentifiers(Transaction transaction) {
       List<ThirdPartyIdentifier> thirdPartyIds = transaction.getThirdPartyIdentifiers();
       Institution settlementEntity = transaction.getSettlementEntity();
@@ -172,7 +173,7 @@ public class SUVModelUtils {
    }
 
    // TODO This is unusable in the SUV interface
-   public static boolean isUuidConsistent(String pathId, String serviceId) {
+   public static boolean isValidUuid(String pathId, String serviceId) {
       return pathId.equals(serviceId);
    }
 
@@ -184,7 +185,7 @@ public class SUVModelUtils {
     * @param uuid
     * @return
     */
-   public static boolean isUuidConsistent(String uuid) {
+   public static boolean isValidUuid(String uuid) {
       return uuid.matches("([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}");
    }
 

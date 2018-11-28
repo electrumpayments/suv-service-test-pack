@@ -19,9 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class VoucherModelUtils extends SUVModelUtils {
    static Logger log = LoggerFactory.getLogger(VoucherModelUtils.class);
 
-   // TODO Implement class
 
-   // TODO complete method
    // TODO confirm correct function
    // TODO documentation
    public static Response canProvisionVoucher(String voucherId, String username, String password) {
@@ -52,6 +50,7 @@ public class VoucherModelUtils extends SUVModelUtils {
          return Response.status(400).entity(errorDetail).build(); // Bad Request
       }
 
+      // If voucher already reversed
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getVoucherReversalRecords();
       RequestKey reversalKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, voucherId);
       BasicReversal reversal = reversalRecords.get(reversalKey);
@@ -65,8 +64,8 @@ public class VoucherModelUtils extends SUVModelUtils {
                      // ErrorDetail.RequestType.VOUCHER_REQUEST,
                      ErrorDetail.ErrorType.GENERAL_ERROR); // TODO Pick a better ErrorType
 
-          // Check for a response for this request, if found add to detailMessage
-          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+         // Check for a response for this request, if found add to detailMessage
+         DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
          ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getVoucherResponseRecords();
          ProvisionResponse rsp = responseRecords.get(requestKey);
          if (rsp != null) {
@@ -101,6 +100,47 @@ public class VoucherModelUtils extends SUVModelUtils {
       detailMessage.setClient(client);
 
       return Response.status(400).entity(errorDetail).build();
+   }
+
+   public static Response buildInvalidUuidErrorResponse(
+         String objectId,
+         Institution client,
+         String username,
+         ErrorDetail.ErrorType requestType) {
+
+      ErrorDetail errorDetail =
+            buildErrorDetail(
+                  objectId,
+                  "Invalid UUID",
+                  "The UUID in the request body is not a vail UUID format." +
+                          "\nUUID must conform to the format 8-4-4-4-12 hexedecimal values." +
+                          "\nExample: 58D5E212-165B-4CA0-909B-C86B9CEE0111",
+                  null,
+
+                  ErrorDetail.ErrorType.FORMAT_ERROR);
+
+      DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+      detailMessage.setClient(client);
+
+      return Response.status(400).entity(errorDetail).build();
+   }
+
+   public static ErrorDetail buildInconsistentIdErrorDetail(String pathId, String objectId, String originalMsgId
+   /* ErrorDetail.RequestType requestType */) {
+
+      ErrorDetail errorDetail =
+            buildErrorDetail(
+                  objectId,
+                  "String inconsistent",
+                  "The ID path parameter is not the same as the object's ID.",
+                  originalMsgId,
+                  // requestType,
+                  ErrorDetail.ErrorType.FORMAT_ERROR);
+
+      DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+      detailMessage.setPathId(pathId);
+
+      return errorDetail;
    }
 
    // TODO Ensure method actually does what it should do

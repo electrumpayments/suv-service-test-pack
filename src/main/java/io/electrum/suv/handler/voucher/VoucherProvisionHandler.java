@@ -1,6 +1,5 @@
 package io.electrum.suv.handler.voucher;
 
-import io.dropwizard.jersey.validation.JerseyViolationException;
 import io.electrum.suv.api.models.ErrorDetail;
 import io.electrum.suv.api.models.ProvisionRequest;
 import io.electrum.suv.api.models.ProvisionResponse;
@@ -32,48 +31,64 @@ public class VoucherProvisionHandler extends BaseHandler {
       return "Voucher Provision";
    }
 
+   /**
+    * Handle the response to a provisionVoucher request.
+    *
+    * See <a href=
+    * "https://electrumpayments.github.io/suv-service-interface-docs/specification/operations/#provisionVoucher">SUV
+    * Interface docs</a> for details.
+    *
+    * @param provisionRequest
+    *           from request body
+    * @param uriInfo
+    * @return a {@link ProvisionResponse} for this transaction or a 400 Error if there is a format error or the voucher
+    *         is already redeemed or reversed.
+    */
    public Response handle(ProvisionRequest provisionRequest, UriInfo uriInfo) {
-      // TODO Remove
+      // TODO Remove debuglog
       log.info("Called handle on VoucherProvisionHandler");
 
       try {
          Response rsp;
-         // TODO Actually implement this method
-         // TODO Validate parameters are consistent and correct
-         //TODO Actually vvalidate these
-         if (provisionRequest.getId().equals("somethingstupid"))
-            throw new JerseyViolationException(null, null);
-         uuid = provisionRequest.getId();
 
-         if (!VoucherModelUtils.isUuidConsistent(uuid)) {
-            return Response.status(400).entity((buildVoucherRequestErrorResponse(uuid))).build();
+         // TODO Relook at Hibernate with Casey
+         // if (provisionRequest.getId().equals("somethingstupid"))
+         // throw new JerseyViolationException(null, null);
+         // uuid = provisionRequest.getId();
+//      <--------------------------------------------------------------->
+         // if (!VoucherModelUtils.isValidUuid(uuid)) {
+         // return Response.status(400).entity((buildVoucherRequestErrorResponse(uuid, provisionRequest))).build();
+         // }
+
+         if (!VoucherModelUtils.isValidUuid(uuid)) {
+            return VoucherModelUtils.buildInvalidUuidErrorResponse(
+                  uuid,
+                  provisionRequest.getClient(),
+                  username,
+                  ErrorDetail.ErrorType.FORMAT_ERROR);
          }
 
+         // Confirm that the basicAuth ID matches clientID in message body
          if (!provisionRequest.getClient().getId().equals(username)) {
             return VoucherModelUtils.buildIncorrectUsernameErrorResponse(
-                    uuid,
+                  uuid,
                   provisionRequest.getClient(),
                   username,
                   ErrorDetail.ErrorType.AUTHENTICATION_ERROR);
          }
 
-         // Check voucher
-         // TODO canProvisionVoucher?
+         // Confirm voucher not already provisioned or reversed.
          rsp = VoucherModelUtils.canProvisionVoucher(uuid, username, password);
          if (rsp != null) {
             return rsp;
          }
 
-         // todo fill method
+         // The voucher can be provisioned and stored.
          RequestKey key = addVoucherRequestToCache(uuid, provisionRequest);
-
          // TODO See Giftcard, should this all be done differently
          ProvisionResponse provisionRsp = VoucherModelUtils.voucherRspFromReq(provisionRequest);
-
          addVoucherResponseToCache(key, provisionRsp);
-
          rsp = Response.created(uriInfo.getRequestUri()).entity(provisionRsp).build();
-
          return rsp;
 
       } catch (Exception e) {
@@ -81,10 +96,9 @@ public class VoucherProvisionHandler extends BaseHandler {
       }
    }
 
-   private ErrorDetail buildVoucherRequestErrorResponse(String voucherId) {
-      // TODO Implement method
-      ErrorDetail errorDetail = new ErrorDetail();
-      return errorDetail;
+   // TODO can remove potentially
+   private ErrorDetail buildVoucherRequestErrorResponse(String voucherId, ProvisionRequest request) {
+      return VoucherModelUtils.buildInconsistentIdErrorDetail(voucherId, request.getId(), null);
    }
 
    // Todo confirm correct function of method
@@ -111,7 +125,7 @@ public class VoucherProvisionHandler extends BaseHandler {
     * @param key
     *           The unique key of this response, the same key as the corresponding VoucherRequest
     * @param provisionRsp
-    *           //TODO Fill params
+    *           The {@link ProvisionResponse} for this request
     */
    private void addVoucherResponseToCache(RequestKey key, ProvisionResponse provisionRsp) {
       ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords =
