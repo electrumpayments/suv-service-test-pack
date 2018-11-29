@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.Path;
 
 //TODO THIS IS ACTUALLY WORKING (PATH)
-@Path("suv/v1")
+@Path(Paths.BASE_PATH)
 @Api(description = "the SUV API", authorizations = { @Authorization("httpBasic") })
 public class VouchersResourceImpl extends VouchersResource {
    static VouchersResourceInterfaceImpl instance = null;
