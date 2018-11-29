@@ -51,7 +51,7 @@
         <dependency>
             <groupId>io.electrum</groupId>
             <artifactId>suv-service-interface</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -119,11 +119,6 @@
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-server</artifactId>
             <version>${jersey-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.electrum</groupId>
-            <artifactId>airtime-service-interface</artifactId>
-            <version>${airtime-version}</version>
         </dependency>
         <dependency>
             <groupId>io.electrum</groupId>
