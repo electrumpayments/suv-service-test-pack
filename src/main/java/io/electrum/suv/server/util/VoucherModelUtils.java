@@ -1,14 +1,13 @@
 package io.electrum.suv.server.util;
 
-import io.electrum.suv.api.models.ErrorDetail;
-import io.electrum.suv.api.models.ProvisionRequest;
-import io.electrum.suv.api.models.ProvisionResponse;
+import io.electrum.suv.api.models.*;
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.DetailMessage;
 import io.electrum.vas.JsonUtil;
 import io.electrum.vas.model.BasicReversal;
 import io.electrum.vas.model.Institution;
+import io.electrum.vas.model.TenderAdvice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +22,9 @@ public class VoucherModelUtils extends SUVModelUtils {
    // TODO documentation
 
    /**
-    * Determine whether a given {@link io.electrum.suv.api.models.Voucher voucher} provision request is able to be
-    * completed. Ensures voucher is not already provisioned, reversed, or redeemed:
+    * Determine whether a given {@link Voucher voucher} provision request is able to be completed.
+    * 
+    * Ensures voucher is not already provisioned, reversed, or redeemed.
     * 
     * 
     * @param voucherId
@@ -46,10 +46,12 @@ public class VoucherModelUtils extends SUVModelUtils {
       // If Voucher already provisioned
       if (originalRequest != null) {
          ErrorDetail errorDetail =
-               buildDuplicateErrorDetail(
+               buildErrorDetail(
                      voucherId,
-                     null,
-                     /* ErrorDetail.RequestType.VOUCHER_REQUEST, */ originalRequest);
+                     "Voucher redeemed.",
+                     "Voucher redemption with String already processed with the associated fields.",
+                     originalRequest.getId(),
+                     ErrorDetail.ErrorType.VOUCHER_ALREADY_PROVISIONED);
 
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
          // detailMessage.setProduct(originalRequest.getProduct()); TODO This doesn't exist...can ignore?
@@ -66,8 +68,8 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       // If voucher already reversed
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getVoucherReversalRecords();
-      RequestKey reversalKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, voucherId);
-      BasicReversal reversal = reversalRecords.get(reversalKey);
+      requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, voucherId);
+      BasicReversal reversal = reversalRecords.get(requestKey);
       if (reversal != null) {
          ErrorDetail errorDetail =
                buildErrorDetail(
@@ -75,7 +77,30 @@ public class VoucherModelUtils extends SUVModelUtils {
                      "Voucher reversed.",
                      "Voucher reversal with String already processed with the associated fields.",
                      reversal.getId(),
-                     // ErrorDetail.RequestType.VOUCHER_REQUEST,
+                     ErrorDetail.ErrorType.GENERAL_ERROR); // TODO Pick a better ErrorType
+
+         //TODO what is this here for
+         // Check for a response for this request, if found add to detailMessage
+         DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getVoucherResponseRecords();
+         ProvisionResponse rsp = responseRecords.get(requestKey);
+         if (rsp != null) {
+            detailMessage.setVoucher(rsp.getVoucher());
+         }
+         return Response.status(400).entity(errorDetail).build();
+      }
+
+      // If voucher already redeemed
+      ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRecords = testServer.getVoucherRedemptionRecords();
+      requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, voucherId);
+      RedemptionRequest redemption = redemptionRecords.get(requestKey);
+      if (redemption != null) {
+         ErrorDetail errorDetail =
+               buildErrorDetail(
+                     voucherId,
+                     "Voucher redeemed.",
+                     "Voucher redemption with String already processed with the associated fields.",
+                     redemption.getId(),
                      ErrorDetail.ErrorType.GENERAL_ERROR); // TODO Pick a better ErrorType
 
          // Check for a response for this request, if found add to detailMessage
@@ -88,7 +113,107 @@ public class VoucherModelUtils extends SUVModelUtils {
          return Response.status(400).entity(errorDetail).build();
       }
 
-      // TODO Validate Voucher not Redeemed
+      return null; // Voucher can be provisioned
+   }
+
+   /**
+    * Determine whether a given {@link Voucher voucher} reversal request can be completed.
+    *
+    * Ensures voucher is already provisioned and is not yet confirmed.
+    * 
+    * @param voucherId
+    *           the unique identifier of the voucher to be reversed
+    * @param reversalId
+    *           the unique identifier of this request
+    * @param username
+    *           from BasicAuth
+    * @param password
+    *           from BasicAuth
+    * @return A 404 Error response if a voucher corresponding to voucherId cannot be found (not provisioned), a 400
+    *         Error if the voucher is already confirmed. Null if voucher can be reversed.
+    */
+   public static Response canReverseVoucher(String voucherId, String reversalId, String username, String password) {
+      final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
+
+      ErrorDetail errorDetail = new ErrorDetail().id(reversalId).originalId(voucherId);
+
+      // TODO Normalise these validation methods to be more similar (this)
+      // Confirm Voucher provisioned
+      ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getVoucherProvisionRecords();
+      Voucher voucher = getVoucherIfProvisioned(voucherId, provisionRecords, username, password);
+      if (voucher == null) {
+         errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
+               .errorMessage("No voucher req.")
+               .detailMessage(
+                     new DetailMessage().freeString("No VoucherRequest located for given voucherId.")
+                           .voucherId(voucherId));
+         return Response.status(404).entity(errorDetail).build();
+      }
+
+      // check it's not confirmed
+      ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords = testServer.getVoucherConfirmationRecords();
+      RequestKey requestKey =
+            new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherId.toString());
+      TenderAdvice confirmation = confirmationRecords.get(requestKey);
+      if (confirmation != null) {
+         errorDetail.errorType(ErrorDetail.ErrorType.GENERAL_ERROR)
+               .errorMessage("Voucher confirmed.")
+               .detailMessage(
+                     new DetailMessage().freeString(
+                           "The voucher cannot be reversed as it has already been confirmed with the associated details.")
+                           .confirmationId(confirmation.getId())
+                           .voucher(voucher));
+         return Response.status(400).entity(errorDetail).build();
+      }
+      return null;
+   }
+
+   public static Response canConfirmVoucher(
+         String voucherId,
+         String confirmationUuid,
+         String username,
+         String password) {
+      final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
+
+      ErrorDetail errorDetail = new ErrorDetail().id(confirmationUuid).originalId(voucherId);
+
+      //TODO Extract method
+      // TODO Normalise these validation methods to be more similar (this)
+      // Confirm Voucher provisioned
+      ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getVoucherProvisionRecords();
+      Voucher voucher = getVoucherIfProvisioned(voucherId, provisionRecords, username, password);
+      if (voucher == null) {
+         errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
+               .errorMessage("No voucher req.")
+               .detailMessage(
+                     new DetailMessage().freeString("No VoucherRequest located for given voucherId.")
+                           .voucherId(voucherId));
+         return Response.status(404).entity(errorDetail).build();
+      }
+
+      // check it's not reversed
+      ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getVoucherReversalRecords();
+      RequestKey requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, voucherId);
+      BasicReversal reversal = reversalRecords.get(requestKey);
+      if (reversal != null) {
+         errorDetail =
+                 buildErrorDetail(
+                         voucherId,
+                         "Voucher reversed.",
+                         "Voucher reversal with String already processed with the associated fields.",
+                         reversal.getId(),
+                         ErrorDetail.ErrorType.GENERAL_ERROR); // TODO Pick a better ErrorType
+
+         //TODO what is this here for
+         // Check for a response for this request, if found add to detailMessage
+         DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getVoucherResponseRecords();
+         ProvisionResponse rsp = responseRecords.get(requestKey);
+         if (rsp != null) {
+            detailMessage.setVoucher(rsp.getVoucher());
+         }
+         return Response.status(400).entity(errorDetail).build();
+      }
       return null;
    }
 
@@ -124,7 +249,7 @@ public class VoucherModelUtils extends SUVModelUtils {
    public static Response buildInvalidUuidErrorResponse(
          String objectId,
          Institution client,
-         String username,
+         String username, // TODO remove redundant param
          ErrorDetail.ErrorType requestType) {
 
       ErrorDetail errorDetail =
@@ -136,7 +261,7 @@ public class VoucherModelUtils extends SUVModelUtils {
                         + "\nExample: 58D5E212-165B-4CA0-909B-C86B9CEE0111",
                   null,
 
-                  ErrorDetail.ErrorType.FORMAT_ERROR);
+                  requestType);
 
       DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
       detailMessage.setClient(client);
@@ -144,6 +269,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       return Response.status(400).entity(errorDetail).build();
    }
 
+   // TODO remove redundant method
    public static ErrorDetail buildInconsistentIdErrorDetail(String pathId, String objectId, String originalMsgId
    /* ErrorDetail.RequestType requestType */) {
 
@@ -174,4 +300,28 @@ public class VoucherModelUtils extends SUVModelUtils {
       // voucherResponse.setResponseProduct(req.getProduct().name("TalkALot").type(Product.ProductType.AIRTIME_FIXED));
       return voucherResponse;
    }
+
+   /**
+    * Determine whether a voucher had been provisioned or not.
+    * 
+    * @param voucherId
+    *           the uuid of the voucher to be returned
+    * @param provisionRecords
+    *           to be searched
+    * @param username
+    *           from BasicAuth
+    * @param password
+    *           from BasicAuth
+    * @return the corresponding voucher if it has been provisioned already, null otherwise.
+    */
+   public static Voucher getVoucherIfProvisioned( // TODO Refactor naming
+         String voucherId,
+         ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords,
+         String username,
+         String password) {
+      RequestKey provisionKey = new RequestKey(username, password, RequestKey.VOUCHERS_RESOURCE, voucherId.toString());
+      log.debug(String.format("Searching for provision record under following key: %s", provisionKey.toString()));
+      return provisionRecords.get(provisionKey).getVoucher();
+   }
+
 }

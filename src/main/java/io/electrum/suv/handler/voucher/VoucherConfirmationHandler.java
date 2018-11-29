@@ -1,23 +1,72 @@
 package io.electrum.suv.handler.voucher;
 
+import io.electrum.suv.api.models.ErrorDetail;
 import io.electrum.suv.handler.BaseHandler;
-import org.apache.commons.lang3.NotImplementedException;
+import io.electrum.suv.server.SUVTestServerRunner;
+import io.electrum.suv.server.util.RequestKey;
+import io.electrum.suv.server.util.VoucherModelUtils;
+import io.electrum.vas.model.Tender;
+import io.electrum.vas.model.TenderAdvice;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class VoucherConfirmationHandler extends BaseHandler {
-    public VoucherConfirmationHandler(HttpHeaders httpHeaders) {
-        super(httpHeaders);
-    }
+   /** The UUID of this request */
+   private String confirmationUuid;
+   /** The UUID identifying the request that this confirmation relates to */
+   private String voucherId;
 
-   public Response handle() {
-      // TODO Implement handle method
-      throw new NotImplementedException("Handle not yet implemented in " + this.getRequestName());
+   public VoucherConfirmationHandler(HttpHeaders httpHeaders) {
+      super(httpHeaders);
    }
 
-    @Override
-    protected String getRequestName() {
-        return "Voucher Confirmation";
-    }
+   public Response handle(TenderAdvice confirmation, UriInfo uriInfo) {
+      try {
+         Response rsp;
+
+         confirmationUuid = confirmation.getId();
+         voucherId = confirmation.getRequestId();
+         if (!VoucherModelUtils.isValidUuid(confirmationUuid)) {
+            return VoucherModelUtils.buildInvalidUuidErrorResponse(
+                  confirmationUuid,
+                  null, // TODO Could overload method
+                  username,
+                  ErrorDetail.ErrorType.FORMAT_ERROR);
+         } else if (!VoucherModelUtils.isValidUuid(voucherId)) {
+            return VoucherModelUtils
+                  .buildInvalidUuidErrorResponse(voucherId, null, username, ErrorDetail.ErrorType.FORMAT_ERROR);
+         }
+
+         rsp = VoucherModelUtils.canConfirmVoucher(voucherId, confirmationUuid, username, password);
+         if (rsp != null) {
+            return rsp;
+         }
+
+         addVoucherConfirmationToCache(confirmation);
+
+         rsp = Response.accepted((confirmation)).build(); // TODO Ask Casey if this is ok
+
+         return rsp;
+
+      } catch (Exception e) {
+         return logAndBuildException(e);
+      }
+   }
+
+   private void addVoucherConfirmationToCache(TenderAdvice confirmation) {
+      ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords =
+            SUVTestServerRunner.getTestServer().getVoucherConfirmationRecords();
+      RequestKey confirmationsKey =
+            new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, confirmation.getRequestId());
+      // quietly overwrites any existing confirmation
+      confirmationRecords.put(confirmationsKey, confirmation);
+   }
+
+   @Override
+   protected String getRequestName() {
+      return "Voucher Confirmation";
+   }
 }

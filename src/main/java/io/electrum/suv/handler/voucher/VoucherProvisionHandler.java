@@ -45,24 +45,11 @@ public class VoucherProvisionHandler extends BaseHandler {
     *         is already redeemed or reversed.
     */
    public Response handle(ProvisionRequest provisionRequest, UriInfo uriInfo) {
-      // TODO Remove debuglog
-      log.info("Called handle on VoucherProvisionHandler");
-
       try {
          Response rsp;
 
-         // TODO Relook at Hibernate with Casey
-         // if (provisionRequest.getId().equals("somethingstupid"))
-         // throw new JerseyViolationException(null, null);
-         // uuid = provisionRequest.getId();
-         // <--------------------------------------------------------------->
-         // if (!VoucherModelUtils.isValidUuid(uuid)) {
-         // return Response.status(400).entity((buildVoucherRequestErrorResponse(uuid, provisionRequest))).build();
-         // }
-
          uuid = provisionRequest.getId();
          if (!VoucherModelUtils.isValidUuid(uuid)) {
-//             if(uuid == null) return VoucherModelUtils.build
             return VoucherModelUtils.buildInvalidUuidErrorResponse(
                   uuid,
                   provisionRequest.getClient(),

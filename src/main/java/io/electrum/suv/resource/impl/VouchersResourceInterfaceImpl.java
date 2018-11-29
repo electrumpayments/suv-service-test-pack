@@ -25,6 +25,14 @@ public class VouchersResourceInterfaceImpl implements IVouchersResource {
          UriInfo uriInfo,
          HttpServletRequest httpServletRequest) {
 
+      log.info(String.format("%s %s", httpServletRequest.getMethod(), uriInfo.getPath()));
+      log.debug(String.format("%s %s\n%s", httpServletRequest.getMethod(), uriInfo.getPath(), body));
+      Response rsp =
+            SUVMessageHandlerFactory.getVoucherConfirmationHandler(httpHeaders)
+                  .handle(/* requestId, confirmationId, */ body, uriInfo);
+      log.debug(String.format("Entity returned:\n%s", rsp.getEntity()));
+
+      asyncResponse.resume(rsp);
    }
 
    @Override
@@ -56,6 +64,16 @@ public class VouchersResourceInterfaceImpl implements IVouchersResource {
          HttpHeaders httpHeaders,
          UriInfo uriInfo,
          HttpServletRequest httpServletRequest) {
+
+
+      log.info(String.format("%s %s", httpServletRequest.getMethod(), uriInfo.getPath()));
+      log.debug(String.format("%s %s\n%s", httpServletRequest.getMethod(), uriInfo.getPath(), body));
+      Response rsp =
+              SUVMessageHandlerFactory.getVoucherReversalHandler(httpHeaders)
+                      .handle(/* requestId, confirmationId, */ body, uriInfo);
+      log.debug(String.format("Entity returned:\n%s", rsp.getEntity()));
+
+      asyncResponse.resume(rsp);
 
    }
 }

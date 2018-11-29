@@ -7,6 +7,7 @@ public class RequestKey {
    //TODO Enum?
    public static final String VOUCHERS_RESOURCE = "vouchers";
    public static final String REVERSALS_RESOURCE = "reversals";
+   public static final String CONFIRMATIONS_RESOURCE = "confirmations";
    public static final String REDEMPTIONS_RESOURCE = "redemptions";
    public static final String REFUNDS_RESOURCE = "refunds";
 
