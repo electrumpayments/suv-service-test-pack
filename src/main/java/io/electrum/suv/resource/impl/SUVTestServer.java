@@ -53,11 +53,15 @@ public class SUVTestServer extends ResourceConfig {
    private ConcurrentHashMap<RequestKey, TenderAdvice> voucherConfirmationRecords;
    private ConcurrentHashMap<RequestKey, BasicReversal> voucherReversalRecords;
 
-   private ConcurrentHashMap<RequestKey, BasicAdvice> redemptionConfirmationRecourds;
-   private ConcurrentHashMap<RequestKey, BasicReversal> redemptionReversalRecourds;
+   private ConcurrentHashMap<RequestKey, BasicAdvice> redemptionConfirmationRecords;
+   private ConcurrentHashMap<RequestKey, BasicReversal> redemptionReversalRecords;
+   private ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRequestRecords;
+   private ConcurrentHashMap<RequestKey, RedemptionResponse> redemptionResponseRecords;
 
    private ConcurrentHashMap<RequestKey, BasicAdvice> refundConfirmationRecords;
    private ConcurrentHashMap<RequestKey, BasicReversal> refundReversalRecords;
+   private ConcurrentHashMap<RequestKey, RefundRequest> refundRequestRecords;
+   private ConcurrentHashMap<RequestKey, RefundResponse> refundResponseRecords;
 
    // This hashmap stores the relationship between purchase references and purchase request id's so a purchase reference
    // can be used to retrieve the correlated purchase request id
@@ -72,10 +76,10 @@ public class SUVTestServer extends ResourceConfig {
       register(JacksonFeature.class);
 
       // TODO Figure out what this does
-       register(
-       new HibernateValidationFeature(
-       new DropwizardConfiguredValidator(Validators.newValidatorFactory().getValidator())));
-       register(new SUVViolationExceptionMapper());
+      register(
+            new HibernateValidationFeature(
+                  new DropwizardConfiguredValidator(Validators.newValidatorFactory().getValidator())));
+      register(new SUVViolationExceptionMapper());
 
       voucherProvisionRecords = new ConcurrentHashMap<>();
       voucherRedemptionRecords = new ConcurrentHashMap<>();
@@ -85,11 +89,12 @@ public class SUVTestServer extends ResourceConfig {
       voucherConfirmationRecords = new ConcurrentHashMap<>();
       voucherReversalRecords = new ConcurrentHashMap<>();
 
-      redemptionConfirmationRecourds = new ConcurrentHashMap<>();
-      redemptionReversalRecourds = new ConcurrentHashMap<>();
+      redemptionConfirmationRecords = new ConcurrentHashMap<>();
+      redemptionReversalRecords = new ConcurrentHashMap<>();
 
       refundConfirmationRecords = new ConcurrentHashMap<>();
       refundReversalRecords = new ConcurrentHashMap<>();
+      refundRequestRecords = new ConcurrentHashMap<>();
 
       purchaseReferenceRecords = new ConcurrentHashMap<>();
 
@@ -107,12 +112,12 @@ public class SUVTestServer extends ResourceConfig {
       return voucherRedemptionRecords;
    }
 
-   public ConcurrentHashMap<RequestKey, BasicAdvice> getRedemptionConfirmationRecourds() {
-      return redemptionConfirmationRecourds;
+   public ConcurrentHashMap<RequestKey, BasicAdvice> getRedemptionConfirmationRecords() {
+      return redemptionConfirmationRecords;
    }
 
-   public ConcurrentHashMap<RequestKey, BasicReversal> getRedemptionReversalRecourds() {
-      return redemptionReversalRecourds;
+   public ConcurrentHashMap<RequestKey, BasicReversal> getRedemptionReversalRecords() {
+      return redemptionReversalRecords;
    }
 
    public ConcurrentHashMap<RequestKey, RefundRequest> getVoucherRefundRecords() {
@@ -141,6 +146,22 @@ public class SUVTestServer extends ResourceConfig {
 
    public ConcurrentHashMap<RequestKey, String> getPurchaseReferenceRecords() {
       return purchaseReferenceRecords;
+   }
+
+   public ConcurrentHashMap<RequestKey, RedemptionRequest> getRedemptionRequestRecords() {
+      return redemptionRequestRecords;
+   }
+
+   public ConcurrentHashMap<RequestKey, RefundRequest> getRefundRequestRecords() {
+      return refundRequestRecords;
+   }
+
+   public ConcurrentHashMap<RequestKey, RedemptionResponse> getRedemptionResponseRecords() {
+      return redemptionResponseRecords;
+   }
+
+   public ConcurrentHashMap<RequestKey, RefundResponse> getRefundResponseRecords() {
+      return refundResponseRecords;
    }
 
    @Provider

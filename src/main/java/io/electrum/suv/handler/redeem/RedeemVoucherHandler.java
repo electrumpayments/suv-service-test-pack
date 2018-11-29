@@ -5,6 +5,7 @@ import io.electrum.suv.handler.BaseHandler;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 public class RedeemVoucherHandler extends BaseHandler {
     public RedeemVoucherHandler(HttpHeaders httpHeaders) {
@@ -16,7 +17,7 @@ public class RedeemVoucherHandler extends BaseHandler {
         return "Redeem Voucher";
     }
 
-    public Response handle(/*String requestId, String confirmationID, */ RedemptionRequest redemptionRequest) {
+    public Response handle(/*String requestId, String confirmationID, */ RedemptionRequest redemptionRequest, UriInfo uriInfo) {
         try{
             Response rsp = null;
 

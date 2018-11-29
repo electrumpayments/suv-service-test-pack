@@ -2,6 +2,7 @@ package io.electrum.suv.resource.impl;
 
 import io.electrum.suv.api.IRefundsResource;
 import io.electrum.suv.api.models.RefundRequest;
+import io.electrum.suv.handler.SUVMessageHandlerFactory;
 import io.electrum.vas.model.BasicAdvice;
 import io.electrum.vas.model.BasicReversal;
 import org.slf4j.Logger;
@@ -9,16 +10,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.*;
 
 //TODO Implement methods correctly
 public class RefundsResourceInterfaceImpl implements IRefundsResource {
-    private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
+   private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
 
-    @Override
+   @Override
    public void confirmRefund(
          BasicAdvice body,
          SecurityContext securityContext,
@@ -27,6 +25,14 @@ public class RefundsResourceInterfaceImpl implements IRefundsResource {
          HttpHeaders httpHeaders,
          UriInfo uriInfo,
          HttpServletRequest httpServletRequest) {
+      log.info(String.format("%s %s", httpServletRequest.getMethod(), uriInfo.getPath()));
+      log.debug(String.format("%s %s\n%s", httpServletRequest.getMethod(), uriInfo.getPath(), body));
+      Response rsp =
+            SUVMessageHandlerFactory.getRefundConfirmationHandler(httpHeaders)
+                  .handle(/* requestId, confirmationId, */ body, uriInfo);
+      log.debug(String.format("Entity returned:\n%s", rsp.getEntity()));
+
+      asyncResponse.resume(rsp);
 
    }
 
@@ -39,7 +45,14 @@ public class RefundsResourceInterfaceImpl implements IRefundsResource {
          HttpHeaders httpHeaders,
          UriInfo uriInfo,
          HttpServletRequest httpServletRequest) {
+      log.info(String.format("%s %s", httpServletRequest.getMethod(), uriInfo.getPath()));
+      log.debug(String.format("%s %s\n%s", httpServletRequest.getMethod(), uriInfo.getPath(), body));
+      Response rsp =
+            SUVMessageHandlerFactory.getRefundReversalHandler(httpHeaders)
+                  .handle(/* requestId, confirmationId, */ body, uriInfo);
+      log.debug(String.format("Entity returned:\n%s", rsp.getEntity()));
 
+      asyncResponse.resume(rsp);
    }
 
    @Override
@@ -51,6 +64,13 @@ public class RefundsResourceInterfaceImpl implements IRefundsResource {
          HttpHeaders httpHeaders,
          UriInfo uriInfo,
          HttpServletRequest httpServletRequest) {
+      log.info(String.format("%s %s", httpServletRequest.getMethod(), uriInfo.getPath()));
+      log.debug(String.format("%s %s\n%s", httpServletRequest.getMethod(), uriInfo.getPath(), body));
+      Response rsp =
+            SUVMessageHandlerFactory.getRefundVoucherHandler(httpHeaders)
+                  .handle(/* requestId, confirmationId, */ body, uriInfo);
+      log.debug(String.format("Entity returned:\n%s", rsp.getEntity()));
 
+      asyncResponse.resume(rsp);
    }
 }

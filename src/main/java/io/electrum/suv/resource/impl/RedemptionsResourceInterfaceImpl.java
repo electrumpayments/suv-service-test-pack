@@ -28,10 +28,9 @@ public class RedemptionsResourceInterfaceImpl implements IRedemptionsResource {
 
       log.info(String.format("%s %s", httpServletRequest.getMethod(), uriInfo.getPath()));
       log.debug(String.format("%s %s\n%s", httpServletRequest.getMethod(), uriInfo.getPath(), body));
-
-      //TODO no requestID present
-      Response rsp = SUVMessageHandlerFactory.getRedeemVoucherHandler(httpHeaders).handle(/*requestId*/ body);
-
+      Response rsp =
+              SUVMessageHandlerFactory.getRedeemVoucherHandler(httpHeaders)
+                      .handle(/* requestId, confirmationId, */ body, uriInfo);
       log.debug(String.format("Entity returned:\n%s", rsp.getEntity()));
 
       asyncResponse.resume(rsp);
@@ -48,7 +47,14 @@ public class RedemptionsResourceInterfaceImpl implements IRedemptionsResource {
          HttpHeaders httpHeaders,
          UriInfo uriInfo,
          HttpServletRequest httpServletRequest) {
+      log.info(String.format("%s %s", httpServletRequest.getMethod(), uriInfo.getPath()));
+      log.debug(String.format("%s %s\n%s", httpServletRequest.getMethod(), uriInfo.getPath(), body));
+      Response rsp =
+              SUVMessageHandlerFactory.getRedeemReversalHandler(httpHeaders)
+                      .handle(/* requestId, confirmationId, */ body, uriInfo);
+      log.debug(String.format("Entity returned:\n%s", rsp.getEntity()));
 
+      asyncResponse.resume(rsp);
    }
 
    @Override
@@ -60,6 +66,13 @@ public class RedemptionsResourceInterfaceImpl implements IRedemptionsResource {
          HttpHeaders httpHeaders,
          UriInfo uriInfo,
          HttpServletRequest httpServletRequest) {
+      log.info(String.format("%s %s", httpServletRequest.getMethod(), uriInfo.getPath()));
+      log.debug(String.format("%s %s\n%s", httpServletRequest.getMethod(), uriInfo.getPath(), body));
+      Response rsp =
+              SUVMessageHandlerFactory.getRedeemConfirmationHandler(httpHeaders)
+                      .handle(/* requestId, confirmationId, */ body, uriInfo);
+      log.debug(String.format("Entity returned:\n%s", rsp.getEntity()));
 
+      asyncResponse.resume(rsp);
    }
 }
