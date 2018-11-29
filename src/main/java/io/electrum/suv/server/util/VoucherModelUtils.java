@@ -321,7 +321,8 @@ public class VoucherModelUtils extends SUVModelUtils {
          String password) {
       RequestKey provisionKey = new RequestKey(username, password, RequestKey.VOUCHERS_RESOURCE, voucherId.toString());
       log.debug(String.format("Searching for provision record under following key: %s", provisionKey.toString()));
-      return provisionRecords.get(provisionKey).getVoucher();
+      ProvisionRequest pr = provisionRecords.get(provisionKey);
+      return pr != null ? pr.getVoucher() : null;
    }
 
 }
