@@ -79,7 +79,7 @@ public class VoucherModelUtils extends SUVModelUtils {
                      reversal.getId(),
                      ErrorDetail.ErrorType.GENERAL_ERROR); // TODO Pick a better ErrorType
 
-         //TODO what is this here for
+         // TODO what is this here for
          // Check for a response for this request, if found add to detailMessage
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
          ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getVoucherResponseRecords();
@@ -140,8 +140,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       // TODO Normalise these validation methods to be more similar (this)
       // Confirm Voucher provisioned
       ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getVoucherProvisionRecords();
-      Voucher voucher = getVoucherIfProvisioned(voucherId, provisionRecords, username, password);
-      if (voucher == null) {
+      if (!isVoucherProvisioned(voucherId, provisionRecords, username, password)) {
          errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No voucher req.")
                .detailMessage(
@@ -162,7 +161,7 @@ public class VoucherModelUtils extends SUVModelUtils {
                      new DetailMessage().freeString(
                            "The voucher cannot be reversed as it has already been confirmed with the associated details.")
                            .confirmationId(confirmation.getId())
-                           .voucher(voucher));
+                           .voucherId(voucherId));
          return Response.status(400).entity(errorDetail).build();
       }
       return null;
@@ -177,12 +176,11 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       ErrorDetail errorDetail = new ErrorDetail().id(confirmationUuid).originalId(voucherId);
 
-      //TODO Extract method
+      // TODO Extract method
       // TODO Normalise these validation methods to be more similar (this)
       // Confirm Voucher provisioned
       ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getVoucherProvisionRecords();
-      Voucher voucher = getVoucherIfProvisioned(voucherId, provisionRecords, username, password);
-      if (voucher == null) {
+      if (!isVoucherProvisioned(voucherId, provisionRecords, username, password)) {
          errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No voucher req.")
                .detailMessage(
@@ -197,14 +195,14 @@ public class VoucherModelUtils extends SUVModelUtils {
       BasicReversal reversal = reversalRecords.get(requestKey);
       if (reversal != null) {
          errorDetail =
-                 buildErrorDetail(
-                         voucherId,
-                         "Voucher reversed.",
-                         "Voucher reversal with String already processed with the associated fields.",
-                         reversal.getId(),
-                         ErrorDetail.ErrorType.GENERAL_ERROR); // TODO Pick a better ErrorType
+               buildErrorDetail(
+                     voucherId,
+                     "Voucher reversed.",
+                     "Voucher reversal with String already processed with the associated fields.",
+                     reversal.getId(),
+                     ErrorDetail.ErrorType.GENERAL_ERROR); // TODO Pick a better ErrorType
 
-         //TODO what is this here for
+         // TODO what is this here for
          // Check for a response for this request, if found add to detailMessage
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
          ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getVoucherResponseRecords();
@@ -312,17 +310,16 @@ public class VoucherModelUtils extends SUVModelUtils {
     *           from BasicAuth
     * @param password
     *           from BasicAuth
-    * @return the corresponding voucher if it has been provisioned already, null otherwise.
+    * @return whether voucher with this UUID has been provisioned.
     */
-   public static Voucher getVoucherIfProvisioned( // TODO Refactor naming
+   public static boolean isVoucherProvisioned( // TODO Refactor naming
          String voucherId,
          ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords,
          String username,
          String password) {
       RequestKey provisionKey = new RequestKey(username, password, RequestKey.VOUCHERS_RESOURCE, voucherId.toString());
       log.debug(String.format("Searching for provision record under following key: %s", provisionKey.toString()));
-      ProvisionRequest pr = provisionRecords.get(provisionKey);
-      return pr != null ? pr.getVoucher() : null;
+      return provisionRecords.get(provisionKey) != null;
    }
 
 }

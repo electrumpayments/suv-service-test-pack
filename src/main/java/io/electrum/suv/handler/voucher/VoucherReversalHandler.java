@@ -46,14 +46,19 @@ public class VoucherReversalHandler extends BaseHandler {
                   .buildInvalidUuidErrorResponse(voucherId, null, username, ErrorDetail.ErrorType.FORMAT_ERROR);
          }
 
+         // TODO check this in airtime
          rsp = VoucherModelUtils.canReverseVoucher(voucherId, reversalUuid, username, password);
          if (rsp != null) {
+            if (rsp.getStatus() == 404) {
+               // make sure to record the reversal in case we get the request late.
+               addVoucherReversalToCache(reversal);
+            }
             return rsp;
          }
 
          addVoucherReversalToCache(reversal);
 
-         rsp = Response.accepted((reversal)).build(); //TODO Ask Casey if this is ok
+         rsp = Response.accepted((reversal)).build(); // TODO Ask Casey if this is ok
 
          return rsp;
 
