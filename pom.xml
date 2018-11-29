@@ -6,7 +6,7 @@
     <artifactId>suv-service-test-pack</artifactId>
     <version>1.3.0</version>
     <packaging>jar</packaging>
-    <name>Airtime Test Pack</name>
+    <name>SUV Test Pack</name>
     <description>Server and Postman scripts to test Airtime Service Interface implementaitons</description>
     <url>https://electrumpayments.github.io/suv-service-test-pack</url>
     <licenses>
