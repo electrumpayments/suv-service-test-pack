@@ -1,302 +1,124 @@
 package io.electrum.suv.server.util;
 
+import io.electrum.suv.api.RefundsResource;
+import io.electrum.suv.api.models.RefundRequest;
+import io.electrum.suv.api.models.RefundResponse;
+import io.electrum.suv.server.SUVTestServerRunner;
+import io.electrum.vas.JsonUtil;
+import io.electrum.vas.model.BasicAdvice;
+import io.electrum.vas.model.BasicReversal;
+
+import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class RefundModelUtils extends SUVModelUtils {
+   public static RefundResponse refundRspFromReq(RefundRequest refundRequest) throws IOException {
+       RefundResponse refundResponse =
+               JsonUtil.deserialize(JsonUtil.serialize(refundRequest, RefundRequest.class), RefundResponse.class);
+
+       updateWithRandomizedIdentifiers(refundResponse);
+       refundResponse.setVoucher(createRandomizedVoucher());
+       refundResponse.setSlipData(createRandomizedSlipData());
+
+       //TODO Confirm not needed to populate more fields
+       return refundResponse;
+   }
 
    // TODO Reimplement all these for new values
-   //<editor-fold desc="error and validation checks on data storage">
-  /* public static Response canPurchasePurchaseRequest(String purchaseRequestId, String username, String password) {
-      ConcurrentHashMap<RequestKey, PurchaseRequest> purchaseRequestRecords =
-            SUVTestServerRunner.getTestServer().getPurchaseRequestRecords();
-      RequestKey requestKey = new RequestKey(username, password, PurchaseResource.Purchase.PURCHASE, purchaseRequestId);
-
-      // Check if request already provisioned
-      PurchaseRequest originalRequest = purchaseRequestRecords.get(requestKey);
-      if (originalRequest != null) {
-         return buildDuplicateErrorResponse(purchaseRequestId, requestKey, originalRequest);
-      }
-
-      // Check if request has already been reversed
-      BasicReversal reversal = getPurchaseReversalFromCache(purchaseRequestId, username, password);
-      if (reversal != null) {
-         return buildAlreadyReversedErrorResponse(purchaseRequestId, requestKey, reversal);
-      }
-
-      return null;
-   }
-
-   public static Response canReversePurchase(BasicReversal reversal, String username, String password) {
-      if (!isPurchaseRequestProvisioned(reversal.getRequestId(), username, password)) {
-         ErrorDetail errorDetail =
-               buildRequestNotFoundErrorDetail(
-                     reversal.getId(),
-                     reversal.getRequestId(),
-                     ErrorDetail.RequestType.PURCHASE_REVERSAL);
-         return Response.status(404).entity(errorDetail).build();
-      }
-
-      // check that it's not confirmed
-      PurchaseConfirmation confirmation = getPurchaseConfirmationFromCache(reversal.getRequestId(), username, password);
-      if (confirmation != null) {
-         ErrorDetail errorDetail =
-               buildErrorDetail(
-                     reversal.getId(),
-                     "Purchase Request confirmed already.",
-                     "The purchase cannot be reversed as it has already been confirmed with the associated details.",
-                     reversal.getRequestId(),
-                     ErrorDetail.RequestType.PURCHASE_REVERSAL,
-                     ErrorDetail.ErrorType.ACCOUNT_ALREADY_SETTLED);
-
-         DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-         detailMessage.setConfirmationId(confirmation.getId());
-
-         return Response.status(400).entity(errorDetail).build();
-      }
-
-      return null;
-   }
-
-   public static Response canConfirmPurchase(
-         PurchaseConfirmation purchaseConfirmation,
-         String username,
-         String password) {
-      // check if purchase request was provisioned
-      if (!isPurchaseRequestProvisioned(purchaseConfirmation.getRequestId(), username, password)) {
-         ErrorDetail errorDetail =
-               buildRequestNotFoundErrorDetail(
-                     purchaseConfirmation.getId(),
-                     purchaseConfirmation.getRequestId(),
-                     ErrorDetail.RequestType.PURCHASE_CONFIRMATION);
-         return Response.status(404).entity(errorDetail).build();
-      }
-
-      // check that it's not reversed
-      BasicReversal reversal = getPurchaseReversalFromCache(purchaseConfirmation.getRequestId(), username, password);
-      if (reversal != null) {
-         ErrorDetail errorDetail =
-               buildErrorDetail(
-                     reversal.getId(),
-                     "Purchase Request reversed already.",
-                     "The purchase cannot be confirmed as it has already been reversed with the associated details.",
-                     reversal.getRequestId(),
-                     ErrorDetail.RequestType.PURCHASE_CONFIRMATION,
-                     ErrorDetail.ErrorType.ACCOUNT_ALREADY_SETTLED);
-         return Response.status(400).entity(errorDetail).build();
-      }
-
-      return null;
-   }
-
-   public static Response canPurchaseStatusWithMsgId(
-         String originalPurchaseRequestId,
-         String username,
-         String password) {
-      // check if purchase request was provisioned
-      if (!isPurchaseRequestProvisioned(originalPurchaseRequestId, username, password)) {
-         ErrorDetail errorDetail =
-               buildRequestNotFoundErrorDetail(
-                     null,
-                     originalPurchaseRequestId,
-                     ErrorDetail.RequestType.PURCHASE_STATUS_REQUEST);
-         return Response.status(404).entity(errorDetail).build();
-      }
-
-      // check that it's not reversed
-      BasicReversal reversal = getPurchaseReversalFromCache(originalPurchaseRequestId, username, password);
-      if (reversal != null) {
-         ErrorDetail errorDetail =
-               buildErrorDetail(
-                     reversal.getId(),
-                     "Purchase Request reversed already.",
-                     "The purchase has already been reversed with the associated details.",
-                     reversal.getRequestId(),
-                     ErrorDetail.RequestType.PURCHASE_STATUS_REQUEST,
-                     ErrorDetail.ErrorType.ACCOUNT_ALREADY_SETTLED);
-         return Response.status(400).entity(errorDetail).build();
-      }
-
-      return null;
-   }
-
-   public static Response canPurchaseStatusWithPurchaseRef(
-         String purchaseRef,
-         String provider,
-         String username,
-         String password) {
-      if (purchaseRef == null || provider == null) {
-         ErrorDetail errorDetail =
-               buildErrorDetail(
-                     null,
-                     "The purchaseRef or provider is null",
-                     "The purchaseRef and provider are both required when no originalMsgId is given",
-                     purchaseRef,
-                     ErrorDetail.RequestType.PURCHASE_STATUS_REQUEST,
-                     ErrorDetail.ErrorType.FORMAT_ERROR);
-         return Response.status(400).entity(errorDetail).build();
-      }
-
-      // check if a purchase can be found with the given purchaseRef
-      if (!containsPurchaseIdWithPurchRef(purchaseRef, username, password)) {
-         ErrorDetail errorDetail =
-               buildRequestNotFoundErrorDetail(null, purchaseRef, ErrorDetail.RequestType.PURCHASE_STATUS_REQUEST);
-         return Response.status(404).entity(errorDetail).build();
-      }
-
-      return null;
-   }
-
-   private static ErrorDetail buildRequestNotFoundErrorDetail(
-         String id,
-         String requestId,
-         ErrorDetail.RequestType requestType) {
-      return buildErrorDetail(
-            id,
-            "Original purchase was not found.",
-            "No PurchaseRequest located for given purchase Identifier.",
-            requestId,
-            requestType,
-            ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD);
-   }
-
-   public static Response buildNoPurchaseRspFoundErrorResponse(String purchaseRequestId) {
-      ErrorDetail errorDetail =
-            buildErrorDetail(
-                  null,
-                  "Purchase Response not found.",
-                  "No Purchase Response could be found with associated msg id.",
-                  purchaseRequestId,
-                  ErrorDetail.RequestType.PURCHASE_STATUS_REQUEST,
-                  ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD);
-
-      return Response.status(400).entity(errorDetail).build();
-   }
-
-   private static Response buildAlreadyReversedErrorResponse(
-         String purchaseRequestId,
-         RequestKey requestKey,
-         BasicReversal reversal) {
-      ErrorDetail errorDetail =
-            buildErrorDetail(
-                  purchaseRequestId,
-                  "Purchase Request reversed.",
-                  "Purchase reversal with String already processed with the associated fields.",
-                  reversal.getId(),
-                  ErrorDetail.RequestType.PURCHASE_REVERSAL,
-                  ErrorDetail.ErrorType.ACCOUNT_ALREADY_SETTLED);
-
-      PurchaseResponse rsp = getPurchaseResponseFromCache(requestKey);
-      if (rsp != null) {
-         DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-         detailMessage.setVoucher(rsp.getVoucher());
-      }
-      return Response.status(400).entity(errorDetail).build();
-   }
-
-   private static Response buildDuplicateErrorResponse(
-         String purchaseRequestId,
-         RequestKey requestKey,
-         PurchaseRequest originalRequest) {
-      ErrorDetail errorDetail =
-            buildDuplicateErrorDetail(
-                  purchaseRequestId,
-                  null,
-                  ErrorDetail.RequestType.PURCHASE_REQUEST,
-                  originalRequest);
-
-      DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-      detailMessage.setProduct(originalRequest.getProduct());
-
-      PurchaseResponse rsp = getPurchaseResponseFromCache(requestKey);
-      if (rsp != null) {
-         detailMessage.setVoucher(rsp.getVoucher());
-      }
-      return Response.status(400).entity(errorDetail).build();
-   }
-
-   private static boolean isPurchaseRequestProvisioned(String purchaseRequestId, String username, String password) {
-      ConcurrentHashMap<RequestKey, PurchaseRequest> purchaseRequestRecords =
-            SUVTestServerRunner.getTestServer().getPurchaseRequestRecords();
-      RequestKey provisionKey =
-            new RequestKey(username, password, PurchaseResource.Purchase.PURCHASE, purchaseRequestId);
+   /*
+    * 
+    * private static ErrorDetail buildRequestNotFoundErrorDetail( String id, String requestId, ErrorDetail.RequestType
+    * requestType) { return buildErrorDetail( id, "Original refund was not found.",
+    * "No refundRequest located for given refund Identifier.", requestId, requestType,
+    * ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD); }
+    * 
+    * public static Response buildNorefundRspFoundErrorResponse(String refundRequestId) { ErrorDetail errorDetail =
+    * buildErrorDetail( null, "refund Response not found.", "No refund Response could be found with associated msg id.",
+    * refundRequestId, ErrorDetail.RequestType.refund_STATUS_REQUEST, ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD);
+    * 
+    * return Response.status(400).entity(errorDetail).build(); }
+    * 
+    * private static Response buildAlreadyReversedErrorResponse( String refundRequestId, RequestKey requestKey,
+    * BasicReversal reversal) { ErrorDetail errorDetail = buildErrorDetail( refundRequestId, "refund Request reversed.",
+    * "refund reversal with String already processed with the associated fields.", reversal.getId(),
+    * ErrorDetail.RequestType.refund_REVERSAL, ErrorDetail.ErrorType.ACCOUNT_ALREADY_SETTLED);
+    * 
+    * refundResponse rsp = getrefundResponseFromCache(requestKey); if (rsp != null) { DetailMessage detailMessage =
+    * (DetailMessage) errorDetail.getDetailMessage(); detailMessage.setVoucher(rsp.getVoucher()); } return
+    * Response.status(400).entity(errorDetail).build(); }
+    * 
+    * private static Response buildDuplicateErrorResponse( String refundRequestId, RequestKey requestKey, refundRequest
+    * originalRequest) { ErrorDetail errorDetail = buildDuplicateErrorDetail( refundRequestId, null,
+    * ErrorDetail.RequestType.refund_REQUEST, originalRequest);
+    * 
+    * DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+    * detailMessage.setProduct(originalRequest.getProduct());
+    * 
+    * refundResponse rsp = getrefundResponseFromCache(requestKey); if (rsp != null) {
+    * detailMessage.setVoucher(rsp.getVoucher()); } return Response.status(400).entity(errorDetail).build(); }
+    */
+   private static boolean isRefundRequestProvisioned(String refundRequestId, String username, String password) {
+      ConcurrentHashMap<RequestKey, RefundRequest> refundRequestRecords =
+            SUVTestServerRunner.getTestServer().getRefundRequestRecords();
+      RequestKey provisionKey = new RequestKey(username, password, RequestKey.REFUNDS_RESOURCE, refundRequestId);
       log.debug(
             String.format(
-                  "Searching for purchase request provision record under following key: %s",
+                  "Searching for refund request provision record under following key: %s",
                   provisionKey.toString()));
-      return purchaseRequestRecords.containsKey(provisionKey);
+      return refundRequestRecords.containsKey(provisionKey);
    }
 
-   public static PurchaseRequest getPurchaseRequestFromCache(
-         String purchaseRequestId,
-         String username,
-         String password) {
-      ConcurrentHashMap<RequestKey, PurchaseRequest> purchaseRequestRecords =
-            SUVTestServerRunner.getTestServer().getPurchaseRequestRecords();
-      RequestKey provisionKey =
-            new RequestKey(username, password, PurchaseResource.Purchase.PURCHASE, purchaseRequestId);
+   public static RefundRequest getRefundRequestFromCache(String refundRequestId, String username, String password) {
+      ConcurrentHashMap<RequestKey, RefundRequest> refundRequestRecords =
+            SUVTestServerRunner.getTestServer().getRefundRequestRecords();
+      RequestKey provisionKey = new RequestKey(username, password, RequestKey.REFUNDS_RESOURCE, refundRequestId);
       log.debug(
             String.format(
-                  "Searching for purchase request provision record under following key: %s",
+                  "Searching for refund request provision record under following key: %s",
                   provisionKey.toString()));
-      return purchaseRequestRecords.get(provisionKey);
+      return refundRequestRecords.get(provisionKey);
    }
 
-   private static PurchaseReversal getPurchaseReversalFromCache(
-         String purchaseRequestId,
-         String username,
-         String password) {
-      ConcurrentHashMap<RequestKey, PurchaseReversal> reversalRecords =
-            SUVTestServerRunner.getTestServer().getPurchaseReversalRecords();
-      RequestKey reversalKey =
-            new RequestKey(username, password, PurchaseResource.ReversePurchase.REVERSE_PURCHASE, purchaseRequestId);
+   private static BasicReversal getRefundReversalFromCache(String refundRequestId, String username, String password) {
+      ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
+            SUVTestServerRunner.getTestServer().getRefundReversalRecords();
+      RequestKey reversalKey = new RequestKey(username, password, RequestKey.REFUNDS_RESOURCE, refundRequestId);
       return reversalRecords.get(reversalKey);
    }
 
-   private static PurchaseConfirmation getPurchaseConfirmationFromCache(
-         String purchaseRequestId,
-         String username,
-         String password) {
-      ConcurrentHashMap<RequestKey, PurchaseConfirmation> purchaseConfirmationRecords =
-            SUVTestServerRunner.getTestServer().getPurchaseConfirmationRecords();
-      RequestKey confirmKey =
-            new RequestKey(
-                  username,
-                  password,
-                  PurchaseResource.ConfirmPurchase.PURCHASE_CONFIRMATION,
-                  purchaseRequestId);
-      return purchaseConfirmationRecords.get(confirmKey);
+   private static BasicAdvice getRefundConfirmationFromCache(String refundRequestId, String username, String password) {
+      ConcurrentHashMap<RequestKey, BasicAdvice> refundConfirmationRecords =
+            SUVTestServerRunner.getTestServer().getRefundConfirmationRecords();
+      RequestKey confirmKey = new RequestKey(username, password, RequestKey.REFUNDS_RESOURCE, refundRequestId);
+      return refundConfirmationRecords.get(confirmKey);
    }
 
-   private static PurchaseResponse getPurchaseResponseFromCache(RequestKey purchaseRequestKey) {
-      ConcurrentHashMap<RequestKey, PurchaseResponse> responseRecords =
-            SUVTestServerRunner.getTestServer().getPurchaseResponseRecords();
-      return responseRecords.get(purchaseRequestKey);
+   private static RefundResponse getRefundResponseFromCache(RequestKey refundRequestKey) {
+      ConcurrentHashMap<RequestKey, RefundResponse> responseRecords =
+            SUVTestServerRunner.getTestServer().getRefundResponseRecords();
+      return responseRecords.get(refundRequestKey);
    }
 
-   public static PurchaseResponse getPurchaseResponseFromCache(
-         String purchaseRequestId,
-         String username,
-         String password) {
-      RequestKey purchaseRequestKey =
-            new RequestKey(username, password, PurchaseResource.Purchase.PURCHASE, purchaseRequestId);
-      ConcurrentHashMap<RequestKey, PurchaseResponse> responseRecords =
-            SUVTestServerRunner.getTestServer().getPurchaseResponseRecords();
-      return responseRecords.get(purchaseRequestKey);
+   public static RefundResponse getrefundResponseFromCache(String refundRequestId, String username, String password) {
+      RequestKey refundRequestKey = new RequestKey(username, password, RequestKey.REFUNDS_RESOURCE, refundRequestId);
+      ConcurrentHashMap<RequestKey, RefundResponse> responseRecords =
+            SUVTestServerRunner.getTestServer().getRefundResponseRecords();
+      return responseRecords.get(refundRequestKey);
    }
 
-   public static String getPurchaseIdWithPurchRefFromCache(String purchaseReference, String username, String password) {
-      RequestKey purchaseReferenceKey =
-            new RequestKey(username, password, RequestKey.PURCHASE_REF_RESOURCE, purchaseReference);
-      ConcurrentHashMap<RequestKey, String> purchaseReferenceRecords =
-            SUVTestServerRunner.getTestServer().getPurchaseReferenceRecords();
-      return purchaseReferenceRecords.get(purchaseReferenceKey);
-   }
-
-   public static boolean containsPurchaseIdWithPurchRef(String purchaseReference, String username, String password) {
-      RequestKey purchaseReferenceKey =
-            new RequestKey(username, password, RequestKey.PURCHASE_REF_RESOURCE, purchaseReference);
-      ConcurrentHashMap<RequestKey, String> purchaseReferenceRecords =
-            SUVTestServerRunner.getTestServer().getPurchaseReferenceRecords();
-      return purchaseReferenceRecords.containsKey(purchaseReferenceKey);
-   }*/
-   //</editor-fold>
+   /*
+    * public static String getrefundIdWithPurchRefFromCache(String refundReference, String username, String password) {
+    * RequestKey refundReferenceKey = new RequestKey(username, password, RequestKey.refund_REF_RESOURCE,
+    * refundReference); ConcurrentHashMap<RequestKey, String> refundReferenceRecords =
+    * SUVTestServerRunner.getTestServer().getrefundReferenceRecords(); return
+    * refundReferenceRecords.get(refundReferenceKey); }
+    * 
+    * public static boolean containsrefundIdWithPurchRef(String refundReference, String username, String password) {
+    * RequestKey refundReferenceKey = new RequestKey(username, password, RequestKey.refund_REF_RESOURCE,
+    * refundReference); ConcurrentHashMap<RequestKey, String> refundReferenceRecords =
+    * SUVTestServerRunner.getTestServer().getrefundReferenceRecords(); return
+    * refundReferenceRecords.containsKey(refundReferenceKey); }
+    */
+   // </editor-fold>
 
 }
