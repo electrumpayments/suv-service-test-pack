@@ -48,7 +48,7 @@ public class SUVTestServer extends ResourceConfig {
    private ConcurrentHashMap<RequestKey, ProvisionRequest> voucherProvisionRecords;
    private ConcurrentHashMap<RequestKey, RedemptionRequest> voucherRedemptionRecords;
    private ConcurrentHashMap<RequestKey, RefundRequest> voucherRefundRecords;
-   private ConcurrentHashMap<RequestKey, ProvisionResponse> voucherResponseRecords;
+   private ConcurrentHashMap<RequestKey, ProvisionResponse> voucherResponseRecords; // Holds response returned to vendor after voucher is provisioned.
 
    private ConcurrentHashMap<RequestKey, TenderAdvice> voucherConfirmationRecords;
    private ConcurrentHashMap<RequestKey, BasicReversal> voucherReversalRecords;

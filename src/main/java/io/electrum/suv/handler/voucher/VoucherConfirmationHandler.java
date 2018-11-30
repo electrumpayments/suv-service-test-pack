@@ -10,7 +10,7 @@ import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.Tender;
 import io.electrum.vas.model.TenderAdvice;
 import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
-import sun.jvm.hotspot.memory.SystemDictionary;
+
 
 import javax.validation.ConstraintViolation;
 import javax.ws.rs.core.HttpHeaders;
@@ -43,6 +43,7 @@ public class VoucherConfirmationHandler extends BaseHandler {
 
          confirmationUuid = confirmation.getId();
          voucherId = confirmation.getRequestId();
+         // TODO !!!Either remove validation or write postman test for confirmation!!!
          if (!VoucherModelUtils.isValidUuid(confirmationUuid)) {
             return VoucherModelUtils.buildInvalidUuidErrorResponse(
                   confirmationUuid,

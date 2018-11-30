@@ -57,7 +57,7 @@ public class VoucherProvisionHandler extends BaseHandler {
                   ErrorDetail.ErrorType.FORMAT_ERROR);
          }
 
-         // Confirm that the basicAuth ID matches clientID inÒ message body
+         // Confirm that the basicAuth ID matches clientID in message body
          if (!provisionRequest.getClient().getId().equals(username)) {
             return VoucherModelUtils.buildIncorrectUsernameErrorResponse(
                   uuid,
