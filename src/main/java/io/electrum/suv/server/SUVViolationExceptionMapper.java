@@ -1,6 +1,5 @@
 package io.electrum.suv.server;
 
-import com.google.common.collect.FluentIterable;
 import io.dropwizard.jersey.validation.ConstraintMessage;
 import io.dropwizard.jersey.validation.JerseyViolationException;
 import io.electrum.suv.server.util.SUVModelUtils;
@@ -16,13 +15,10 @@ public class SUVViolationExceptionMapper implements ExceptionMapper<JerseyViolat
    public Response toResponse(JerseyViolationException exception) {
       final Invocable invocable = exception.getInvocable();
       final List<String> errors =
-            FluentIterable.from(exception.getConstraintViolations())
-                  .transform(violation -> ConstraintMessage.getMessage(violation, invocable))
-                  .toList();
-      /*
-       * exception.getConstraintViolations() .stream() .map(violation -> ConstraintMessage.getMessage(violation,
-       * invocable)) .collect(Collectors.toList()); //TODO Confirm with Casey that I can change to this
-       */
+            exception.getConstraintViolations()
+                  .stream()
+                  .map(violation -> ConstraintMessage.getMessage(violation, invocable))
+                  .collect(Collectors.toList());
 
       return Response.status(Response.Status.BAD_REQUEST).entity(SUVModelUtils.buildFormatErrorRsp(errors)).build();
    }

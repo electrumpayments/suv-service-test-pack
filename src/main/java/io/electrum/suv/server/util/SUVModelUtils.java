@@ -84,7 +84,6 @@ public class SUVModelUtils {
    }
 
    // todo why randomise these instead of using the ones sent by the requests?
-
    /**
     * Updates a given {@link Transaction transaction} with randomized 3rd party IDs. Inserts placeholder settlement
     * entity if transaction does not include one.
@@ -160,7 +159,6 @@ public class SUVModelUtils {
       DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
       detailMessage.setVoucherId(objectId);
       detailMessage.setRequestTime(transaction.getTime().toString()); //
-      // detailMessage.setProduct(transaction.getProduct()); //TODO This was removed in airtime, important? See giftcard
       detailMessage.setReceiver(transaction.getReceiver());
 
       return errorDetail;
@@ -188,10 +186,9 @@ public class SUVModelUtils {
       return errorDetail;
    }
 
-   // TODO Can this be converted to Hibernate?
+   // TODO Do we validate for uuid format?
    /** Confirms UUID format valid using regex (8-4-4-4-12 hexadecimal) */
    public static boolean isValidUuid(String uuid) {
-       if(uuid == null) return false; //TODO this should no longer be necessary
       return uuid.matches("([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}");
    }
 

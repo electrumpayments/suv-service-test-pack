@@ -22,7 +22,6 @@ public class DetailMessage {
    protected String reversalId = null;
    protected String confirmationId = null;
    protected String voidId = null;
-//   protected Product product = null;
    protected String requestTime = null;
    protected String reversalTime = null;
    protected String confirmDate = null;

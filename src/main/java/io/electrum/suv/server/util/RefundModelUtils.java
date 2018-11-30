@@ -20,7 +20,7 @@ public class RefundModelUtils extends SUVModelUtils {
        refundResponse.setVoucher(createRandomizedVoucher());
        refundResponse.setSlipData(createRandomizedSlipData());
 
-       //TODO Confirm not needed to populate more fields
+       //TODO Confirm not needed to populate more fields (optional)
        return refundResponse;
    }
 

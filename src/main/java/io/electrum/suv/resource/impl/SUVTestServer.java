@@ -32,17 +32,6 @@ import io.electrum.vas.model.BasicReversal;
 
 public class SUVTestServer extends ResourceConfig {
 
-   // private ConcurrentHashMap<RequestKey, VoucherRequest> provisionVoucherRecords;
-   // private ConcurrentHashMap<RequestKey, VoucherResponse> voucherResponseRecords;
-   // private ConcurrentHashMap<RequestKey, BasicReversal> voucherReversalRecords;
-   // private ConcurrentHashMap<RequestKey, VoucherConfirmation> voucherConfirmationRecords;
-   //
-   // private ConcurrentHashMap<RequestKey, PurchaseRequest> purchaseRequestRecords;
-   // private ConcurrentHashMap<RequestKey, PurchaseReversal> purchaseReversalRecords;
-   // private ConcurrentHashMap<RequestKey, PurchaseConfirmation> purchaseConfirmationRecords;
-   // private ConcurrentHashMap<RequestKey, PurchaseResponse> purchaseResponseRecords;
-
-   // TODO Fill these based on the operations specified in the docs (up to 9)
    // The value of the hashmap is a class in the models,
    // can be found (with its record name pair) in the docs under params/schema for each request type.
    private ConcurrentHashMap<RequestKey, ProvisionRequest> voucherProvisionRecords;
@@ -75,7 +64,6 @@ public class SUVTestServer extends ResourceConfig {
       register(MyObjectMapperProvider.class);
       register(JacksonFeature.class);
 
-      // TODO Figure out what this does
       register(
             new HibernateValidationFeature(
                   new DropwizardConfiguredValidator(Validators.newValidatorFactory().getValidator())));

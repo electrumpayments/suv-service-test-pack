@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.Path;
 
-//TODO THIS IS ACTUALLY WORKING (PATH)
 @Path(Paths.BASE_PATH)
 @Api(description = "the SUV API", authorizations = { @Authorization("httpBasic") })
 public class VouchersResource extends io.electrum.suv.api.VouchersResource {

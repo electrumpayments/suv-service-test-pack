@@ -61,52 +61,30 @@ public class VoucherModelUtils extends SUVModelUtils {
          return Response.status(400).entity(errorDetail).build(); // Bad Request
       }
 
-      // // If voucher already reversed
-      // ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getVoucherReversalRecords();
-      // requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, voucherId);
-      // BasicReversal reversal = reversalRecords.get(requestKey);
-      // if (reversal != null) {
-      // ErrorDetail errorDetail =
-      // buildErrorDetail(
-      // voucherId,
-      // "Voucher reversed.",
-      // "Voucher reversal with String already processed with the associated fields.",
-      // reversal.getId(),
-      // ErrorDetail.ErrorType.GENERAL_ERROR); // TODO Pick a better ErrorType
-      //
-      // // TODO what is this here for
-      // // Check for a response for this request, if found add to detailMessage
-      // DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-      // ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getVoucherResponseRecords();
-      // ProvisionResponse rsp = responseRecords.get(requestKey);
-      // if (rsp != null) {
-      // detailMessage.setVoucher(rsp.getVoucher());
-      // }
-      // return Response.status(400).entity(errorDetail).build();
-      // }
-      //
-      // // If voucher already redeemed
-      // ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRecords = testServer.getVoucherRedemptionRecords();
-      // requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, voucherId);
-      // RedemptionRequest redemption = redemptionRecords.get(requestKey);
-      // if (redemption != null) {
-      // ErrorDetail errorDetail =
-      // buildErrorDetail(
-      // voucherId,
-      // "Voucher redeemed.",
-      // "Voucher redemption with String already processed with the associated fields.",
-      // redemption.getId(),
-      // ErrorDetail.ErrorType.GENERAL_ERROR); // TODO Pick a better ErrorType
-      //
-      // // Check for a response for this request, if found add to detailMessage
-      // DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-      // ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getVoucherResponseRecords();
-      // ProvisionResponse rsp = responseRecords.get(requestKey);
-      // if (rsp != null) {
-      // detailMessage.setVoucher(rsp.getVoucher());
-      // }
-      // return Response.status(400).entity(errorDetail).build();
-      // }
+      //TODO I don't believe this can be tested for in PostMan
+      // If voucher reverssal request already received
+      ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getVoucherReversalRecords();
+      requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, voucherId);
+      BasicReversal reversal = reversalRecords.get(requestKey);
+      if (reversal != null) {
+         ErrorDetail errorDetail =
+               buildErrorDetail(
+                     voucherId,
+                     "Voucher reversed.",
+                     "Voucher reversal with String already processed with the associated fields.",
+                     reversal.getId(),
+                     ErrorDetail.ErrorType.GENERAL_ERROR); // TODO Pick a better ErrorType
+
+         // TODO what is this here for
+         // Check for a response for this request, if found add to detailMessage
+         DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getVoucherResponseRecords();
+         ProvisionResponse rsp = responseRecords.get(requestKey);
+         if (rsp != null) {
+            detailMessage.setVoucher(rsp.getVoucher());
+         }
+         return Response.status(400).entity(errorDetail).build();
+      }
 
       return null; // Voucher can be provisioned
    }

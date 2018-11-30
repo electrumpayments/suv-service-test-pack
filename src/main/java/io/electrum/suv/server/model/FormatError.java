@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.electrum.vas.Utils;
 import io.swagger.annotations.ApiModelProperty;
 
-//TODO find out if this is useful now
 public class FormatError {
 
    private String field = null;
