@@ -7,7 +7,6 @@ import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
-import sun.jvm.hotspot.jdi.ConcreteMethodImpl;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -48,7 +47,7 @@ public class RedeemVoucherHandler extends BaseHandler {
 
          String voucherCode = redemptionRequest.getVoucher().getCode();
          // Confirm voucher not already provisioned or reversed.
-         rsp = VoucherModelUtils.canRedeemVoucher(voucherCode, username, password);
+         rsp = VoucherModelUtils.canRedeemVoucher(voucherCode, username, password, uuid);
          if (rsp != null) {
             return rsp;
          }
@@ -77,7 +76,7 @@ public class RedeemVoucherHandler extends BaseHandler {
    private RequestKey addRedemptionRequestToCache(String voucherId, RedemptionRequest request) {
       RequestKey key = new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, voucherId);
       ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRecords =
-            SUVTestServerRunner.getTestServer().getVoucherRedemptionRecords();
+            SUVTestServerRunner.getTestServer().getRedemptionRequestRecords();
       redemptionRecords.put(key, request);
 
       return key;

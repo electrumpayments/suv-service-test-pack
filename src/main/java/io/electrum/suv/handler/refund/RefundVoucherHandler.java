@@ -6,7 +6,6 @@ import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.util.RefundModelUtils;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
-import org.apache.commons.lang3.NotImplementedException;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -49,7 +48,7 @@ public class RefundVoucherHandler extends BaseHandler {
          }
 
          // The voucher can be Refunded
-         RequestKey key = addVoucherRefundToCache(uuid, refundRequest);
+         RequestKey key = addRefundRequestToCache(uuid, refundRequest);
 
          // TODO See Giftcard, should this all be done differently
          RefundResponse refundRsp = RefundModelUtils.refundRspFromReq(refundRequest);
@@ -68,11 +67,11 @@ public class RefundVoucherHandler extends BaseHandler {
       refundResponseRecords.put(key, request);
    }
 
-   private RequestKey addVoucherRefundToCache(String voucherId, RefundRequest request) {
+   private RequestKey addRefundRequestToCache(String voucherId, RefundRequest request) {
       RequestKey key = new RequestKey(username, password, RequestKey.REFUNDS_RESOURCE, voucherId); // TODO are there
                                                                                                    // other resources?
       ConcurrentHashMap<RequestKey, RefundRequest> voucherRefundRecords =
-            SUVTestServerRunner.getTestServer().getVoucherRefundRecords();
+            SUVTestServerRunner.getTestServer().getRefundRequestRecords();
       voucherRefundRecords.put(key, request);
       return key;
    }

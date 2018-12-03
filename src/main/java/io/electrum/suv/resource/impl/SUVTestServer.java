@@ -35,8 +35,6 @@ public class SUVTestServer extends ResourceConfig {
    // The value of the hashmap is a class in the models,
    // can be found (with its record name pair) in the docs under params/schema for each request type.
    private ConcurrentHashMap<RequestKey, ProvisionRequest> voucherProvisionRecords;
-   private ConcurrentHashMap<RequestKey, RedemptionRequest> voucherRedemptionRecords;
-   private ConcurrentHashMap<RequestKey, RefundRequest> voucherRefundRecords;
    private ConcurrentHashMap<RequestKey, ProvisionResponse> voucherResponseRecords; // Holds response returned to vendor
                                                                                     // after voucher is provisioned.
 
@@ -71,10 +69,7 @@ public class SUVTestServer extends ResourceConfig {
       register(new SUVViolationExceptionMapper());
 
       voucherProvisionRecords = new ConcurrentHashMap<>();
-      voucherRedemptionRecords = new ConcurrentHashMap<>();
-      voucherRefundRecords = new ConcurrentHashMap<>();
       voucherResponseRecords = new ConcurrentHashMap<>();
-
       voucherConfirmationRecords = new ConcurrentHashMap<>();
       voucherReversalRecords = new ConcurrentHashMap<>();
 
@@ -100,9 +95,7 @@ public class SUVTestServer extends ResourceConfig {
       return voucherResponseRecords;
    }
 
-   public ConcurrentHashMap<RequestKey, RedemptionRequest> getVoucherRedemptionRecords() {
-      return voucherRedemptionRecords;
-   }
+
 
    public ConcurrentHashMap<RequestKey, BasicAdvice> getRedemptionConfirmationRecords() {
       return redemptionConfirmationRecords;
@@ -112,9 +105,7 @@ public class SUVTestServer extends ResourceConfig {
       return redemptionReversalRecords;
    }
 
-   public ConcurrentHashMap<RequestKey, RefundRequest> getVoucherRefundRecords() {
-      return voucherRefundRecords;
-   }
+
 
    public ConcurrentHashMap<RequestKey, BasicAdvice> getRefundConfirmationRecords() {
       return refundConfirmationRecords;
