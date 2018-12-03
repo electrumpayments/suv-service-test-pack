@@ -3823,9 +3823,7 @@
 											"",
 											"var voucher = jsonData.voucher;",
 											"tests[\"Voucher present\"] = voucher !== null;",
-											"tests[\"Voucher serial number present\"] = voucher.serialNumber !== null;",
-											"tests[\"Voucher pin present\"] = voucher.pin !== null;",
-											"tests[\"Voucher request time present\"] = jsonData.requestTime !== null;",
+											"tests[\"Voucher code present\"] = voucher.code !== null;",
 											"",
 											"var originator = jsonData.originator;",
 											"tests[\"Originator present\"] = originator !== null;",
@@ -4404,7 +4402,3044 @@
 		},
 		{
 			"name": "Redemptions Model",
-			"item": []
+			"item": [
+				{
+					"name": "Redemption Cofirmations",
+					"item": [],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Redemption Error responses",
+					"item": [
+						{
+							"name": "Provision request",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "dd8631d6-bc19-4793-81b0-265fd5aabcf3",
+										"exec": [
+											"tests[\"Status code is 201\"] = responseCode.code === 201;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"",
+											"var thirdPartyIds = jsonData.thirdPartyIdentifiers",
+											"postman.setEnvironmentVariable(\"thirdPartyId1\", thirdPartyIds[0].institutionId);",
+											"postman.setEnvironmentVariable(\"thirdPartyTranRef1\", thirdPartyIds[0].transactionIdentifier);",
+											"",
+											"postman.setEnvironmentVariable(\"thirdPartyId2\", thirdPartyIds[1].institutionId);",
+											"postman.setEnvironmentVariable(\"thirdPartyTranRef2\", thirdPartyIds[1].transactionIdentifier);",
+											"",
+											"postman.setEnvironmentVariable(\"thirdPartyId3\", thirdPartyIds[2].institutionId);",
+											"postman.setEnvironmentVariable(\"thirdPartyTranRef3\", thirdPartyIds[2].transactionIdentifier);",
+											"",
+											"postman.setEnvironmentVariable(\"thirdPartyId4\", thirdPartyIds[3].institutionId);",
+											"postman.setEnvironmentVariable(\"thirdPartyTranRef4\", thirdPartyIds[3].transactionIdentifier);",
+											"",
+											"//Update environment variable for redemption",
+											"postman.setEnvironmentVariable(\"voucherCode\", jsonData.voucher.code);",
+											"postman.setEnvironmentVariable(\"voucherExpiry\", jsonData.voucher.expiryDate);"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "b6f268de-acbb-48e5-8056-339bc385e153",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"originatorRef\", (\"orig\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"clientRef\", (\"clnt\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"settlementEntityRef\", (\"seEn\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"receiverRef\", (\"receiver\"+uuidLast4).toUpperCase());",
+											"",
+											"var dateTime = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", dateTime);",
+											"postman.setEnvironmentVariable(\"requestTime\", dateTime);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic MjIyMjIyMjI6cGFzc3dvcmQ="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/vouchers",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"vouchers"
+									]
+								},
+								"description": "Voucher provision request"
+							},
+							"response": []
+						},
+						{
+							"name": "Redemption of unconfirmed voucher",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "77f36893-f14c-4241-a259-a0f076447f5c",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is VOUCHER_NOT_REDEEMABLE\"] = jsonData.errorType === \"VOUCHER_NOT_REDEEMABLE\";",
+											"tests[\"No original ID returned\"] = jsonData.originalId == null;",
+											"tests[\"Redemption ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"redemptionId\");"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "319b0a01-d065-4d3a-93b4-4e4449be8cf6",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var redemptionId = uuid();",
+											"postman.setEnvironmentVariable(\"redemptionId\", redemptionId);",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic MjIyMjIyMjI6cGFzc3dvcmQ="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{redemptionId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions"
+									]
+								},
+								"description": "Voucher confirmation advice"
+							},
+							"response": []
+						},
+						{
+							"name": "Confirmation of prior voucher",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "77f36893-f14c-4241-a259-a0f076447f5c",
+										"exec": [
+											"tests[\"Status code is 202\"] = responseCode.code === 202;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Confirmation ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"confirmationId\");",
+											"tests[\"Request ID returned\"] = jsonData.requestId === postman.getEnvironmentVariable(\"requestId\");",
+											"tests[\"Time returned\"] = jsonData.time === postman.getEnvironmentVariable(\"timestamp\");",
+											"tests[\"Third party identifiers\"] = jsonData.id !== null;",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "319b0a01-d065-4d3a-93b4-4e4449be8cf6",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var voidId = uuid();",
+											"postman.setEnvironmentVariable(\"confirmationId\", voidId);",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic MjIyMjIyMjI6cGFzc3dvcmQ="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{confirmationId}}\",\n    \"requestId\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"thirdPartyIdentifiers\": [\n        {\n            \"institutionId\": \"{{thirdPartyId1}}\",\n            \"transactionIdentifier\": \"{{thirdPartyTranRef1}}\"\n        },\n        {\n            \"institutionId\": \"{{thirdPartyId2}}\",\n            \"transactionIdentifier\": \"{{thirdPartyTranRef2}}\"\n        },\n        {\n            \"institutionId\": \"{{thirdPartyId3}}\",\n            \"transactionIdentifier\": \"{{thirdPartyTranRef3}}\"\n        },\n        {\n            \"institutionId\": \"{{thirdPartyId4}}\",\n            \"transactionIdentifier\": \"{{thirdPartyTranRef4}}\"\n        }\n    ],\n    \"tenders\": [\n    \t{\n    \t\"amount\":{\n    \t\t\"amount\":1000,\n    \t\t\"currency\":710\n    \t},\n    \t\"tenderType\":\"CASH\"\n    \t}]\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/vouchers/confirmations",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"vouchers",
+										"confirmations"
+									]
+								},
+								"description": "Voucher confirmation advice"
+							},
+							"response": []
+						},
+						{
+							"name": "Redemption of prior voucher",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "77f36893-f14c-4241-a259-a0f076447f5c",
+										"exec": [
+											"tests[\"Status code is 202\"] = responseCode.code === 201;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Redemption ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"redemptionId\");",
+											"",
+											"tests[\"Time returned\"] = jsonData.time === postman.getEnvironmentVariable(\"timestamp\");",
+											"",
+											"var originator = jsonData.originator;",
+											"tests[\"Originator present\"] = originator !== null;",
+											"tests[\"Originator Merchant present\"] = originator.merchant !== null;",
+											"tests[\"Originator Institution present\"] = originator.institution !== null;",
+											"tests[\"Originator terminal echoed\"] = originator.terminalId === postman.getEnvironmentVariable(\"termId\");",
+											"",
+											"var client = jsonData.client;",
+											"tests[\"client institution present\"] = client !== null;",
+											"tests[\"client institution ID present\"] = client.id !== null;",
+											"tests[\"client institution name present\"] = client.name !== null;",
+											"",
+											"tests[\"Voucher Code returned\"] = jsonData.voucher !== null;",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "319b0a01-d065-4d3a-93b4-4e4449be8cf6",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var redemptionId = uuid();",
+											"postman.setEnvironmentVariable(\"redemptionId\", redemptionId);",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic MjIyMjIyMjI6cGFzc3dvcmQ="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{redemptionId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions"
+									]
+								},
+								"description": "Voucher confirmation advice"
+							},
+							"response": []
+						},
+						{
+							"name": "Redemption of previously redeemed voucher",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "77f36893-f14c-4241-a259-a0f076447f5c",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is DUPLICATE_RECORD\"] = jsonData.errorType === \"DUPLICATE_RECORD\";",
+											"tests[\"No original ID returned\"] = jsonData.originalId == null;",
+											"tests[\"Redemption ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"redemptionId\");"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "319b0a01-d065-4d3a-93b4-4e4449be8cf6",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var redemptionId = uuid();",
+											"postman.setEnvironmentVariable(\"redemptionId\", redemptionId);",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic MjIyMjIyMjI6cGFzc3dvcmQ="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{redemptionId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions"
+									]
+								},
+								"description": "Voucher confirmation advice"
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Redemption Missing field tests",
+					"item": [
+						{
+							"name": "Missing voucher ID",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "ae01840c-eacf-4559-a3c6-b0c16f71d3cc",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"id may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "df6938a2-1de9-43bf-b4d5-1ebecfb30027",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n   \"time\":\"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing time",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "f46b99a6-3cd7-4125-a52c-be8f80249b94",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"time may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "a153629e-0349-4cc9-a942-707c3aaea316",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing originator",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "8e85bd24-f5e2-4182-884f-f2912bb4372c",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"originator may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "07e98f24-6f29-4017-81c6-f5a00d5c7411",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing originator.merchant",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "532bacbf-a351-464f-ac8c-f47efa85aae4",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"originator.merchant may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "243250f5-ba10-436d-9bdd-908a848260da",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing originator.merchant.merchantId",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "e7610ef0-7256-49a7-b82d-47309b10ec19",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"originator.merchant.merchantId may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "0d107e75-4d7a-4edc-aa6a-2de2f63284e1",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing originator.merchant.merchantName",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "8f26317a-703b-4fe5-960e-2b7cb3f75c6d",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"originator.merchant.merchantName may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "ad867204-bfe3-4849-a7f1-df959d6638e3",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\"\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing merchantName.name",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "7d86cda0-3a18-4b04-9660-57025727f05e",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"originator.merchant.merchantName.name may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "0b4d47c9-4e07-460f-a8e9-22ac2a74193f",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing merchantName.city",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "392b1498-4935-46d9-a95d-b565c098cef0",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"originator.merchant.merchantName.city may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "ca400dbf-dde1-45f0-bdee-ad2644a34b36",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing merchantName.region",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "b163b054-b04d-415c-af1c-141f3108f630",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"originator.merchant.merchantName.region may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "e127cd7b-4ca4-41e8-860a-1b295d8c8f35",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing merchantName.country",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "5d0b1e64-ec66-4736-a770-63124891da77",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"originator.merchant.merchantName.country may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "485da880-3154-4c21-9149-1aae8bd5e6da",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing originator.merchant.merchantType",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "17fa6f3c-e970-4e08-823f-e18f77c92c11",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"originator.merchant.merchantType may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "6a183ddd-a570-4ea2-97ac-33c37fedb552",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing originator.terminalId",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "a7ca689b-ed5f-4f5e-9eb3-f955eabac2a7",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"originator.terminalId may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "3edfa005-9fb6-49af-8eb1-341e1f1dacf7",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing originator.institution",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "6551c880-dabe-4712-a088-257845681acf",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"originator.institution may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "c72875f3-56db-4561-b27d-00d530c2e7de",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\"\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing originator.institution.id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "ea5d1009-27fb-4205-8de3-445ff376e175",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"originator.institution.id may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "3a2c1b48-4da8-49f8-9aa5-1fd6fde94516",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing originator.institution.name",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "79164c93-9e6e-45a3-9301-030c7c04bad3",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"originator.institution.name may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "68026678-3096-4e8b-a686-79f01c1775f4",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing client",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "f83dcded-18fe-4d00-a5dd-627c41127714",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"client may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "a5175f66-c2a8-4fb5-b3f8-1217372f81e9",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing client.id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "247db5a9-3667-45e2-a02e-8217456f7fa7",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"client.id may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "de4aa68c-6e0b-4794-b8d9-1f12462bd10f",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing client.name",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "3beb2324-d2e7-4659-8d4a-d1223ca66990",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"client.name may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "e6e8e2f2-973a-4bd8-8f58-d93d815b3459",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing thirdPartyId.institutionId",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "3beb2324-d2e7-4659-8d4a-d1223ca66990",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg ===  \"thirdPartyIdentifiers[0].institutionId may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "e6e8e2f2-973a-4bd8-8f58-d93d815b3459",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n        \n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing thirdPartyId.transactionIdentifier",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "3beb2324-d2e7-4659-8d4a-d1223ca66990",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
+											"tests[\"Error message is not null\"] = jsonData.errorMessage !== null;",
+											"var formatErrors = jsonData.detailMessage.formatErrors;",
+											"tests[\"Correct Error message\"] = formatErrors[0].msg === \"client.name may not be null\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "e6e8e2f2-973a-4bd8-8f58-d93d815b3459",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"merchantRef\", (\"merch\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"senderRef\", (\"send\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"processorRef\", (\"proc\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"vendorRef\", (\"vendor\"+uuidLast4).toUpperCase());",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic dGVzdENsaWVudDpwYXNzd29yZA=="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Messages intended to test that the server correctly identifies a missing field in a message to the server.",
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Redemption Requests",
+					"item": [
+						{
+							"name": "Provision request",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "dd8631d6-bc19-4793-81b0-265fd5aabcf3",
+										"exec": [
+											"tests[\"Status code is 201\"] = responseCode.code === 201;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"",
+											"var thirdPartyIds = jsonData.thirdPartyIdentifiers",
+											"postman.setEnvironmentVariable(\"thirdPartyId1\", thirdPartyIds[0].institutionId);",
+											"postman.setEnvironmentVariable(\"thirdPartyTranRef1\", thirdPartyIds[0].transactionIdentifier);",
+											"",
+											"postman.setEnvironmentVariable(\"thirdPartyId2\", thirdPartyIds[1].institutionId);",
+											"postman.setEnvironmentVariable(\"thirdPartyTranRef2\", thirdPartyIds[1].transactionIdentifier);",
+											"",
+											"postman.setEnvironmentVariable(\"thirdPartyId3\", thirdPartyIds[2].institutionId);",
+											"postman.setEnvironmentVariable(\"thirdPartyTranRef3\", thirdPartyIds[2].transactionIdentifier);",
+											"",
+											"postman.setEnvironmentVariable(\"thirdPartyId4\", thirdPartyIds[3].institutionId);",
+											"postman.setEnvironmentVariable(\"thirdPartyTranRef4\", thirdPartyIds[3].transactionIdentifier);",
+											"",
+											"//Update environment variable for redemption",
+											"postman.setEnvironmentVariable(\"voucherCode\", jsonData.voucher.code);",
+											"postman.setEnvironmentVariable(\"voucherExpiry\", jsonData.voucher.expiryDate);"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "b6f268de-acbb-48e5-8056-339bc385e153",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"originatorRef\", (\"orig\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"clientRef\", (\"clnt\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"settlementEntityRef\", (\"seEn\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"receiverRef\", (\"receiver\"+uuidLast4).toUpperCase());",
+											"",
+											"var dateTime = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", dateTime);",
+											"postman.setEnvironmentVariable(\"requestTime\", dateTime);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic MjIyMjIyMjI6cGFzc3dvcmQ="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/vouchers",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"vouchers"
+									]
+								},
+								"description": "Voucher provision request"
+							},
+							"response": []
+						},
+						{
+							"name": "Confirmation of prior voucher",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "77f36893-f14c-4241-a259-a0f076447f5c",
+										"exec": [
+											"tests[\"Status code is 202\"] = responseCode.code === 202;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Confirmation ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"confirmationId\");",
+											"tests[\"Request ID returned\"] = jsonData.requestId === postman.getEnvironmentVariable(\"requestId\");",
+											"tests[\"Time returned\"] = jsonData.time === postman.getEnvironmentVariable(\"timestamp\");",
+											"tests[\"Third party identifiers\"] = jsonData.id !== null;",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "319b0a01-d065-4d3a-93b4-4e4449be8cf6",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var confirmationId = uuid();",
+											"postman.setEnvironmentVariable(\"confirmationId\", confirmationId);",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic MjIyMjIyMjI6cGFzc3dvcmQ="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{confirmationId}}\",\n    \"requestId\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"thirdPartyIdentifiers\": [\n        {\n            \"institutionId\": \"{{thirdPartyId1}}\",\n            \"transactionIdentifier\": \"{{thirdPartyTranRef1}}\"\n        },\n        {\n            \"institutionId\": \"{{thirdPartyId2}}\",\n            \"transactionIdentifier\": \"{{thirdPartyTranRef2}}\"\n        },\n        {\n            \"institutionId\": \"{{thirdPartyId3}}\",\n            \"transactionIdentifier\": \"{{thirdPartyTranRef3}}\"\n        },\n        {\n            \"institutionId\": \"{{thirdPartyId4}}\",\n            \"transactionIdentifier\": \"{{thirdPartyTranRef4}}\"\n        }\n    ],\n    \"tenders\": [\n    \t{\n    \t\"amount\":{\n    \t\t\"amount\":1000,\n    \t\t\"currency\":710\n    \t},\n    \t\"tenderType\":\"CASH\"\n    \t}]\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/vouchers/confirmations",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"vouchers",
+										"confirmations"
+									]
+								},
+								"description": "Voucher confirmation advice"
+							},
+							"response": []
+						},
+						{
+							"name": "Redemption of prior voucher",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "77f36893-f14c-4241-a259-a0f076447f5c",
+										"exec": [
+											"tests[\"Status code is 202\"] = responseCode.code === 201;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Redemption ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"redemptionId\");",
+											"",
+											"tests[\"Time returned\"] = jsonData.time === postman.getEnvironmentVariable(\"timestamp\");",
+											"",
+											"var originator = jsonData.originator;",
+											"tests[\"Originator present\"] = originator !== null;",
+											"tests[\"Originator Merchant present\"] = originator.merchant !== null;",
+											"tests[\"Originator Institution present\"] = originator.institution !== null;",
+											"tests[\"Originator terminal echoed\"] = originator.terminalId === postman.getEnvironmentVariable(\"termId\");",
+											"",
+											"var client = jsonData.client;",
+											"tests[\"client institution present\"] = client !== null;",
+											"tests[\"client institution ID present\"] = client.id !== null;",
+											"tests[\"client institution name present\"] = client.name !== null;",
+											"",
+											"tests[\"Voucher Code returned\"] = jsonData.voucher !== null;",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "319b0a01-d065-4d3a-93b4-4e4449be8cf6",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var redemptionId = uuid();",
+											"postman.setEnvironmentVariable(\"confirmationId\", redemptionId);",
+											"",
+											"var timestamp = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", timestamp);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic MjIyMjIyMjI6cGFzc3dvcmQ="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{redemptionId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n    \"voucher\": {\n        \"code\": \"{{voucherCode}}\",\n        \"expiryDate\": \"{{voucherExpiry}}\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/redemptions",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"redemptions"
+									]
+								},
+								"description": "Voucher confirmation advice"
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Redemption Reversals",
+					"item": [],
+					"_postman_isSubFolder": true
+				}
+			]
 		},
 		{
 			"name": "Refunds Model",
