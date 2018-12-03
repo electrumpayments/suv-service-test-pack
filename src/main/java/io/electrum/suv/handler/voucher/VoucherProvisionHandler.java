@@ -19,9 +19,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class VoucherProvisionHandler extends BaseHandler {
    private static final Logger log = LoggerFactory.getLogger(VoucherProvisionHandler.class);
 
-   @NotNull
-   String uuid;
-
    public VoucherProvisionHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
    }
@@ -48,10 +45,10 @@ public class VoucherProvisionHandler extends BaseHandler {
       try {
          Response rsp;
 
-         uuid = provisionRequest.getId();
+         String uuid = provisionRequest.getId();
          if (!VoucherModelUtils.isValidUuid(uuid)) {
             return VoucherModelUtils.buildInvalidUuidErrorResponse(
-                  uuid,
+                    uuid,
                   provisionRequest.getClient(),
                   username,
                   ErrorDetail.ErrorType.FORMAT_ERROR);
@@ -60,7 +57,7 @@ public class VoucherProvisionHandler extends BaseHandler {
          // Confirm that the basicAuth ID matches clientID in message body
          if (!provisionRequest.getClient().getId().equals(username)) {
             return VoucherModelUtils.buildIncorrectUsernameErrorResponse(
-                  uuid,
+                    uuid,
                   provisionRequest.getClient(),
                   username,
                   ErrorDetail.ErrorType.AUTHENTICATION_ERROR);
