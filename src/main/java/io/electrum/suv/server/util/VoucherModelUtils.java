@@ -1,5 +1,6 @@
 package io.electrum.suv.server.util;
 
+import com.sun.xml.internal.ws.addressing.v200408.MemberSubmissionWsaClientTube;
 import io.electrum.suv.api.models.*;
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
@@ -24,8 +25,8 @@ public class VoucherModelUtils extends SUVModelUtils {
    /**
     * Determine whether a given {@link Voucher voucher} provision request is able to be completed.
     * 
-    * Ensures voucher is not already provisioned. No need to check if redeemed, reversed or confirmed as those actions
-    * cannot occur on an unprovisioned voucher.
+    * Ensures voucher is not already provisioned or no reversal request has been received. No need to check if redeemed
+    * or confirmed as those actions cannot occur on an unprovisioned voucher.
     * 
     * 
     * @param voucherId
@@ -61,8 +62,8 @@ public class VoucherModelUtils extends SUVModelUtils {
          return Response.status(400).entity(errorDetail).build(); // Bad Request
       }
 
-      //TODO I don't believe this can be tested for in PostMan
-      // If voucher reverssal request already received
+      // TODO I don't believe this can be tested for in PostMan
+      // If voucher reversal request already received
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getVoucherReversalRecords();
       requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, voucherId);
       BasicReversal reversal = reversalRecords.get(requestKey);
@@ -75,7 +76,7 @@ public class VoucherModelUtils extends SUVModelUtils {
                      reversal.getId(),
                      ErrorDetail.ErrorType.GENERAL_ERROR); // TODO Pick a better ErrorType
 
-         // TODO what is this here for
+         // TODO what is this here for, really don't see it being !null
          // Check for a response for this request, if found add to detailMessage
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
          ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getVoucherResponseRecords();
@@ -112,20 +113,19 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       // TODO Normalise these validation methods to be more similar (this)
       // Confirm Voucher provisioned
-      ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getVoucherProvisionRecords();
-      if (!isVoucherProvisioned(voucherId, provisionRecords, username, password)) {
-         errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
-               .errorMessage("No voucher req.")
-               .detailMessage(
-                     new DetailMessage().freeString("No VoucherRequest located for given voucherId.")
-                           .voucherId(voucherId));
-         return Response.status(404).entity(errorDetail).build();
-      } // TODO extract this to confirmVoucherRedeemed() returns response code or null
+      // ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getVoucherProvisionRecords();
+      // if (!isVoucherProvisioned(voucherId, provisionRecords, username, password)) {
+      // errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
+      // .errorMessage("No voucher req.")
+      // .detailMessage(
+      // new DetailMessage().freeString("No VoucherRequest located for given voucherId.")
+      // .voucherId(voucherId));
+      // return Response.status(404).entity(errorDetail).build();
+      // } // TODO extract this to confirmVoucherRedeemed() returns response code or null
 
       // check it's not confirmed
       ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords = testServer.getVoucherConfirmationRecords();
-      RequestKey requestKey =
-            new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherId);
+      RequestKey requestKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherId);
       TenderAdvice confirmation = confirmationRecords.get(requestKey);
       if (confirmation != null) {
          errorDetail.errorType(ErrorDetail.ErrorType.VOUCHER_ALREADY_CONFIRMED)
@@ -297,7 +297,72 @@ public class VoucherModelUtils extends SUVModelUtils {
       return provisionRecords.get(provisionKey) != null;
    }
 
-   public static Response canRefundVoucher(String uuid, String username, String password) {
+   /**
+    * Determine whether a given {@link Voucher voucher} redemption request is able to be completed.
+    * 
+    * Ensures voucher is not already redeemed and has been confirmed.
+    * 
+    * 
+    * @param voucherId
+    *           the unique identifier of this voucher
+    * @param username
+    *           from BasicAuth
+    * @param password
+    *           from BasicAuth
+    * @return A 400 error response indicating the voucher could not be redeemed, null if able to redeem.
+    */
+   public static Response canRedeemVoucher(String voucherId, String username, String password) {
+      final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
+
+      ConcurrentHashMap<RequestKey, RedemptionRequest> requestRecords = testServer.getRedemptionRequestRecords();
+      // TODO Could make requestKey part of method args
+      RequestKey requestKey = new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, voucherId);
+      RedemptionRequest originalRequest = requestRecords.get(requestKey);
+
+      // If Voucher already redeemed
+      if (originalRequest != null) {
+         ErrorDetail errorDetail = buildDuplicateErrorDetail(voucherId, null, originalRequest);
+
+         DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+
+         // Check for a response for this request
+         ConcurrentHashMap<RequestKey, RedemptionResponse> responseRecords = testServer.getRedemptionResponseRecords();
+         RedemptionResponse rsp = responseRecords.get(requestKey);
+         if (rsp != null) {
+            detailMessage.setVoucher(rsp.getVoucher()); // TODO confirm this is !null
+         }
+         return Response.status(400).entity(errorDetail).build();
+      }
+
+      // If voucher not yet confirmed
+      ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords = testServer.getVoucherConfirmationRecords();
+      TenderAdvice confirmation = confirmationRecords.get(requestKey);
+      if (confirmation != null) {
+         ErrorDetail errorDetail =
+               buildErrorDetail(
+                     voucherId,
+                     "Voucher confirmed.",
+                     "Voucher confirmation with String already processed with the associated fields.",
+                     confirmation.getId(),
+                     ErrorDetail.ErrorType.VOUCHER_ALREADY_CONFIRMED);
+      }
+
+      return null;
+   }
+
+   public static RedemptionResponse redemptionRspFromReq(RedemptionRequest redemptionRequest) throws IOException {
+      RedemptionResponse redemptionResponse =
+              JsonUtil.deserialize(JsonUtil.serialize(redemptionRequest, RedemptionRequest.class), RedemptionResponse.class);
+
+      updateWithRandomizedIdentifiers(redemptionResponse);
+      redemptionResponse.setVoucher(redemptionRequest.getVoucher());
+      redemptionResponse.setSlipData(createRandomizedSlipData());
+      // redemptionResponse.setResponseProduct(req.getProduct().name("TalkALot").type(Product.ProductType.AIRTIME_FIXED));
+      return redemptionResponse;
+   }
+
+   public static Response canRefundVoucher(String voucherId, String username, String password) {
+      // todo implement method
       return null;
    }
 }
