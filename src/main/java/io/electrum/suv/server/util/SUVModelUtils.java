@@ -29,8 +29,8 @@ import io.electrum.vas.model.Transaction;
 public class SUVModelUtils {
    protected static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
 
-   protected static List<String> redeemInstructions = new ArrayList<String>();
-   protected static List<SlipLine> messageLines = new ArrayList<SlipLine>();
+   protected static List<String> redeemInstructions = new ArrayList<>();
+   protected static List<SlipLine> messageLines = new ArrayList<>();
 
    static {
       redeemInstructions.add("To redeem your voucher");
@@ -61,11 +61,7 @@ public class SUVModelUtils {
     * .transactionIdentifiers(basicAdvice.getThirdPartyIdentifiers()); }
     */
 
-   /**
-    * Create a new voucher with randomized values
-    * 
-    * @return
-    */
+   /** Create a new voucher with randomized values for ode, expiry date and instruction */
    protected static Voucher createRandomizedVoucher() {
       Voucher voucher = new Voucher();
       voucher.setCode(RandomData.random09((int) ((Math.random() * 20) + 1)));

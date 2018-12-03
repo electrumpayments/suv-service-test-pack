@@ -125,7 +125,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       // check it's not confirmed
       ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords = testServer.getVoucherConfirmationRecords();
       RequestKey requestKey =
-            new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherId.toString());
+            new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherId);
       TenderAdvice confirmation = confirmationRecords.get(requestKey);
       if (confirmation != null) {
          errorDetail.errorType(ErrorDetail.ErrorType.VOUCHER_ALREADY_CONFIRMED)
@@ -292,7 +292,7 @@ public class VoucherModelUtils extends SUVModelUtils {
          ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords,
          String username,
          String password) {
-      RequestKey provisionKey = new RequestKey(username, password, RequestKey.VOUCHERS_RESOURCE, voucherId.toString());
+      RequestKey provisionKey = new RequestKey(username, password, RequestKey.VOUCHERS_RESOURCE, voucherId);
       log.debug(String.format("Searching for provision record under following key: %s", provisionKey.toString()));
       return provisionRecords.get(provisionKey) != null;
    }
