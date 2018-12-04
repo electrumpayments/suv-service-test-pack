@@ -335,10 +335,11 @@ public class VoucherModelUtils extends SUVModelUtils {
       }
 
       // If voucher not yet confirmed
+      // Use the mapping from the voucher code to a request key (which corresponds to a confirmationsRecord)
+      ConcurrentHashMap<String, RequestKey> voucherCodeRequestKey = testServer.getVoucherCodeRequestKeyRecords();
       ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords = testServer.getVoucherConfirmationRecords();
-      requestKey.setResourceType(RequestKey.CONFIRMATIONS_RESOURCE);
-      TenderAdvice confirmation = confirmationRecords.get(requestKey);
-      if (confirmation == null) {
+      RequestKey confirmationKey = voucherCodeRequestKey.get(voucherCode);
+      if (confirmationKey == null) {
          ErrorDetail errorDetail =
                buildErrorDetail(
                      requestId,
