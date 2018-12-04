@@ -95,7 +95,7 @@ public class VoucherModelUtils extends SUVModelUtils {
     * Ensures voucher is already provisioned and is not yet confirmed.
     * 
     * @param voucherId
-    *           the unique identifier of the voucher to be reversed
+    *           the unique identifier of the voucherRequest to be reversed
     * @param reversalId
     *           the unique identifier of this request
     * @param username
@@ -112,15 +112,15 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       // TODO Normalise these validation methods to be more similar (this)
       // Confirm Voucher provisioned
-      // ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getVoucherProvisionRecords();
-      // if (!isVoucherProvisioned(voucherId, provisionRecords, username, password)) {
-      // errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
-      // .errorMessage("No voucher req.")
-      // .detailMessage(
-      // new DetailMessage().freeString("No VoucherRequest located for given voucherId.")
-      // .voucherId(voucherId));
-      // return Response.status(404).entity(errorDetail).build();
-      // } // TODO extract this to confirmVoucherRedeemed() returns response code or null
+      ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getVoucherProvisionRecords();
+      if (!isVoucherProvisioned(voucherId, provisionRecords, username, password)) {
+         errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
+               .errorMessage("No voucher req.")
+               .detailMessage(
+                     new DetailMessage().freeString("No VoucherRequest located for given voucherId.")
+                           .voucherId(voucherId));
+         return Response.status(404).entity(errorDetail).build();
+      } // TODO extract this to confirmVoucherRedeemed() returns response code or null
 
       // check it's not confirmed
       ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords = testServer.getVoucherConfirmationRecords();
@@ -137,7 +137,6 @@ public class VoucherModelUtils extends SUVModelUtils {
          return Response.status(400).entity(errorDetail).build();
       }
 
-      // TODO Check that it is not redeemed? Probably not needed
       return null;
    }
 
@@ -308,7 +307,8 @@ public class VoucherModelUtils extends SUVModelUtils {
     *           from BasicAuth
     * @param password
     *           from BasicAuth
-    * @param requestId the unique identifier of this request
+    * @param requestId
+    *           the unique identifier of this request
     * @return A 400 error response indicating the voucher could not be redeemed, null if able to redeem.
     */
    public static Response canRedeemVoucher(String voucherCode, String username, String password, String requestId) {
@@ -343,7 +343,9 @@ public class VoucherModelUtils extends SUVModelUtils {
                buildErrorDetail(
                      requestId,
                      "Voucher not confirmed.",
-                     String.format("Voucher confirmation for Voucher Code:%s has not been processed. Cannot redeem unconfirmed vouchers.", voucherCode),
+                     String.format(
+                           "Voucher confirmation for Voucher Code:%s has not been processed. Cannot redeem unconfirmed vouchers.",
+                           voucherCode),
                      null,
                      ErrorDetail.ErrorType.VOUCHER_NOT_REDEEMABLE);
          return Response.status(400).entity(errorDetail).build();

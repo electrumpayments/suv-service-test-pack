@@ -76,6 +76,7 @@ public class VoucherConfirmationHandler extends BaseHandler {
       ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords =
             SUVTestServerRunner.getTestServer().getVoucherConfirmationRecords();
 
+       //TODO your bug is here dummy, MOVE IT
       ProvisionResponse provisionRsp =
             SUVTestServerRunner.getTestServer()
                   .getVoucherResponseRecords()
@@ -83,7 +84,7 @@ public class VoucherConfirmationHandler extends BaseHandler {
 
       String voucherCode = provisionRsp.getVoucher().getCode();
 
-      RequestKey confirmationsKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherCode);
+      RequestKey confirmationsKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherId);
       // quietly overwrites any existing confirmation
       confirmationRecords.put(confirmationsKey, confirmation);
    }
