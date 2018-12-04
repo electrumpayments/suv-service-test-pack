@@ -55,7 +55,9 @@ public class SUVTestServer extends ResourceConfig {
    private ConcurrentHashMap<RequestKey, String> purchaseReferenceRecords;
 
    /** This hashmap stores the mapping between a voucher code and the request key to access its {@link SUVTestServer#voucherConfirmationRecords} entry. */
-   private ConcurrentHashMap<String, RequestKey> voucherCodeRequestKeyRecords;
+   private ConcurrentHashMap<String, RequestKey> voucherCodeRequestKeyConfirmationRecords;
+   /** This hashmap stores the mapping between a voucher code and the request key to access its {@link SUVTestServer#redemptionRequestRecords} entry. */
+   private ConcurrentHashMap<String, RequestKey> voucherCodeRequestKeyRedemptionRecords;
 
    private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
 
@@ -87,7 +89,8 @@ public class SUVTestServer extends ResourceConfig {
 
       purchaseReferenceRecords = new ConcurrentHashMap<>();
 
-      voucherCodeRequestKeyRecords = new ConcurrentHashMap<>();
+      voucherCodeRequestKeyConfirmationRecords = new ConcurrentHashMap<>();
+      voucherCodeRequestKeyRedemptionRecords = new ConcurrentHashMap<>();
 
       log.debug("Initialising new TestServer");
    }
@@ -151,11 +154,15 @@ public class SUVTestServer extends ResourceConfig {
       return refundResponseRecords;
    }
 
-    public ConcurrentHashMap<String, RequestKey> getVoucherCodeRequestKeyRecords() {
-        return voucherCodeRequestKeyRecords;
+    public ConcurrentHashMap<String, RequestKey> getVoucherCodeRequestKeyConfirmationRecords() {
+        return voucherCodeRequestKeyConfirmationRecords;
     }
 
-    @Provider
+   public ConcurrentHashMap<String, RequestKey> getVoucherCodeRequestKeyRedemptionRecords() {
+      return voucherCodeRequestKeyRedemptionRecords;
+   }
+
+   @Provider
    public static class MyObjectMapperProvider implements ContextResolver<ObjectMapper> {
 
       private final ObjectMapper mapper;

@@ -90,41 +90,42 @@ public class VoucherModelUtils extends SUVModelUtils {
    }
 
    /**
-    * Determine whether a given {@link Voucher voucher} reversal request can be completed.
+    * Determine whether the corresponding {@link ProvisionRequest} can be reversed.
     *
-    * Ensures voucher is already provisioned and is not yet confirmed.
+    * Ensures the corresponding voucher is already provisioned and is not yet confirmed. The provision request referred
+    * to by the reversal must have been received and a provision confirmation request must not have been received yet.
     * 
-    * @param voucherId
+    * @param voucherUuid
     *           the unique identifier of the voucherRequest to be reversed
-    * @param reversalId
+    * @param reversalUuid
     *           the unique identifier of this request
     * @param username
     *           from BasicAuth
     * @param password
     *           from BasicAuth
-    * @return A 404 Error response if a voucher corresponding to voucherId cannot be found (not provisioned), a 400
+    * @return A 404 Error response if a voucher corresponding to voucherUuid cannot be found (not provisioned), a 400
     *         Error if the voucher is already confirmed. Null if voucher can be reversed.
     */
-   public static Response canReverseVoucher(String voucherId, String reversalId, String username, String password) {
+   public static Response canReverseVoucher(String voucherUuid, String reversalUuid, String username, String password) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
 
-      ErrorDetail errorDetail = new ErrorDetail().id(reversalId).originalId(voucherId);
+      ErrorDetail errorDetail = new ErrorDetail().id(reversalUuid).originalId(voucherUuid);
 
       // TODO Normalise these validation methods to be more similar (this)
       // Confirm Voucher provisioned
       ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getVoucherProvisionRecords();
-      if (!isVoucherProvisioned(voucherId, provisionRecords, username, password)) {
+      if (!isVoucherProvisioned(voucherUuid, provisionRecords, username, password)) {
          errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No voucher req.")
                .detailMessage(
-                     new DetailMessage().freeString("No VoucherRequest located for given voucherId.")
-                           .voucherId(voucherId));
+                     new DetailMessage().freeString("No VoucherRequest located for given voucherUuid.")
+                           .voucherId(voucherUuid));
          return Response.status(404).entity(errorDetail).build();
       } // TODO extract this to confirmVoucherRedeemed() returns response code or null
 
       // check it's not confirmed
       ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords = testServer.getVoucherConfirmationRecords();
-      RequestKey requestKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherId);
+      RequestKey requestKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherUuid);
       TenderAdvice confirmation = confirmationRecords.get(requestKey);
       if (confirmation != null) {
          errorDetail.errorType(ErrorDetail.ErrorType.VOUCHER_ALREADY_CONFIRMED)
@@ -133,7 +134,7 @@ public class VoucherModelUtils extends SUVModelUtils {
                      new DetailMessage().freeString(
                            "The voucher cannot be reversed as it has already been confirmed with the associated details.")
                            .confirmationId(confirmation.getId())
-                           .voucherId(voucherId));
+                           .voucherId(voucherUuid));
          return Response.status(400).entity(errorDetail).build();
       }
 
@@ -141,30 +142,30 @@ public class VoucherModelUtils extends SUVModelUtils {
    }
 
    public static Response canConfirmVoucher(
-         String voucherId,
+         String voucherUuid,
          String confirmationUuid,
          String username,
          String password) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
 
-      ErrorDetail errorDetail = new ErrorDetail().id(confirmationUuid).originalId(voucherId);
+      ErrorDetail errorDetail = new ErrorDetail().id(confirmationUuid).originalId(voucherUuid);
 
       // TODO Extract method
       // TODO Normalise these validation methods to be more similar (this)
       // Confirm Voucher provisioned
       ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getVoucherProvisionRecords();
-      if (!isVoucherProvisioned(voucherId, provisionRecords, username, password)) {
+      if (!isVoucherProvisioned(voucherUuid, provisionRecords, username, password)) {
          errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No voucher req.")
                .detailMessage(
                      new DetailMessage().freeString("No VoucherRequest located for given voucherId.")
-                           .voucherId(voucherId));
+                           .voucherId(voucherUuid));
          return Response.status(404).entity(errorDetail).build();
       }
 
       // check it's not reversed
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getVoucherReversalRecords();
-      RequestKey requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, voucherId);
+      RequestKey requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, voucherUuid);
       BasicReversal reversal = reversalRecords.get(requestKey);
       if (reversal != null) {
          errorDetail.errorType(ErrorDetail.ErrorType.VOUCHER_ALREADY_REVERSED)
@@ -371,5 +372,86 @@ public class VoucherModelUtils extends SUVModelUtils {
    public static Response canRefundVoucher(String voucherId, String username, String password) {
       // todo implement method
       return null;
+   }
+
+   /**
+    * Determine whether the corresponding {@link RedemptionRequest} can be reversed.
+    *
+    * Ensures the corresponding voucher has been redeemed and the redemption is not yet confirmed. The redemption
+    * request referred to by the reversal must have been received and a redemption confirmation request must not have
+    * been received yet. have been received
+    * 
+    * @param voucherUuid
+    *           the unique identifier of the redemptionRequest to be reversed
+    * @param reversalUuid
+    *           the unique identifier of this request
+    * @param username
+    *           from BasicAuth
+    * @param password
+    *           from BasicAuth
+    * @return A 404 Error response if a voucher corresponding to voucherUuid cannot be found (not provisioned), a 400
+    *         Error if the voucher is already confirmed. Null if voucher can be reversed.
+    */
+   public static Response canReverseRedemption(
+         String voucherUuid,
+         String reversalUuid,
+         String username,
+         String password) {
+      final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
+
+      ErrorDetail errorDetail = new ErrorDetail().id(reversalUuid).originalId(voucherUuid);
+
+      // TODO Normalise these validation methods to be more similar (this)
+      // Confirm Voucher redeemed
+      ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRequestRecords =
+            testServer.getRedemptionRequestRecords();
+      if (!isVoucherRedeemed(voucherUuid, redemptionRequestRecords, username, password)) {
+         errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
+               .errorMessage("No voucher req.")
+               .detailMessage(
+                     new DetailMessage().freeString("No VoucherRequest located for given voucherUuid.")
+                           .voucherId(voucherUuid));
+         return Response.status(404).entity(errorDetail).build();
+      } // TODO extract this to confirmVoucherRedeemed() returns response code or null
+
+      // check it's not confirmed
+      ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords = testServer.getVoucherConfirmationRecords();
+      RequestKey requestKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherUuid);
+      TenderAdvice confirmation = confirmationRecords.get(requestKey);
+      if (confirmation != null) {
+         errorDetail.errorType(ErrorDetail.ErrorType.VOUCHER_ALREADY_CONFIRMED)
+               .errorMessage("Voucher confirmed.")
+               .detailMessage(
+                     new DetailMessage().freeString(
+                           "The voucher cannot be reversed as it has already been confirmed with the associated details.")
+                           .confirmationId(confirmation.getId())
+                           .voucherId(voucherUuid));
+         return Response.status(400).entity(errorDetail).build();
+      }
+
+      return null;
+   }
+
+   /**
+    * Determine whether a voucher had been redeemed or not.
+    *
+    * @param voucherId
+    *           the uuid of the voucher to be returned
+    * @param provisionRecords
+    *           to be searched
+    * @param username
+    *           from BasicAuth
+    * @param password
+    *           from BasicAuth
+    * @return whether voucher with this UUID has been provisioned.
+    */
+   public static boolean isVoucherRedeemed( // TODO Refactor naming
+         String voucherId,
+         ConcurrentHashMap<RequestKey, RedemptionRequest> provisionRecords,
+         String username,
+         String password) {
+      RequestKey provisionKey = new RequestKey(username, password, RequestKey.VOUCHERS_RESOURCE, voucherId);
+      log.debug(String.format("Searching for provision record under following key: %s", provisionKey.toString()));
+      return provisionRecords.get(provisionKey) != null;
    }
 }

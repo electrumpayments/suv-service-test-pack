@@ -38,14 +38,14 @@ public class DetailMessage {
 
    /**
     * The randomly generated String identifying this voucher request, as defined for a variant 4 String in [RFC
-    * 4122](https://tools.ietf.org/html/rfc4122). This must be the same as the voucherId path parameter.
+    * 4122](https://tools.ietf.org/html/rfc4122).
     **/
    public DetailMessage pathId(String pathId) {
       this.pathId = pathId;
       return this;
    }
 
-   @ApiModelProperty(value = "The randomly generated String identifying this voucher request, as defined for a variant 4 String in [RFC 4122](https://tools.ietf.org/html/rfc4122). This must be the same as the voucherId path parameter.")
+   @ApiModelProperty(value = "The randomly generated String identifying this voucher request, as defined for a variant 4 String in [RFC 4122](https://tools.ietf.org/html/rfc4122).")
    @JsonProperty("pathId")
    public String getPathId() {
       return pathId;
@@ -57,14 +57,14 @@ public class DetailMessage {
 
    /**
     * The randomly generated String identifying this voucher request, as defined for a variant 4 String in [RFC
-    * 4122](https://tools.ietf.org/html/rfc4122). This must be the same as the voucherId path parameter.
+    * 4122](https://tools.ietf.org/html/rfc4122).
     **/
    public DetailMessage voucherId(String voucherId) {
       this.voucherId = voucherId;
       return this;
    }
 
-   @ApiModelProperty(value = "The randomly generated String identifying this voucher request, as defined for a variant 4 String in [RFC 4122](https://tools.ietf.org/html/rfc4122). This must be the same as the voucherId path parameter.")
+   @ApiModelProperty(value = "The randomly generated String identifying this voucher request, as defined for a variant 4 String in [RFC 4122](https://tools.ietf.org/html/rfc4122).")
    @JsonProperty("voucherId")
    public String getVoucherId() {
       return voucherId;
@@ -76,14 +76,14 @@ public class DetailMessage {
 
    /**
     * The randomly generated String identifying this voucher reversal, as defined for a variant 4 String in [RFC
-    * 4122](https://tools.ietf.org/html/rfc4122). This must be the same as the reversalId path parameter.
+    * 4122](https://tools.ietf.org/html/rfc4122).
     **/
    public DetailMessage reversalId(String reversalId) {
       this.reversalId = reversalId;
       return this;
    }
 
-   @ApiModelProperty(value = "The randomly generated String identifying this voucher reversal, as defined for a variant 4 String in [RFC 4122](https://tools.ietf.org/html/rfc4122). This must be the same as the reversalId path parameter.")
+   @ApiModelProperty(value = "The randomly generated String identifying this voucher reversal, as defined for a variant 4 String in [RFC 4122](https://tools.ietf.org/html/rfc4122).")
    @JsonProperty("reversalId")
    public String getReversalId() {
       return reversalId;
@@ -95,14 +95,14 @@ public class DetailMessage {
 
    /**
     * The randomly generated String identifying this voucher confirmation, as defined for a variant 4 String in [RFC
-    * 4122](https://tools.ietf.org/html/rfc4122). This must be the same as the confirmationId path parameter.
+    * 4122](https://tools.ietf.org/html/rfc4122).
     **/
    public DetailMessage confirmationId(String confirmationId) {
       this.confirmationId = confirmationId;
       return this;
    }
 
-   @ApiModelProperty(value = "The randomly generated String identifying this voucher confirmation, as defined for a variant 4 String in [RFC 4122](https://tools.ietf.org/html/rfc4122). This must be the same as the confirmationId path parameter.")
+   @ApiModelProperty(value = "The randomly generated String identifying this voucher confirmation, as defined for a variant 4 String in [RFC 4122](https://tools.ietf.org/html/rfc4122).")
    @JsonProperty("confirmationId")
    public String getConfirmationId() {
       return confirmationId;
@@ -114,14 +114,14 @@ public class DetailMessage {
 
    /**
     * The randomly generated String identifying this voucher void, as defined for a variant 4 String in [RFC
-    * 4122](https://tools.ietf.org/html/rfc4122). This must be the same as the voidId path parameter.
+    * 4122](https://tools.ietf.org/html/rfc4122).
     **/
    public DetailMessage voidId(String voidId) {
       this.voidId = voidId;
       return this;
    }
 
-   @ApiModelProperty(value = "The randomly generated String identifying this voucher void, as defined for a variant 4 String in [RFC 4122](https://tools.ietf.org/html/rfc4122). This must be the same as the voidId path parameter.")
+   @ApiModelProperty(value = "The randomly generated String identifying this voucher void, as defined for a variant 4 String in [RFC 4122](https://tools.ietf.org/html/rfc4122).")
    @JsonProperty("voidId")
    public String getVoidId() {
       return voidId;
@@ -134,20 +134,20 @@ public class DetailMessage {
    /**
     * The product for which the voucher should be provisioned.
     **/
-//   public DetailMessage product(Product product) {
-//      this.product = product;
-//      return this;
-//   }
+   // public DetailMessage product(Product product) {
+   // this.product = product;
+   // return this;
+   // }
 
-//   @ApiModelProperty(value = "The product for which the voucher should be provisioned.")
-//   @JsonProperty("product")
-//   public Product getProduct() {
-//      return product;
-//   }
-//
-//   public void setProduct(Product product) {
-//      this.product = product;
-//   }
+   // @ApiModelProperty(value = "The product for which the voucher should be provisioned.")
+   // @JsonProperty("product")
+   // public Product getProduct() {
+   // return product;
+   // }
+   //
+   // public void setProduct(Product product) {
+   // this.product = product;
+   // }
 
    /**
     * The date and time of the request as recorded by the sender. The format shall be as defined for date-time in [RFC
@@ -406,14 +406,14 @@ public class DetailMessage {
       return Objects.equals(pathId, detailMessage.pathId) && Objects.equals(voucherId, detailMessage.voucherId)
             && Objects.equals(reversalId, detailMessage.reversalId)
             && Objects.equals(confirmationId, detailMessage.confirmationId)
-//            && Objects.equals(voidId, detailMessage.voidId) && Objects.equals(product, detailMessage.product)
+            // && Objects.equals(voidId, detailMessage.voidId) && Objects.equals(product, detailMessage.product)
             && Objects.equals(requestTime, detailMessage.requestTime)
             && Objects.equals(reversalTime, detailMessage.reversalTime)
             && Objects.equals(confirmDate, detailMessage.confirmDate)
             && Objects.equals(voidDate, detailMessage.voidDate) && Objects.equals(originator, detailMessage.originator)
             && Objects.equals(client, detailMessage.client)
             && Objects.equals(settlementEntity, detailMessage.settlementEntity)
-//            && Objects.equals(receiver, detailMessage.receiver) && Objects.equals(voucher, detailMessage.voucher)
+            // && Objects.equals(receiver, detailMessage.receiver) && Objects.equals(voucher, detailMessage.voucher)
             && Objects.equals(slipData, detailMessage.slipData) && Objects.equals(freeString, detailMessage.freeString)
             && Objects.equals(formatErrors, detailMessage.formatErrors);
    }
@@ -426,7 +426,7 @@ public class DetailMessage {
             reversalId,
             confirmationId,
             voidId,
-//            product,
+            // product,
             requestTime,
             reversalTime,
             confirmDate,
@@ -435,7 +435,7 @@ public class DetailMessage {
             client,
             settlementEntity,
             receiver,
-//            voucher,
+            // voucher,
             slipData,
             freeString,
             formatErrors);
@@ -451,7 +451,7 @@ public class DetailMessage {
       sb.append("    reversalId: ").append(Utils.toIndentedString(reversalId)).append("\n");
       sb.append("    confirmationId: ").append(Utils.toIndentedString(confirmationId)).append("\n");
       sb.append("    voidId: ").append(Utils.toIndentedString(voidId)).append("\n");
-//      sb.append("    product: ").append(Utils.toIndentedString(product)).append("\n");
+      // sb.append(" product: ").append(Utils.toIndentedString(product)).append("\n");
       sb.append("    requestTime: ").append(Utils.toIndentedString(requestTime)).append("\n");
       sb.append("    reversalTime: ").append(Utils.toIndentedString(reversalTime)).append("\n");
       sb.append("    confirmDate: ").append(Utils.toIndentedString(confirmDate)).append("\n");
@@ -460,7 +460,7 @@ public class DetailMessage {
       sb.append("    sender: ").append(Utils.toIndentedString(client)).append("\n");
       sb.append("    processor: ").append(Utils.toIndentedString(settlementEntity)).append("\n");
       sb.append("    vendor: ").append(Utils.toIndentedString(receiver)).append("\n");
-//      sb.append("    voucher: ").append(Utils.toIndentedString(voucher)).append("\n");
+      // sb.append(" voucher: ").append(Utils.toIndentedString(voucher)).append("\n");
       sb.append("    slipData: ").append(Utils.toIndentedString(slipData)).append("\n");
       sb.append("    thirdPartyIdentifiers: ").append(Utils.toIndentedString(thirdPartyIdentifiers)).append("\n");
       sb.append("    freeString: ").append(Utils.toIndentedString(freeString)).append("\n");

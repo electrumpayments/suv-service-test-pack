@@ -20,11 +20,6 @@ public class VoucherReversalHandler extends BaseHandler {
 
    private static final Logger log = LoggerFactory.getLogger(VoucherProvisionHandler.class);
 
-   /** The UUID of this request */
-   private String reversalUuid;
-   /** The UUID identifying the request that this reversal relates to */
-   private String voucherId;
-
    public VoucherReversalHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
    }
@@ -33,11 +28,14 @@ public class VoucherReversalHandler extends BaseHandler {
       try {
          Response rsp;
 
-         reversalUuid = reversal.getId();
-         voucherId = reversal.getRequestId();
+         // The UUID of this request
+         String reversalUuid = reversal.getId();
+         // The UUID identifying the request that this reversal relates to
+         String voucherId = reversal.getRequestId();
+
          if (!VoucherModelUtils.isValidUuid(reversalUuid)) {
             return VoucherModelUtils.buildInvalidUuidErrorResponse(
-                  reversalUuid,
+                    reversalUuid,
                   null, // TODO Could overload method
                   username,
                   ErrorDetail.ErrorType.FORMAT_ERROR);

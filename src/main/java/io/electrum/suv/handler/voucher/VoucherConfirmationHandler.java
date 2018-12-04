@@ -1,23 +1,16 @@
 package io.electrum.suv.handler.voucher;
 
-import io.dropwizard.jersey.validation.JerseyViolationException;
 import io.electrum.suv.api.models.ErrorDetail;
-import io.electrum.suv.api.models.ProvisionRequest;
 import io.electrum.suv.api.models.ProvisionResponse;
 import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.util.RequestKey;
-import io.electrum.suv.server.util.SUVModelUtils;
 import io.electrum.suv.server.util.VoucherModelUtils;
-import io.electrum.vas.model.Tender;
 import io.electrum.vas.model.TenderAdvice;
-import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 
-import javax.validation.ConstraintViolation;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class VoucherConfirmationHandler extends BaseHandler {
@@ -76,7 +69,7 @@ public class VoucherConfirmationHandler extends BaseHandler {
       ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords =
             SUVTestServerRunner.getTestServer().getVoucherConfirmationRecords();
       ConcurrentHashMap<String, RequestKey> voucherCodeRequestKeyRecords =
-            SUVTestServerRunner.getTestServer().getVoucherCodeRequestKeyRecords();
+            SUVTestServerRunner.getTestServer().getVoucherCodeRequestKeyConfirmationRecords();
 
        //TODO your bug is here dummy, MOVE IT
       ProvisionResponse provisionRsp =
