@@ -28,13 +28,13 @@ public class RedeemReversalHandler extends BaseHandler {
 
          if (!VoucherModelUtils.isValidUuid(reversalUuid)) {
             return VoucherModelUtils.buildInvalidUuidErrorResponse(
-                    reversalUuid,
-                    null, // TODO Could overload method
-                    username,
-                    ErrorDetail.ErrorType.FORMAT_ERROR);
+                  reversalUuid,
+                  null, // TODO Could overload method
+                  username,
+                  ErrorDetail.ErrorType.FORMAT_ERROR);
          } else if (!VoucherModelUtils.isValidUuid(voucherId)) {
             return VoucherModelUtils
-                    .buildInvalidUuidErrorResponse(voucherId, null, username, ErrorDetail.ErrorType.FORMAT_ERROR);
+                  .buildInvalidUuidErrorResponse(voucherId, null, username, ErrorDetail.ErrorType.FORMAT_ERROR);
          }
 
          // TODO check this in airtime
@@ -60,12 +60,11 @@ public class RedeemReversalHandler extends BaseHandler {
 
    private void addRedemptionReversalToCache(BasicReversal basicReversal) {
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
-              SUVTestServerRunner.getTestServer().getRedemptionReversalRecords();
+            SUVTestServerRunner.getTestServer().getRedemptionReversalRecords();
       RequestKey reversalKey =
-              new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, basicReversal.getRequestId());
+            new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, basicReversal.getRequestId());
       reversalRecords.put(reversalKey, basicReversal);
    }
-
 
    @Override
    protected String getRequestName() {

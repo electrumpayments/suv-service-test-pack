@@ -5,6 +5,7 @@ import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.DetailMessage;
 import io.electrum.vas.JsonUtil;
+import io.electrum.vas.model.BasicAdvice;
 import io.electrum.vas.model.BasicReversal;
 import io.electrum.vas.model.Institution;
 import io.electrum.vas.model.TenderAdvice;
@@ -277,7 +278,7 @@ public class VoucherModelUtils extends SUVModelUtils {
     * Determine whether a voucher had been provisioned or not.
     * 
     * @param voucherId
-    *           the uuid of the voucher to be returned
+    *           the uuid of the request to be checked
     * @param provisionRecords
     *           to be searched
     * @param username
@@ -308,42 +309,51 @@ public class VoucherModelUtils extends SUVModelUtils {
     *           from BasicAuth
     * @param password
     *           from BasicAuth
-    * @param requestId
+    * @param requestUuid
     *           the unique identifier of this request
     * @return A 400 error response indicating the voucher could not be redeemed, null if able to redeem.
     */
-   public static Response canRedeemVoucher(String voucherCode, String username, String password, String requestId) {
+   public static Response canRedeemVoucher(String voucherCode, String username, String password, String requestUuid) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
 
       ConcurrentHashMap<RequestKey, RedemptionRequest> requestRecords = testServer.getRedemptionRequestRecords();
-      // TODO Could make requestKey part of method args
-      RequestKey requestKey = new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, voucherCode);
-      RedemptionRequest originalRequest = requestRecords.get(requestKey);
 
-      // If Voucher already redeemed
-      if (originalRequest != null) {
-         ErrorDetail errorDetail = buildDuplicateErrorDetail(requestId, null, originalRequest);
+      // If no redemptionRequests have been recorded, the voucher cannot fail the test of having already been redeemed.
+      if (requestRecords.size() != 0) {
+         // TODO Could make requestKey part of method args
+         final ConcurrentHashMap<String, RequestKey> voucherCodeRequestKeyRedemptionRecords =
+               SUVTestServerRunner.getTestServer().getVoucherCodeRequestKeyRedemptionRecords();
 
-         DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+         RequestKey requestKey = voucherCodeRequestKeyRedemptionRecords.get(voucherCode);
+//         RedemptionRequest originalRequest = requestRecords.get(requestKey);
 
-         // Check for a response for this request
-         ConcurrentHashMap<RequestKey, RedemptionResponse> responseRecords = testServer.getRedemptionResponseRecords();
-         RedemptionResponse rsp = responseRecords.get(requestKey);
-         if (rsp != null) {
-            detailMessage.setVoucher(rsp.getVoucher()); // TODO confirm this is !null
+         // If Voucher already redeemed
+         if (requestKey != null) {
+            ErrorDetail errorDetail = buildDuplicateErrorDetail(requestUuid, null, requestRecords.get(requestKey));
+
+            DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+
+            // Check for a response for this request
+            ConcurrentHashMap<RequestKey, RedemptionResponse> responseRecords =
+                  testServer.getRedemptionResponseRecords();
+            RedemptionResponse rsp = responseRecords.get(requestKey);
+            if (rsp != null) {
+               detailMessage.setVoucher(rsp.getVoucher()); // TODO confirm this is !null
+            }
+            return Response.status(400).entity(errorDetail).build();
          }
-         return Response.status(400).entity(errorDetail).build();
       }
 
       // If voucher not yet confirmed
       // Use the mapping from the voucher code to a request key (which corresponds to a confirmationsRecord)
-      ConcurrentHashMap<String, RequestKey> voucherCodeRequestKey = testServer.getVoucherCodeRequestKeyRecords();
+      ConcurrentHashMap<String, RequestKey> voucherCodeRequestKey =
+            testServer.getVoucherCodeRequestKeyConfirmationRecords();
       ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords = testServer.getVoucherConfirmationRecords();
       RequestKey confirmationKey = voucherCodeRequestKey.get(voucherCode);
       if (confirmationKey == null) {
          ErrorDetail errorDetail =
                buildErrorDetail(
-                     requestId,
+                     requestUuid,
                      "Voucher not confirmed.",
                      String.format(
                            "Voucher confirmation for Voucher Code:%s has not been processed. Cannot redeem unconfirmed vouchers.",
@@ -381,7 +391,7 @@ public class VoucherModelUtils extends SUVModelUtils {
     * request referred to by the reversal must have been received and a redemption confirmation request must not have
     * been received yet. have been received
     * 
-    * @param voucherUuid
+    * @param redemptionUuid
     *           the unique identifier of the redemptionRequest to be reversed
     * @param reversalUuid
     *           the unique identifier of this request
@@ -389,35 +399,36 @@ public class VoucherModelUtils extends SUVModelUtils {
     *           from BasicAuth
     * @param password
     *           from BasicAuth
-    * @return A 404 Error response if a voucher corresponding to voucherUuid cannot be found (not provisioned), a 400
-    *         Error if the voucher is already confirmed. Null if voucher can be reversed.
+    * @return A 404 Error response if a voucher corresponding to redemptionUuid cannot be found (not redeemed), a 400
+    *         Error if the voucher redemtion is already confirmed. Null if redemption can be reversed.
     */
    public static Response canReverseRedemption(
-         String voucherUuid,
+         String redemptionUuid,
          String reversalUuid,
          String username,
          String password) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
 
-      ErrorDetail errorDetail = new ErrorDetail().id(reversalUuid).originalId(voucherUuid);
+      ErrorDetail errorDetail = new ErrorDetail().id(reversalUuid).originalId(redemptionUuid);
 
       // TODO Normalise these validation methods to be more similar (this)
       // Confirm Voucher redeemed
       ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRequestRecords =
             testServer.getRedemptionRequestRecords();
-      if (!isVoucherRedeemed(voucherUuid, redemptionRequestRecords, username, password)) {
+      if (!isVoucherRedeemed(redemptionUuid, redemptionRequestRecords, username, password)) {
          errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
-               .errorMessage("No voucher req.")
+               .errorMessage("No redemption req.")
                .detailMessage(
-                     new DetailMessage().freeString("No VoucherRequest located for given voucherUuid.")
-                           .voucherId(voucherUuid));
+                     new DetailMessage().freeString("No RedemptionRequest located for given redemptionUuid.")
+                           .voucherId(redemptionUuid));
          return Response.status(404).entity(errorDetail).build();
-      } // TODO extract this to confirmVoucherRedeemed() returns response code or null
+      }
 
       // check it's not confirmed
-      ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords = testServer.getVoucherConfirmationRecords();
-      RequestKey requestKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherUuid);
-      TenderAdvice confirmation = confirmationRecords.get(requestKey);
+      ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords = testServer.getRedemptionConfirmationRecords();
+      RequestKey requestKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, redemptionUuid);
+      BasicAdvice confirmation = confirmationRecords.get(requestKey);
+
       if (confirmation != null) {
          errorDetail.errorType(ErrorDetail.ErrorType.VOUCHER_ALREADY_CONFIRMED)
                .errorMessage("Voucher confirmed.")
@@ -425,7 +436,7 @@ public class VoucherModelUtils extends SUVModelUtils {
                      new DetailMessage().freeString(
                            "The voucher cannot be reversed as it has already been confirmed with the associated details.")
                            .confirmationId(confirmation.getId())
-                           .voucherId(voucherUuid));
+                           .voucherId(redemptionUuid));
          return Response.status(400).entity(errorDetail).build();
       }
 
@@ -435,8 +446,8 @@ public class VoucherModelUtils extends SUVModelUtils {
    /**
     * Determine whether a voucher had been redeemed or not.
     *
-    * @param voucherId
-    *           the uuid of the voucher to be returned
+    * @param redemptionRequestUuid
+    *           the uuid of the request to be checked
     * @param provisionRecords
     *           to be searched
     * @param username
@@ -446,12 +457,14 @@ public class VoucherModelUtils extends SUVModelUtils {
     * @return whether voucher with this UUID has been provisioned.
     */
    public static boolean isVoucherRedeemed( // TODO Refactor naming
-         String voucherId,
+         String redemptionRequestUuid,
          ConcurrentHashMap<RequestKey, RedemptionRequest> provisionRecords,
          String username,
          String password) {
-      RequestKey provisionKey = new RequestKey(username, password, RequestKey.VOUCHERS_RESOURCE, voucherId);
-      log.debug(String.format("Searching for provision record under following key: %s", provisionKey.toString()));
+      RequestKey provisionKey =
+            new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, redemptionRequestUuid);
+      log.debug(
+            String.format("Searching for redemptionRequest record under following key: %s", provisionKey.toString()));
       return provisionRecords.get(provisionKey) != null;
    }
 }
