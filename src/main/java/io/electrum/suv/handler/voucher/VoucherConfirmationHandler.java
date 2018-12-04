@@ -3,6 +3,8 @@ package io.electrum.suv.handler.voucher;
 import io.electrum.suv.api.models.ErrorDetail;
 import io.electrum.suv.api.models.ProvisionResponse;
 import io.electrum.suv.handler.BaseHandler;
+import io.electrum.suv.resource.impl.SUVTestServer;
+import io.electrum.suv.resource.impl.SUVTestServer.VoucherState;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
@@ -12,6 +14,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static io.electrum.suv.resource.impl.SUVTestServer.VoucherState.*;
 
 public class VoucherConfirmationHandler extends BaseHandler {
    /** The UUID of this request */
@@ -65,13 +69,18 @@ public class VoucherConfirmationHandler extends BaseHandler {
       }
    }
 
+   /**
+    * Adds the voucher confirmation request to the cache and stores an entry to the voucher in the list of existing
+    * vouchers //TODO documentation
+    */
    private void addVoucherConfirmationToCache(TenderAdvice confirmation) {
       ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords =
             SUVTestServerRunner.getTestServer().getVoucherConfirmationRecords();
-      ConcurrentHashMap<String, RequestKey> voucherCodeRequestKeyRecords =
-            SUVTestServerRunner.getTestServer().getVoucherCodeRequestKeyConfirmationRecords();
+      // ConcurrentHashMap<String, RequestKey> voucherCodeRequestKeyRecords =
+      // SUVTestServerRunner.getTestServer().getVoucherCodeRequestKeyConfirmationRecords();
+      ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
+            SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
 
-       //TODO your bug is here dummy, MOVE IT
       ProvisionResponse provisionRsp =
             SUVTestServerRunner.getTestServer()
                   .getVoucherResponseRecords()
@@ -82,7 +91,8 @@ public class VoucherConfirmationHandler extends BaseHandler {
       RequestKey confirmationsKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherId);
       // quietly overwrites any existing confirmation
       confirmationRecords.put(confirmationsKey, confirmation);
-      voucherCodeRequestKeyRecords.put(voucherCode, confirmationsKey);
+      // voucherCodeRequestKeyRecords.put(voucherCode, confirmationsKey);
+      confirmedExistingVouchers.put(voucherCode, VoucherState.CONFIRMED_PROVISIONED);
    }
 
    @Override
