@@ -147,7 +147,7 @@ public class SUVModelUtils {
             buildErrorDetail(
                   objectId,
                   "Duplicate UUID.",
-                  "Request with String already processed with the associated fields.",
+                  "Request with ID already processed with the associated fields.",
                   originalMsgId,
                   // requestType,
                   ErrorDetail.ErrorType.DUPLICATE_RECORD);

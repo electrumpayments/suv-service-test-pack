@@ -5,6 +5,8 @@ import io.electrum.suv.api.models.ProvisionResponse;
 import io.electrum.suv.api.models.RedemptionRequest;
 import io.electrum.suv.api.models.RedemptionResponse;
 import io.electrum.suv.handler.BaseHandler;
+import io.electrum.suv.resource.impl.SUVTestServer;
+import io.electrum.suv.resource.impl.SUVTestServer.VoucherState;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
@@ -13,6 +15,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static io.electrum.suv.resource.impl.SUVTestServer.VoucherState.CONFIRMED_PROVISIONED;
+import static io.electrum.suv.resource.impl.SUVTestServer.VoucherState.REDEEMED;
 
 public class RedeemVoucherHandler extends BaseHandler {
    public RedeemVoucherHandler(HttpHeaders httpHeaders) {
@@ -71,10 +76,19 @@ public class RedeemVoucherHandler extends BaseHandler {
 
    }
 
+   /**
+    * Adds the voucher redemption response to the cache and update the entry to the voucher in the list of existing
+    * vouchers //TODO documentation
+    */
    private void addRedemptionResponseToCache(RequestKey key, RedemptionResponse redemptionRsp) {
       ConcurrentHashMap<RequestKey, RedemptionResponse> responseRecords =
             SUVTestServerRunner.getTestServer().getRedemptionResponseRecords();
+      ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
+            SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
+
       responseRecords.put(key, redemptionRsp);
+      confirmedExistingVouchers.put(redemptionRsp.getVoucher().getCode(), VoucherState.REDEEMED);
+
    }
 
    // TODO generalise addVoucherToCache(String uuid, Transaction request, ConcurrentHashMap<Object,Object> records)?
@@ -82,13 +96,13 @@ public class RedeemVoucherHandler extends BaseHandler {
       RequestKey key = new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, requestUuid);
       ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRecords =
             SUVTestServerRunner.getTestServer().getRedemptionRequestRecords();
-      ConcurrentHashMap<String, RequestKey> voucherCodeRequestKeyRedemptionRecords =
-            SUVTestServerRunner.getTestServer().getVoucherCodeRequestKeyRedemptionRecords();
+      // ConcurrentHashMap<String, RequestKey> voucherCodeRequestKeyRedemptionRecords =
+      // SUVTestServerRunner.getTestServer().getVoucherCodeRequestKeyRedemptionRecords();
 
       String voucherCode = request.getVoucher().getCode();
 
       redemptionRecords.put(key, request);
-      voucherCodeRequestKeyRedemptionRecords.put(voucherCode, key);
+      // voucherCodeRequestKeyRedemptionRecords.put(voucherCode, key);
 
       return key;
    }

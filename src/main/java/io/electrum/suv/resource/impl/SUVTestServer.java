@@ -2,6 +2,7 @@ package io.electrum.suv.resource.impl;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -55,9 +56,12 @@ public class SUVTestServer extends ResourceConfig {
    private ConcurrentHashMap<RequestKey, String> purchaseReferenceRecords;
 
    /** This hashmap stores the mapping between a voucher code and the request key to access its {@link SUVTestServer#voucherConfirmationRecords} entry. */
-   private ConcurrentHashMap<String, RequestKey> voucherCodeRequestKeyConfirmationRecords;
+//   private ConcurrentHashMap<String, RequestKey> voucherCodeRequestKeyConfirmationRecords;
    /** This hashmap stores the mapping between a voucher code and the request key to access its {@link SUVTestServer#redemptionRequestRecords} entry. */
-   private ConcurrentHashMap<String, RequestKey> voucherCodeRequestKeyRedemptionRecords;
+//   private ConcurrentHashMap<String, RequestKey> voucherCodeRequestKeyRedemptionRecords;
+
+   private ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers;
+
 
    private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
 
@@ -89,8 +93,10 @@ public class SUVTestServer extends ResourceConfig {
 
       purchaseReferenceRecords = new ConcurrentHashMap<>();
 
-      voucherCodeRequestKeyConfirmationRecords = new ConcurrentHashMap<>();
-      voucherCodeRequestKeyRedemptionRecords = new ConcurrentHashMap<>();
+//      voucherCodeRequestKeyConfirmationRecords = new ConcurrentHashMap<>();
+//      voucherCodeRequestKeyRedemptionRecords = new ConcurrentHashMap<>();
+
+      confirmedExistingVouchers = new ConcurrentHashMap<>();
 
       log.debug("Initialising new TestServer");
    }
@@ -154,15 +160,20 @@ public class SUVTestServer extends ResourceConfig {
       return refundResponseRecords;
    }
 
-    public ConcurrentHashMap<String, RequestKey> getVoucherCodeRequestKeyConfirmationRecords() {
-        return voucherCodeRequestKeyConfirmationRecords;
+//    public ConcurrentHashMap<String, RequestKey> getVoucherCodeRequestKeyConfirmationRecords() {
+//        return voucherCodeRequestKeyConfirmationRecords;
+//    }
+
+//   public ConcurrentHashMap<String, RequestKey> getVoucherCodeRequestKeyRedemptionRecords() {
+//      return voucherCodeRequestKeyRedemptionRecords;
+//   }
+
+    public ConcurrentHashMap<String, VoucherState> getConfirmedExistingVouchers() {
+        return confirmedExistingVouchers;
     }
 
-   public ConcurrentHashMap<String, RequestKey> getVoucherCodeRequestKeyRedemptionRecords() {
-      return voucherCodeRequestKeyRedemptionRecords;
-   }
 
-   @Provider
+    @Provider
    public static class MyObjectMapperProvider implements ContextResolver<ObjectMapper> {
 
       private final ObjectMapper mapper;
@@ -200,5 +211,22 @@ public class SUVTestServer extends ResourceConfig {
          String output = super.translate(input);
          return output == null ? null : output.replace('_', '-');
       }
+   }
+
+   //TODO Refactor
+   public enum VoucherState{
+       CONFIRMED_PROVISIONED(0),
+       REDEEMED(1),
+       CONFIRMED_REDEEMED(2);
+
+       private int value;
+
+       VoucherState(int value){
+           this.value = value;
+       }
+
+       public int getValue(){
+           return value;
+       }
    }
 }
