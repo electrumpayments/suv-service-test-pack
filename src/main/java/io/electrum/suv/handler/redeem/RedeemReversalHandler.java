@@ -1,7 +1,9 @@
 package io.electrum.suv.handler.redeem;
 
 import io.electrum.suv.api.models.ErrorDetail;
+import io.electrum.suv.api.models.RedemptionRequest;
 import io.electrum.suv.handler.BaseHandler;
+import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
@@ -58,12 +60,26 @@ public class RedeemReversalHandler extends BaseHandler {
       }
    }
 
+   /**
+    * Must check for a corresponding redemption request to get voucher from so that vouchers state may be updated. If no
+    * corresponding redmption exists, that voucher must still exist in provision_confirmed state (this is fine) //TODO Docs
+    */
    private void addRedemptionReversalToCache(BasicReversal basicReversal) {
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
             SUVTestServerRunner.getTestServer().getRedemptionReversalRecords();
       RequestKey reversalKey =
             new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, basicReversal.getRequestId());
+
+      ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
+            SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
+      ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRequestRecords =
+            SUVTestServerRunner.getTestServer().getRedemptionRequestRecords();
+
+      RedemptionRequest redemptionRequest = redemptionRequestRecords.get(reversalKey);
       reversalRecords.put(reversalKey, basicReversal);
+      if (redemptionRequest != null) {
+         confirmedExistingVouchers.put(redemptionRequest.getVoucher().getCode(), SUVTestServer.VoucherState.REDEEMED);
+      }
    }
 
    @Override

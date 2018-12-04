@@ -356,7 +356,7 @@ public class VoucherModelUtils extends SUVModelUtils {
                         requestUuid,
                         "Duplicate Redemption Requests",
                         "A Redemption Request for that voucher has already been received.",
-                        null, //TODO Reintroduce mapping to retrieve this
+                        null, // TODO Reintroduce mapping to retrieve this
                         ErrorDetail.ErrorType.VOUCHER_ALREADY_REDEEMED);
 
             DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
@@ -449,7 +449,8 @@ public class VoucherModelUtils extends SUVModelUtils {
                      new DetailMessage().freeString(
                            "The voucher cannot be reversed as it has already been confirmed with the associated details.")
                            .confirmationId(confirmation.getId())
-                           .voucherId(redemptionUuid));
+                           .voucherId(redemptionUuid)
+                           .reversalId(reversalUuid));
          return Response.status(400).entity(errorDetail).build();
       }
 

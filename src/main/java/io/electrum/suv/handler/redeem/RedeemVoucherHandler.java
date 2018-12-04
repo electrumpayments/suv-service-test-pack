@@ -10,6 +10,7 @@ import io.electrum.suv.resource.impl.SUVTestServer.VoucherState;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
+import io.electrum.vas.model.BasicReversal;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -79,16 +80,23 @@ public class RedeemVoucherHandler extends BaseHandler {
    /**
     * Adds the voucher redemption response to the cache and update the entry to the voucher in the list of existing
     * vouchers //TODO documentation
+    * 
+    * Must check for corresponding ReverseRedemptionRequest before Updating state of voucher so as to maintain validity
+    * of state and requests, don't update if it exists.
     */
    private void addRedemptionResponseToCache(RequestKey key, RedemptionResponse redemptionRsp) {
       ConcurrentHashMap<RequestKey, RedemptionResponse> responseRecords =
             SUVTestServerRunner.getTestServer().getRedemptionResponseRecords();
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
+      ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
+            SUVTestServerRunner.getTestServer().getRedemptionReversalRecords();
 
+      BasicReversal basicReversal = reversalRecords.get(key);
       responseRecords.put(key, redemptionRsp);
-      confirmedExistingVouchers.put(redemptionRsp.getVoucher().getCode(), VoucherState.REDEEMED);
-
+      if (basicReversal == null) {
+         confirmedExistingVouchers.put(redemptionRsp.getVoucher().getCode(), VoucherState.REDEEMED);
+      }
    }
 
    // TODO generalise addVoucherToCache(String uuid, Transaction request, ConcurrentHashMap<Object,Object> records)?
