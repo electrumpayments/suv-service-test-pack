@@ -19,9 +19,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class RedeemConfirmationHandler extends BaseHandler {
 
-    private String voucherCode;
+   private String voucherCode;
 
-    public RedeemConfirmationHandler(HttpHeaders httpHeaders) {
+   public RedeemConfirmationHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
    }
 
@@ -32,7 +32,7 @@ public class RedeemConfirmationHandler extends BaseHandler {
          // THe UUID of this request
          String confirmationUuid = confirmation.getId();
          // The UUID identifying the request that this confirmation relates to
-         String voucherId = confirmation.getRequestId();
+         String redemptionUuid = confirmation.getRequestId();
 
          // TODO !!!Either remove validation or write postman test for confirmation!!!
          if (!VoucherModelUtils.isValidUuid(confirmationUuid)) {
@@ -41,20 +41,22 @@ public class RedeemConfirmationHandler extends BaseHandler {
                   null, // TODO Could overload method
                   username,
                   ErrorDetail.ErrorType.FORMAT_ERROR);
-         } else if (!VoucherModelUtils.isValidUuid(voucherId)) {
+         } else if (!VoucherModelUtils.isValidUuid(redemptionUuid)) {
             return VoucherModelUtils
-                  .buildInvalidUuidErrorResponse(voucherId, null, username, ErrorDetail.ErrorType.FORMAT_ERROR);
+                  .buildInvalidUuidErrorResponse(redemptionUuid, null, username, ErrorDetail.ErrorType.FORMAT_ERROR);
          }
 
-          RedemptionResponse redemptionRsp =
-                  SUVTestServerRunner.getTestServer()
-                          .getRedemptionResponseRecords()
-                          .get(new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, voucherId));
+         RedemptionResponse redemptionRsp =
+               SUVTestServerRunner.getTestServer()
+                     .getRedemptionResponseRecords()
+                     .get(new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, redemptionUuid));
 
-          voucherCode = redemptionRsp.getVoucher().getCode();
+         if (redemptionRsp == null)
+            voucherCode = null;
+         else
+            voucherCode = redemptionRsp.getVoucher().getCode();
 
-
-          rsp = VoucherModelUtils.canConfirmRedemption(voucherId, confirmationUuid, username, password, voucherCode);
+         rsp = VoucherModelUtils.canConfirmRedemption(redemptionUuid, confirmationUuid, username, password, voucherCode);
          if (rsp != null) {
             return rsp;
          }
@@ -73,6 +75,7 @@ public class RedeemConfirmationHandler extends BaseHandler {
    /**
     * Adds the voucher confirmation request to the cache and stores an entry to the voucher in the list of existing
     * vouchers //TODO documentation
+    * 
     * @param confirmation
     */
    private void addRedemptionConfirmationToCache(BasicAdvice confirmation) {
@@ -81,7 +84,6 @@ public class RedeemConfirmationHandler extends BaseHandler {
 
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
-
 
       RequestKey confirmationsKey =
             new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, confirmation.getRequestId());

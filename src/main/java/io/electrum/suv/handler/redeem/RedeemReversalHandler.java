@@ -2,6 +2,7 @@ package io.electrum.suv.handler.redeem;
 
 import io.electrum.suv.api.models.ErrorDetail;
 import io.electrum.suv.api.models.RedemptionRequest;
+import io.electrum.suv.api.models.RedemptionResponse;
 import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
@@ -19,6 +20,8 @@ public class RedeemReversalHandler extends BaseHandler {
       super(httpHeaders);
    }
 
+   private String voucherCode;
+
    public Response handle(BasicReversal reversal, UriInfo uriInfo) {
       try {
          Response rsp;
@@ -26,7 +29,7 @@ public class RedeemReversalHandler extends BaseHandler {
          // The UUID of this request
          String reversalUuid = reversal.getId();
          // The UUID identifying the request that this reversal relates to
-         String voucherId = reversal.getRequestId();
+         String redemptionUuid = reversal.getRequestId();
 
          if (!VoucherModelUtils.isValidUuid(reversalUuid)) {
             return VoucherModelUtils.buildInvalidUuidErrorResponse(
@@ -34,13 +37,23 @@ public class RedeemReversalHandler extends BaseHandler {
                   null, // TODO Could overload method
                   username,
                   ErrorDetail.ErrorType.FORMAT_ERROR);
-         } else if (!VoucherModelUtils.isValidUuid(voucherId)) {
+         } else if (!VoucherModelUtils.isValidUuid(redemptionUuid)) {
             return VoucherModelUtils
-                  .buildInvalidUuidErrorResponse(voucherId, null, username, ErrorDetail.ErrorType.FORMAT_ERROR);
+                  .buildInvalidUuidErrorResponse(redemptionUuid, null, username, ErrorDetail.ErrorType.FORMAT_ERROR);
          }
 
+         RedemptionResponse redemptionRsp =
+                 SUVTestServerRunner.getTestServer()
+                         .getRedemptionResponseRecords()
+                         .get(new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, redemptionUuid));
+
+         if (redemptionRsp == null)
+            voucherCode = null;
+         else
+            voucherCode = redemptionRsp.getVoucher().getCode();
+
          // TODO check this in airtime
-         rsp = VoucherModelUtils.canReverseRedemption(voucherId, reversalUuid, username, password);
+         rsp = VoucherModelUtils.canReverseRedemption(redemptionUuid, reversalUuid, username, password, voucherCode);
          if (rsp != null) {
             if (rsp.getStatus() == 404) {
                // make sure to record the reversal in case we get the request late.
@@ -67,18 +80,19 @@ public class RedeemReversalHandler extends BaseHandler {
    private void addRedemptionReversalToCache(BasicReversal basicReversal) {
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
             SUVTestServerRunner.getTestServer().getRedemptionReversalRecords();
-      RequestKey reversalKey =
-            new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, basicReversal.getRequestId());
+      RequestKey key =
+            new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, basicReversal.getRequestId());
 
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
       ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRequestRecords =
             SUVTestServerRunner.getTestServer().getRedemptionRequestRecords();
 
-      RedemptionRequest redemptionRequest = redemptionRequestRecords.get(reversalKey);
-      reversalRecords.put(reversalKey, basicReversal);
+      RedemptionRequest redemptionRequest = redemptionRequestRecords.get(key);
+      key.setResourceType(RequestKey.REVERSALS_RESOURCE);
+      reversalRecords.put(key, basicReversal);
       if (redemptionRequest != null) {
-         confirmedExistingVouchers.put(redemptionRequest.getVoucher().getCode(), SUVTestServer.VoucherState.REDEEMED);
+         confirmedExistingVouchers.put(redemptionRequest.getVoucher().getCode(), SUVTestServer.VoucherState.CONFIRMED_PROVISIONED);
       }
    }
 

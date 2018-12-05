@@ -343,9 +343,7 @@ public class VoucherModelUtils extends SUVModelUtils {
                buildErrorDetail(
                      requestUuid,
                      "Voucher not confirmed.",
-                     String.format(
-                           "Voucher confirmation for Voucher Code:%s has not been processed. Cannot redeem unconfirmed vouchers.",
-                           voucherCode),
+                     "Voucher confirmation for this voucher has not been processed. Cannot redeem unconfirmed vouchers.",
                      null,
                      ErrorDetail.ErrorType.VOUCHER_NOT_REDEEMABLE);
          return Response.status(400).entity(errorDetail).build();
@@ -423,6 +421,7 @@ public class VoucherModelUtils extends SUVModelUtils {
     *           from BasicAuth
     * @param password
     *           from BasicAuth
+    * @param voucherCode
     * @return A 404 Error response if a voucher corresponding to redemptionUuid cannot be found (not redeemed), a 400
     *         Error if the voucher redemtion is already confirmed. Null if redemption can be reversed.
     */
@@ -430,39 +429,70 @@ public class VoucherModelUtils extends SUVModelUtils {
          String redemptionUuid,
          String reversalUuid,
          String username,
-         String password) {
+         String password,
+         String voucherCode) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
 
+      //TODO Convert to switch-cases
       ErrorDetail errorDetail = new ErrorDetail().id(reversalUuid).originalId(redemptionUuid);
 
-      // TODO Normalise these validation methods to be more similar (this)
-      // Confirm Voucher redeemed
+      ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
+            SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
+
       ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRequestRecords =
             testServer.getRedemptionRequestRecords();
-      if (!isVoucherRedeemed(redemptionUuid, redemptionRequestRecords, username, password)) {
-         errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
-               .errorMessage("No redemption req.")
-               .detailMessage(
-                     new DetailMessage().freeString("No RedemptionRequest located for given redemptionUuid.")
-                           .voucherId(redemptionUuid));
-         return Response.status(404).entity(errorDetail).build();
-      }
+
 
       // check it's not confirmed
       ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords = testServer.getRedemptionConfirmationRecords();
       RequestKey requestKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, redemptionUuid);
       BasicAdvice confirmation = confirmationRecords.get(requestKey);
 
-      if (confirmation != null) {
-         errorDetail.errorType(ErrorDetail.ErrorType.VOUCHER_ALREADY_CONFIRMED)
-               .errorMessage("Voucher confirmed.")
+      if (voucherCode == null) {
+         errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
+                 .errorMessage("No Redemption Request")
+                 .detailMessage(
+                         new DetailMessage().freeString(
+                                 "The Redemption Request to which this Redemption Reversal refers does not exist."));
+         return Response.status(404).entity(errorDetail).build();
+      }
+
+      if(confirmedExistingVouchers.get(voucherCode) == VoucherState.REDEEMED) return null;
+
+      if (confirmedExistingVouchers.get(voucherCode) == VoucherState.CONFIRMED_REDEEMED) {
+         errorDetail.errorType(ErrorDetail.ErrorType.REDEMPTION_ALREADY_CONFIRMED)
+               .errorMessage("Redemption confirmed.")
                .detailMessage(
                      new DetailMessage().freeString(
-                           "The voucher cannot be reversed as it has already been confirmed with the associated details.")
+                           "The Voucher Redemption cannot be reversed as it has already been confirmed with the associated details.")
                            .confirmationId(confirmation.getId())
                            .voucherId(redemptionUuid)
                            .reversalId(reversalUuid));
          return Response.status(400).entity(errorDetail).build();
+      }
+
+      // TODO Normalise these validation methods to be more similar (this)
+      // Confirm Voucher redeemed
+
+
+      if (confirmedExistingVouchers.get(voucherCode) != VoucherState.REDEEMED) {
+         errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
+                 .errorMessage("No redemption req.")
+                 .detailMessage(
+                         new DetailMessage()
+                                 .freeString("No RedemptionRequest located for given redemptionUuid. (originalId)")
+                                 .reversalId(reversalUuid));
+         return Response.status(404).entity(errorDetail).build();
+      }
+
+      if (confirmedExistingVouchers.get(voucherCode) != VoucherState.REDEEMED) {
+         errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
+               .errorMessage("No redemption req.")
+               .detailMessage(
+                     new DetailMessage()
+                           .freeString("No RedemptionRequest located for given redemptionUuid. (originalId)")
+                           .reversalId(reversalUuid));
+         return Response.status(404).entity(errorDetail).build();
       }
 
       return null;
@@ -500,23 +530,25 @@ public class VoucherModelUtils extends SUVModelUtils {
     *
     *
     * 
-    * @param voucherUuid
+    * @param redemptionUuid
     *           identifies the request to which this confirmation refers
     * @param confirmationUuid
     *           uniquely identifies this confirmation request
     * @param username
     * @param password
-    * @param voucherCode the code for the corresponding voucher
+    * @param voucherCode
+    *           the code for the corresponding voucher
     * @return
     */
    public static Response canConfirmRedemption(
-           String voucherUuid,
-           String confirmationUuid,
-           String username,
-           String password, String voucherCode) {
+         String redemptionUuid,
+         String confirmationUuid,
+         String username,
+         String password,
+         String voucherCode) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
 
-      ErrorDetail errorDetail = new ErrorDetail().id(confirmationUuid).originalId(voucherUuid);
+      ErrorDetail errorDetail = new ErrorDetail().id(confirmationUuid).originalId(redemptionUuid);
 
       // TODO Extract method
       // TODO Normalise these validation methods to be more similar (this)
@@ -525,22 +557,31 @@ public class VoucherModelUtils extends SUVModelUtils {
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
 
-      if (confirmedExistingVouchers.get(voucherCode) != VoucherState.REDEEMED) {
+      if (voucherCode == null) {
          errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No Redemption Request")
                .detailMessage(
                      new DetailMessage().freeString(
-                           String.format(
-                                 "The voucher to which this Redemption Confirmation pertains is not currently in he redeemed state"
-                                       + "The Voucher is currently in a %s state.",
-                                 confirmedExistingVouchers.get(voucherCode).name()))
-                           .voucherId(voucherUuid));
+                           "The Redemption Request to which this Redemption Confirmation refers does not exist."));
          return Response.status(404).entity(errorDetail).build();
+      }
+
+      if (confirmedExistingVouchers.get(voucherCode) != VoucherState.REDEEMED) {
+         errorDetail.errorType(ErrorDetail.ErrorType.VOUCHER_NOT_REDEEMED)
+               .errorMessage("Redemption Confirmation not performed")
+               .detailMessage(
+                     new DetailMessage().freeString(
+                           String.format(
+                                 "The voucher referenced in the Redemption Request to which this Redemption Confirmation pertains is not currently in the redeemed state. "
+                                       + "The Voucher is currently in a %s state.",
+                                 confirmedExistingVouchers.get(voucherCode).name())));
+         // .voucherId(redemptionUuid)); TODO Removed this, didn't make sense to duplicate information
+         return Response.status(400).entity(errorDetail).build(); // TODO Error codes ok?
       }
 
       // check it's not reversed
       // ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getVoucherReversalRecords();
-      // RequestKey requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, voucherUuid);
+      // RequestKey requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, redemptionUuid);
       // BasicReversal reversal = reversalRecords.get(requestKey);
       // if()
       // if (reversal != null) {
