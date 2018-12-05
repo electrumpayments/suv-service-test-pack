@@ -143,6 +143,17 @@ public class VoucherModelUtils extends SUVModelUtils {
       return null;
    }
 
+   /**
+    * Require the voucher has been provisioned and has not been reversed
+    *
+    * @param voucherUuid
+    *           identifies the request to which this confirmation refers
+    * @param confirmationUuid
+    *           uniquely identifies this confirmation request
+    * @param username
+    * @param password
+    * @return
+    */
    public static Response canConfirmVoucher(
          String voucherUuid,
          String confirmationUuid,
@@ -480,5 +491,77 @@ public class VoucherModelUtils extends SUVModelUtils {
       log.debug(
             String.format("Searching for redemptionRequest record under following key: %s", provisionKey.toString()));
       return provisionRecords.get(provisionKey) != null;
+   }
+
+   /**
+    * Requires the Voucher corresponding to the RedemptionRequest referred to in the Redemption Confirmation to be in a
+    * redeemed state. If he voucher is in an unredeemed state, either due to having been Refunded, the redemption being
+    * reversed or no redemption request having been received the confirmation will fail.
+    *
+    *
+    * 
+    * @param voucherUuid
+    *           identifies the request to which this confirmation refers
+    * @param confirmationUuid
+    *           uniquely identifies this confirmation request
+    * @param username
+    * @param password
+    * @param voucherCode the code for the corresponding voucher
+    * @return
+    */
+   public static Response canConfirmRedemption(
+           String voucherUuid,
+           String confirmationUuid,
+           String username,
+           String password, String voucherCode) {
+      final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
+
+      ErrorDetail errorDetail = new ErrorDetail().id(confirmationUuid).originalId(voucherUuid);
+
+      // TODO Extract method
+      // TODO Normalise these validation methods to be more similar (this)
+      // Confirm Voucher in Redeemed state.
+      // No other checks are needed as a confirmation can only occur from this state.
+      ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
+            SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
+
+      if (confirmedExistingVouchers.get(voucherCode) != VoucherState.REDEEMED) {
+         errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
+               .errorMessage("No Redemption Request")
+               .detailMessage(
+                     new DetailMessage().freeString(
+                           String.format(
+                                 "The voucher to which this Redemption Confirmation pertains is not currently in he redeemed state"
+                                       + "The Voucher is currently in a %s state.",
+                                 confirmedExistingVouchers.get(voucherCode).name()))
+                           .voucherId(voucherUuid));
+         return Response.status(404).entity(errorDetail).build();
+      }
+
+      // check it's not reversed
+      // ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getVoucherReversalRecords();
+      // RequestKey requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, voucherUuid);
+      // BasicReversal reversal = reversalRecords.get(requestKey);
+      // if()
+      // if (reversal != null) {
+      // errorDetail.errorType(ErrorDetail.ErrorType.VOUCHER_ALREADY_REVERSED)
+      // .errorMessage("Voucher reversed.")
+      // .detailMessage(
+      // new DetailMessage()
+      // .freeString("Voucher provision has already been reversed with the associated details.")
+      // .reversalId(reversal.getId()));
+      // // TODO Pick a better ErrorType
+      //
+      // // TODO what is this here for
+      // // Check for a response for this request, if found add to detailMessage
+      // // DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+      // // ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getVoucherResponseRecords();
+      // // ProvisionResponse rsp = responseRecords.get(requestKey);
+      // // if (rsp != null) {
+      // // detailMessage.setVoucher(rsp.getVoucher());
+      // // }
+      // return Response.status(400).entity(errorDetail).build();
+      // }
+      return null;
    }
 }
