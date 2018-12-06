@@ -34,7 +34,7 @@ public class RedeemConfirmationHandler extends BaseHandler {
          // The UUID identifying the request that this confirmation relates to
          String redemptionUuid = confirmation.getRequestId();
 
-         // TODO !!!Either remove validation or write postman test for confirmation!!!
+         // Validate uuid format in code until it can be ported to hibernate in the interface
          if (!VoucherModelUtils.isValidUuid(confirmationUuid)) {
             return VoucherModelUtils.buildInvalidUuidErrorResponse(
                   confirmationUuid,

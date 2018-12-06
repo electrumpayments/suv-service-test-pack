@@ -17,7 +17,7 @@ public class RefundModelUtils extends SUVModelUtils {
                JsonUtil.deserialize(JsonUtil.serialize(refundRequest, RefundRequest.class), RefundResponse.class);
 
        updateWithRandomizedIdentifiers(refundResponse);
-       refundResponse.setVoucher(createRandomizedVoucher());
+//       refundResponse.setVoucher(createRandomizedVoucher());
        refundResponse.setSlipData(createRandomizedSlipData());
 
        //TODO Confirm not needed to populate more fields (optional)

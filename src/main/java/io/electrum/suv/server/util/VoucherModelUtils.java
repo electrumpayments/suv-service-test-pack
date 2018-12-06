@@ -534,16 +534,6 @@ public class VoucherModelUtils extends SUVModelUtils {
          return Response.status(404).entity(errorDetail).build();
       }
 
-      if (confirmedExistingVouchers.get(voucherCode) != VoucherState.REDEEMED) {
-         errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
-               .errorMessage("No redemption req.")
-               .detailMessage(
-                     new DetailMessage()
-                           .freeString("No RedemptionRequest located for given redemptionUuid. (originalId)")
-                           .reversalId(reversalUuid));
-         return Response.status(404).entity(errorDetail).build();
-      }
-
       return null;
    }
 
@@ -652,6 +642,113 @@ public class VoucherModelUtils extends SUVModelUtils {
       // // }
       // return Response.status(400).entity(errorDetail).build();
       // }
+      return null;
+   }
+
+   public static Response canConfirmRefund(
+         String refundUuid,
+         String confirmationUuid,
+         String username,
+         String password,
+         String voucherCode) {
+      final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
+
+      ErrorDetail errorDetail = new ErrorDetail().id(confirmationUuid).originalId(refundUuid);
+
+      // TODO Extract method
+      // TODO Normalise these validation methods to be more similar (this)
+      // Confirm Voucher in Refunded state.
+      // No other checks are needed as a confirmation can only occur from this state.
+      ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
+            SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
+
+      // No correcponding request
+      if (voucherCode == null) {
+         errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
+               .errorMessage("No Refund Request")
+               .detailMessage(
+                     new DetailMessage()
+                           .freeString("The Refund Request to which this Refund Confirmation refers does not exist."));
+         return Response.status(404).entity(errorDetail).build();
+      }
+
+      if (confirmedExistingVouchers.get(voucherCode) != VoucherState.REFUNDED) {
+         errorDetail.errorType(ErrorType.VOUCHER_NOT_REFUNDED)
+               .errorMessage("Refund Confirmation not performed")
+               .detailMessage(
+                     new DetailMessage().freeString(
+                           String.format(
+                                 "The voucher referenced in the Refund Request to which this Refund Confirmation pertains is not currently in the refunded state. "
+                                       + "The Voucher is currently in a %s state.",
+                                 confirmedExistingVouchers.get(voucherCode).name())));
+         // .voucherId(redemptionUuid)); TODO Removed this, didn't make sense to duplicate information
+         return Response.status(400).entity(errorDetail).build(); // TODO Error codes ok?
+      }
+
+      return null;
+   }
+
+   public static Response canReverseRefund(
+         String refundUuid,
+         String reversalUuid,
+         String username,
+         String password,
+         String voucherCode) {
+      final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
+
+      // TODO Convert to switch-cases
+      ErrorDetail errorDetail = new ErrorDetail().id(reversalUuid).originalId(refundUuid);
+
+      ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
+            SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
+
+      ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRequestRecords =
+            testServer.getRedemptionRequestRecords();
+
+      ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords = testServer.getRedemptionConfirmationRecords();
+      RequestKey requestKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, refundUuid);
+      BasicAdvice confirmation = confirmationRecords.get(requestKey);
+
+      // No corresponding refund request
+      if (voucherCode == null) {
+         errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
+               .errorMessage("No Refund Request")
+               .detailMessage(
+                     new DetailMessage().freeString(
+                           "The Refund Request to which this Refund Reversal refers does not exist."));
+         return Response.status(404).entity(errorDetail).build();
+      }
+
+      // Happy days
+      if (confirmedExistingVouchers.get(voucherCode) == VoucherState.REFUNDED)
+         return null;
+
+      // Reversal already processed
+      if (confirmedExistingVouchers.get(voucherCode) == VoucherState.CONFIRMED_REDEEMED) {
+         errorDetail.errorType(ErrorType.REDEMPTION_ALREADY_CONFIRMED)
+               .errorMessage("Redemption confirmed.")
+               .detailMessage(
+                     new DetailMessage().freeString(
+                           "This Refund Reversal cannot be processed as the relevant voucher is not in a refunded state." )
+                           .confirmationId(confirmation.getId())
+                           .voucherId(refundUuid)
+                           .reversalId(reversalUuid));
+         return Response.status(400).entity(errorDetail).build();
+      }
+
+      // TODO Normalise these validation methods to be more similar (this)
+      // Confirm Voucher redeemed
+
+      if (confirmedExistingVouchers.get(voucherCode) != VoucherState.CONFIRMED_PROVISIONED) {
+         errorDetail.errorType(ErrorType.REFUND_ALREADY_CONFIRMED)
+               .errorMessage("Refund confirmed")
+               .detailMessage(
+                     new DetailMessage()
+                           .freeString("The voucher related to this Refund Reversal has already been refunded.")
+                           .reversalId(reversalUuid));
+         return Response.status(400).entity(errorDetail).build();
+      }
+
       return null;
    }
 }
