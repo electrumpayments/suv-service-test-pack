@@ -4,6 +4,7 @@ import io.electrum.suv.api.models.*;
 import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
+import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
@@ -29,16 +30,10 @@ public class RefundReversalHandler extends BaseHandler {
          // The UUID identifying the request that this reversal relates to
          String refundUuid = reversal.getRequestId();
 
-         if (!VoucherModelUtils.validateUuid(reversalUuid)) {
-            return VoucherModelUtils.buildInvalidUuidErrorResponse(
-                    reversalUuid,
-                    null, // TODO Could overload method
-                    username,
-                    ErrorDetail.ErrorType.FORMAT_ERROR);
-         } else if (!VoucherModelUtils.validateUuid(refundUuid)) {
-            return VoucherModelUtils
-                    .buildInvalidUuidErrorResponse(refundUuid, null, username, ErrorDetail.ErrorType.FORMAT_ERROR);
-         }
+         VoucherModelUtils.validateUuid(reversalUuid);VoucherModelUtils.validateUuid(refundUuid);
+         VoucherModelUtils.validateThirdPartyIdTransactionIds(reversal.getThirdPartyIdentifiers());
+
+
 
          RefundResponse refundRsp =
                  SUVTestServerRunner.getTestServer()
@@ -65,7 +60,8 @@ public class RefundReversalHandler extends BaseHandler {
          rsp = Response.accepted((reversal)).build(); // TODO Ask Casey if this is ok
 
          return rsp;
-
+      } catch (FormatException fe) {
+         throw fe;
       } catch (Exception e) {
          return logAndBuildException(e);
       }

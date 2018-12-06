@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SUVViolationExceptionMapper implements ExceptionMapper<JerseyViolationException> {
+public class SUVHibernateViolationExceptionMapper implements ExceptionMapper<JerseyViolationException> {
    @Override
    public Response toResponse(JerseyViolationException exception) {
       final Invocable invocable = exception.getInvocable();

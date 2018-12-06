@@ -9,6 +9,7 @@ import io.electrum.suv.api.models.ErrorDetail;
 import io.electrum.suv.api.models.Voucher;
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.model.FormatError;
+import io.electrum.suv.server.model.FormatException;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,10 +183,22 @@ public class SUVModelUtils {
       return errorDetail;
    }
 
-   // TODO Do we validate for uuid format?
    /** Confirms UUID format valid using regex (8-4-4-4-12 hexadecimal) */
-   public static boolean validateUuid(String uuid) {
-      return uuid.matches("([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}");
+   public static void validateUuid(String uuid) {
+      if (!uuid.matches("([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}"))
+         throw new FormatException(
+               new FormatError().msg("UUID must conform to the format 8-4-4-4-12 hexadecimal values"));
+   }
+
+   public static void validateThirdPartyIdTransactionIds(List<ThirdPartyIdentifier> thirdPartyIdentifiers) {
+      int cnt = 0;
+      for (ThirdPartyIdentifier tpi : thirdPartyIdentifiers) {
+         if (tpi.getTransactionIdentifier() == null)
+            throw new FormatException(
+                  new FormatError()
+                        .msg(String.format("thirdPartyIdentifiers[%d].transactionIdentifier may not be null", cnt)));
+         cnt++;
+      }
    }
 
 }

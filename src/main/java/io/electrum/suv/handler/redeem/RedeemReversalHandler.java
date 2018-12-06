@@ -6,7 +6,9 @@ import io.electrum.suv.api.models.RedemptionResponse;
 import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
+import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.util.RequestKey;
+import io.electrum.suv.server.util.SUVModelUtils;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
 
@@ -31,21 +33,15 @@ public class RedeemReversalHandler extends BaseHandler {
          // The UUID identifying the request that this reversal relates to
          String redemptionUuid = reversal.getRequestId();
 
-         if (!VoucherModelUtils.validateUuid(reversalUuid)) {
-            return VoucherModelUtils.buildInvalidUuidErrorResponse(
-                  reversalUuid,
-                  null, // TODO Could overload method
-                  username,
-                  ErrorDetail.ErrorType.FORMAT_ERROR);
-         } else if (!VoucherModelUtils.validateUuid(redemptionUuid)) {
-            return VoucherModelUtils
-                  .buildInvalidUuidErrorResponse(redemptionUuid, null, username, ErrorDetail.ErrorType.FORMAT_ERROR);
-         }
+         VoucherModelUtils.validateUuid(reversalUuid);
+         VoucherModelUtils.validateUuid(redemptionUuid);
+         VoucherModelUtils.validateThirdPartyIdTransactionIds(reversal.getThirdPartyIdentifiers());
+
 
          RedemptionResponse redemptionRsp =
-                 SUVTestServerRunner.getTestServer()
-                         .getRedemptionResponseRecords()
-                         .get(new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, redemptionUuid));
+               SUVTestServerRunner.getTestServer()
+                     .getRedemptionResponseRecords()
+                     .get(new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, redemptionUuid));
 
          if (redemptionRsp == null)
             voucherCode = null;
@@ -67,7 +63,8 @@ public class RedeemReversalHandler extends BaseHandler {
          rsp = Response.accepted((reversal)).build(); // TODO Ask Casey if this is ok
 
          return rsp;
-
+      } catch (FormatException fe) {
+         throw fe;
       } catch (Exception e) {
          return logAndBuildException(e);
       }
@@ -75,7 +72,8 @@ public class RedeemReversalHandler extends BaseHandler {
 
    /**
     * Must check for a corresponding redemption request to get voucher from so that vouchers state may be updated. If no
-    * corresponding redmption exists, that voucher must still exist in provision_confirmed state (this is fine) //TODO Docs
+    * corresponding redmption exists, that voucher must still exist in provision_confirmed state (this is fine) //TODO
+    * Docs
     */
    private void addRedemptionReversalToCache(BasicReversal basicReversal) {
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
@@ -92,7 +90,8 @@ public class RedeemReversalHandler extends BaseHandler {
       key.setResourceType(RequestKey.REVERSALS_RESOURCE);
       reversalRecords.put(key, basicReversal);
       if (redemptionRequest != null) {
-         confirmedExistingVouchers.put(redemptionRequest.getVoucher().getCode(), SUVTestServer.VoucherState.CONFIRMED_PROVISIONED);
+         confirmedExistingVouchers
+               .put(redemptionRequest.getVoucher().getCode(), SUVTestServer.VoucherState.CONFIRMED_PROVISIONED);
       }
    }
 

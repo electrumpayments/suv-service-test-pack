@@ -5,10 +5,12 @@ import io.electrum.suv.api.models.RedemptionResponse;
 import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
+import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicAdvice;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -32,16 +34,9 @@ public class RedeemConfirmationHandler extends BaseHandler {
          String redemptionUuid = confirmation.getRequestId();
 
          // Validate uuid format in code until it can be ported to hibernate in the interface
-         if (!VoucherModelUtils.validateUuid(confirmationUuid)) {
-            return VoucherModelUtils.buildInvalidUuidErrorResponse(
-                  confirmationUuid,
-                  null, // TODO Could overload method
-                  username,
-                  ErrorDetail.ErrorType.FORMAT_ERROR);
-         } else if (!VoucherModelUtils.validateUuid(redemptionUuid)) {
-            return VoucherModelUtils
-                  .buildInvalidUuidErrorResponse(redemptionUuid, null, username, ErrorDetail.ErrorType.FORMAT_ERROR);
-         }
+         VoucherModelUtils.validateUuid(confirmationUuid);
+         VoucherModelUtils.validateUuid(redemptionUuid);
+         VoucherModelUtils.validateThirdPartyIdTransactionIds(confirmation.getThirdPartyIdentifiers());
 
          RedemptionResponse redemptionRsp =
                SUVTestServerRunner.getTestServer()
@@ -53,7 +48,9 @@ public class RedeemConfirmationHandler extends BaseHandler {
          else
             voucherCode = redemptionRsp.getVoucher().getCode();
 
-         rsp = VoucherModelUtils.canConfirmRedemption(redemptionUuid, confirmationUuid, username, password, voucherCode);
+         rsp =
+               VoucherModelUtils
+                     .canConfirmRedemption(redemptionUuid, confirmationUuid, username, password, voucherCode);
          if (rsp != null) {
             return rsp;
          }
@@ -63,7 +60,8 @@ public class RedeemConfirmationHandler extends BaseHandler {
          rsp = Response.accepted((confirmation)).build(); // TODO Ask Casey if this is ok
 
          return rsp;
-
+      } catch (FormatException fe) {
+         throw fe;
       } catch (Exception e) {
          return logAndBuildException(e);
       }

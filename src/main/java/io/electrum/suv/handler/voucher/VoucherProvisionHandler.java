@@ -5,14 +5,17 @@ import io.electrum.suv.api.models.ProvisionRequest;
 import io.electrum.suv.api.models.ProvisionResponse;
 import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.server.SUVTestServerRunner;
+import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class VoucherProvisionHandler extends BaseHandler {
@@ -45,18 +48,15 @@ public class VoucherProvisionHandler extends BaseHandler {
          Response rsp;
 
          String uuid = provisionRequest.getId();
-         if (!VoucherModelUtils.validateUuid(uuid)) {
-            return VoucherModelUtils.buildInvalidUuidErrorResponse(
-                    uuid,
-                  provisionRequest.getClient(),
-                  username,
-                  ErrorDetail.ErrorType.FORMAT_ERROR);
-         }
+         VoucherModelUtils.validateUuid(uuid);
+
+         VoucherModelUtils.validateThirdPartyIdTransactionIds(provisionRequest.getThirdPartyIdentifiers());
+
 
          // Confirm that the basicAuth ID matches clientID in message body
          if (!provisionRequest.getClient().getId().equals(username)) {
             return VoucherModelUtils.buildIncorrectUsernameErrorResponse(
-                    uuid,
+                  uuid,
                   provisionRequest.getClient(),
                   username,
                   ErrorDetail.ErrorType.AUTHENTICATION_ERROR);
@@ -76,6 +76,8 @@ public class VoucherProvisionHandler extends BaseHandler {
          rsp = Response.created(uriInfo.getRequestUri()).entity(provisionRsp).build();
          return rsp;
 
+      } catch (FormatException fe) {
+         throw fe;
       } catch (Exception e) {
          return logAndBuildException(e);
       }

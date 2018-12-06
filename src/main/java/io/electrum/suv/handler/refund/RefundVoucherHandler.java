@@ -4,6 +4,7 @@ import io.electrum.suv.api.models.*;
 import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
+import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.util.RefundModelUtils;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
@@ -28,13 +29,9 @@ public class RefundVoucherHandler extends BaseHandler {
          voucherCode = refundRequest.getVoucher().getCode();
 
          // Validate uuid format in code until it can be ported to hibernate in the interface
-         if (!VoucherModelUtils.validateUuid(refundUuid)) {
-            return VoucherModelUtils.buildInvalidUuidErrorResponse(
-                    refundUuid,
-                  refundRequest.getClient(),
-                  username,
-                  ErrorDetail.ErrorType.FORMAT_ERROR);
-         }
+         VoucherModelUtils.validateUuid(refundUuid);
+         VoucherModelUtils.validateThirdPartyIdTransactionIds(refundRequest.getThirdPartyIdentifiers());
+
 
          // Confirm that the basicAuth ID matches clientID in message body
          if (!refundRequest.getClient().getId().equals(username)) {
@@ -59,7 +56,8 @@ public class RefundVoucherHandler extends BaseHandler {
          addRefundResponseToCache(key, refundRsp);
          rsp = Response.created(uriInfo.getRequestUri()).entity(refundRsp).build();
          return rsp;
-
+      } catch (FormatException fe) {
+         throw fe;
       } catch (Exception e) {
          return logAndBuildException(e);
       }

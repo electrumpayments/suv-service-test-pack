@@ -2,7 +2,6 @@ package io.electrum.suv.resource.impl;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,7 +12,9 @@ import io.dropwizard.jersey.validation.DropwizardConfiguredValidator;
 import io.dropwizard.jersey.validation.HibernateValidationFeature;
 import io.dropwizard.jersey.validation.Validators;
 import io.electrum.suv.api.models.*;
-import io.electrum.suv.server.SUVViolationExceptionMapper;
+import io.electrum.suv.handler.redeem.RedeemConfirmationHandler;
+import io.electrum.suv.server.SUVFormatViolationExceptionMapper;
+import io.electrum.suv.server.SUVHibernateViolationExceptionMapper;
 import io.electrum.vas.model.BasicAdvice;
 import io.electrum.vas.model.TenderAdvice;
 import org.glassfish.jersey.jackson.JacksonFeature;
@@ -74,7 +75,8 @@ public class SUVTestServer extends ResourceConfig {
       register(
             new HibernateValidationFeature(
                   new DropwizardConfiguredValidator(Validators.newValidatorFactory().getValidator())));
-      register(new SUVViolationExceptionMapper());
+      register(new SUVHibernateViolationExceptionMapper());
+      register(new SUVFormatViolationExceptionMapper());
 
       voucherProvisionRecords = new ConcurrentHashMap<>();
       voucherResponseRecords = new ConcurrentHashMap<>();

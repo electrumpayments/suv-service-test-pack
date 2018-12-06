@@ -5,6 +5,7 @@ import io.electrum.suv.api.models.RefundResponse;
 import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
+import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicAdvice;
@@ -31,16 +32,10 @@ public class RefundConfirmationHandler extends BaseHandler {
          String refundUuid = confirmation.getRequestId();
 
          // Validate uuid format in code until it can be ported to hibernate in the interface
-         if (!VoucherModelUtils.validateUuid(confirmationUuid)) {
-            return VoucherModelUtils.buildInvalidUuidErrorResponse(
-                  confirmationUuid,
-                  null, // TODO Could overload method
-                  username,
-                  ErrorDetail.ErrorType.FORMAT_ERROR);
-         } else if (!VoucherModelUtils.validateUuid(refundUuid)) {
-            return VoucherModelUtils
-                  .buildInvalidUuidErrorResponse(refundUuid, null, username, ErrorDetail.ErrorType.FORMAT_ERROR);
-         }
+         VoucherModelUtils.validateUuid(confirmationUuid);
+         VoucherModelUtils.validateUuid(refundUuid);
+         VoucherModelUtils.validateThirdPartyIdTransactionIds(confirmation.getThirdPartyIdentifiers());
+
 
          // Check that there is actually a corresponding refund request
          RefundResponse refundRsp =
@@ -63,7 +58,8 @@ public class RefundConfirmationHandler extends BaseHandler {
          rsp = Response.accepted((confirmation)).build(); // TODO Ask Casey if this is ok
 
          return rsp;
-
+      } catch (FormatException fe) {
+         throw fe;
       } catch (Exception e) {
          return logAndBuildException(e);
       }

@@ -6,6 +6,7 @@ import io.electrum.suv.api.models.RedemptionResponse;
 import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.resource.impl.SUVTestServer.VoucherState;
 import io.electrum.suv.server.SUVTestServerRunner;
+import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
@@ -30,15 +31,11 @@ public class RedeemVoucherHandler extends BaseHandler {
          Response rsp = null;
 
          String uuid = redemptionRequest.getId();
-         if (!VoucherModelUtils.validateUuid(uuid)) {
-            return VoucherModelUtils.buildInvalidUuidErrorResponse(
-                  uuid,
-                  redemptionRequest.getClient(),
-                  username,
-                  ErrorDetail.ErrorType.FORMAT_ERROR);
-         }
+        VoucherModelUtils.validateUuid(uuid);
+          VoucherModelUtils.validateThirdPartyIdTransactionIds(redemptionRequest.getThirdPartyIdentifiers());
 
-         // Confirm that the basicAuth ID matches clientID in message body
+
+          // Confirm that the basicAuth ID matches clientID in message body
          if (!redemptionRequest.getClient().getId().equals(username)) {
             return VoucherModelUtils.buildIncorrectUsernameErrorResponse(
                   uuid,
@@ -65,7 +62,8 @@ public class RedeemVoucherHandler extends BaseHandler {
          rsp = Response.created(uriInfo.getRequestUri()).entity(redemptionRsp).build();
 
          return rsp;
-
+      } catch (FormatException fe) {
+          throw fe;
       } catch (Exception e) {
          return logAndBuildException(e);
       }
