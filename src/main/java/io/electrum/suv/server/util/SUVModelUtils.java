@@ -137,7 +137,7 @@ public class SUVModelUtils {
     */
 
    /** Builds an {@link ErrorDetail} for duplicate UUID errors */
-   public static ErrorDetail buildDuplicateErrorDetail(
+   public static ErrorDetail buildDuplicateUuidErrorDetail(
          String objectId,
          String originalMsgId,
          // ErrorDetail.RequestType requestType,

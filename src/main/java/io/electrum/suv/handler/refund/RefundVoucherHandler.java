@@ -13,7 +13,8 @@ import javax.ws.rs.core.UriInfo;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RefundVoucherHandler extends BaseHandler {
-   private String uuid;
+   private String refundUuid;
+   private String voucherCode;
 
    public RefundVoucherHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
@@ -22,11 +23,13 @@ public class RefundVoucherHandler extends BaseHandler {
    public Response handle(RefundRequest refundRequest, UriInfo uriInfo) {
       try {
          Response rsp;
+         refundUuid = refundRequest.getId();
+         voucherCode = refundRequest.getVoucher().getCode();
 
-         uuid = refundRequest.getId();
-         if (!VoucherModelUtils.isValidUuid(uuid)) {
+         //TODO This stays or goes?
+         if (!VoucherModelUtils.isValidUuid(refundUuid)) {
             return VoucherModelUtils.buildInvalidUuidErrorResponse(
-                  uuid,
+                    refundUuid,
                   refundRequest.getClient(),
                   username,
                   ErrorDetail.ErrorType.FORMAT_ERROR);
@@ -35,20 +38,20 @@ public class RefundVoucherHandler extends BaseHandler {
          // Confirm that the basicAuth ID matches clientID in message body
          if (!refundRequest.getClient().getId().equals(username)) {
             return VoucherModelUtils.buildIncorrectUsernameErrorResponse(
-                  uuid,
+                    refundUuid,
                   refundRequest.getClient(),
                   username,
                   ErrorDetail.ErrorType.AUTHENTICATION_ERROR);
          }
 
          // Confirm voucher not already provisioned or reversed.
-         rsp = VoucherModelUtils.canRefundVoucher(uuid, username, password);
+         rsp = VoucherModelUtils.canRefundVoucher(refundUuid, username, password, voucherCode);
          if (rsp != null) {
             return rsp;
          }
 
          // The voucher can be Refunded
-         RequestKey key = addRefundRequestToCache(uuid, refundRequest);
+         RequestKey key = addRefundRequestToCache(refundUuid, refundRequest);
 
          // TODO See Giftcard, should this all be done differently
          RefundResponse refundRsp = RefundModelUtils.refundRspFromReq(refundRequest);

@@ -217,7 +217,8 @@ public class SUVTestServer extends ResourceConfig {
    public enum VoucherState{
        CONFIRMED_PROVISIONED(0),
        REDEEMED(1),
-       CONFIRMED_REDEEMED(2);
+       CONFIRMED_REDEEMED(2),
+       REFUNDED(3);
 
        private int value;
 

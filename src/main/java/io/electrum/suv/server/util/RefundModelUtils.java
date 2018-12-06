@@ -48,7 +48,7 @@ public class RefundModelUtils extends SUVModelUtils {
     * Response.status(400).entity(errorDetail).build(); }
     * 
     * private static Response buildDuplicateErrorResponse( String refundRequestId, RequestKey requestKey, refundRequest
-    * originalRequest) { ErrorDetail errorDetail = buildDuplicateErrorDetail( refundRequestId, null,
+    * originalRequest) { ErrorDetail errorDetail = buildDuplicateUuidErrorDetail( refundRequestId, null,
     * ErrorDetail.RequestType.refund_REQUEST, originalRequest);
     * 
     * DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();

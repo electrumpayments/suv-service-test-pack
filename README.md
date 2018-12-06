@@ -7,6 +7,9 @@ These tests consist of correctly formatted JSON messages that validate server re
 The test pack is comprised of JSON files: `Suv.postman_collection.json`, `heroku.postman_environment.json` and `localhost.postman_environment.json`.
 The postman_collection files are a collection of JSON tests that will be run. They contain JSON request messages and response validation scripts. These tests are dependant on variables contained in the the associated postman_environment files.
 
+### Messaging paradigm
+This server implementation and the included test pack expect a dual messaging paradigm to be followed.
+
 ### Running tests
 
 There are two possible ways to run this test pack: either via the Postman desktop client or via Newman, the command line interface for Postman.
