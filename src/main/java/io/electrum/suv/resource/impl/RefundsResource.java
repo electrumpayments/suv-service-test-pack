@@ -9,9 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.Path;
 
-//TODO Can this not be generalized across the resource implementations
-//TODO Are PATHS necessary
-@Path(Paths.BASE_PATH + Paths.REFUND_VOUCHER)
+
+@Path(Paths.BASE_PATH)
 @Api(description = "the Single Use Voucher API", authorizations = { @Authorization("httpBasic") })
 public class RefundsResource extends io.electrum.suv.api.RefundsResource {
    static RefundsResourceImpl instance = null;

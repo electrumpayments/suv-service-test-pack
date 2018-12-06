@@ -2,6 +2,7 @@ package io.electrum.suv.handler.refund;
 
 import io.electrum.suv.api.models.*;
 import io.electrum.suv.handler.BaseHandler;
+import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.util.RefundModelUtils;
 import io.electrum.suv.server.util.RequestKey;
@@ -26,7 +27,7 @@ public class RefundVoucherHandler extends BaseHandler {
          refundUuid = refundRequest.getId();
          voucherCode = refundRequest.getVoucher().getCode();
 
-         //TODO This stays or goes?
+         // Validate uuid format in code until it can be ported to hibernate in the interface
          if (!VoucherModelUtils.isValidUuid(refundUuid)) {
             return VoucherModelUtils.buildInvalidUuidErrorResponse(
                     refundUuid,
@@ -67,7 +68,12 @@ public class RefundVoucherHandler extends BaseHandler {
    private void addRefundResponseToCache(RequestKey key, RefundResponse request) {
       ConcurrentHashMap<RequestKey, RefundResponse> refundResponseRecords =
             SUVTestServerRunner.getTestServer().getRefundResponseRecords();
+      ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
+              SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
+
       refundResponseRecords.put(key, request);
+      confirmedExistingVouchers.put(voucherCode, SUVTestServer.VoucherState.REFUNDED);
+
    }
 
    private RequestKey addRefundRequestToCache(String voucherId, RefundRequest request) {
