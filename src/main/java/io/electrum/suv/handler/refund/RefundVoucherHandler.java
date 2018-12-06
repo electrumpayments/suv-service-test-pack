@@ -28,7 +28,7 @@ public class RefundVoucherHandler extends BaseHandler {
          voucherCode = refundRequest.getVoucher().getCode();
 
          // Validate uuid format in code until it can be ported to hibernate in the interface
-         if (!VoucherModelUtils.isValidUuid(refundUuid)) {
+         if (!VoucherModelUtils.validateUuid(refundUuid)) {
             return VoucherModelUtils.buildInvalidUuidErrorResponse(
                     refundUuid,
                   refundRequest.getClient(),

@@ -52,7 +52,6 @@ public class VoucherModelUtils extends SUVModelUtils {
          ErrorDetail errorDetail = buildDuplicateUuidErrorDetail(voucherId, null, originalRequest);
 
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-         // detailMessage.setProduct(originalRequest.getProduct()); TODO This doesn't exist...can ignore?
 
          // Check for a response for this request
          ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getVoucherResponseRecords();
@@ -64,7 +63,7 @@ public class VoucherModelUtils extends SUVModelUtils {
          return Response.status(400).entity(errorDetail).build(); // Bad Request
       }
 
-      // TODO I don't believe this can be tested for in PostMan
+
       // If voucher reversal request already received
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getVoucherReversalRecords();
       requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, voucherId);
@@ -74,9 +73,9 @@ public class VoucherModelUtils extends SUVModelUtils {
                buildErrorDetail(
                      voucherId,
                      "Voucher reversed.",
-                     "Voucher reversal with String already processed with the associated fields.",
+                     "Voucher reversal with UUID already processed with the associated fields.",
                      reversal.getId(),
-                     ErrorType.GENERAL_ERROR); // TODO Pick a better ErrorType
+                     ErrorType.VOUCHER_ALREADY_REVERSED);
 
          // TODO what is this here for, really don't see it being !null
          // Check for a response for this request, if found add to detailMessage
@@ -333,12 +332,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
 
-      /* If voucher provision not yet confirmed */
-      // Use the mapping from the voucher code to a request key (which corresponds to a confirmationsRecord)
-      // ConcurrentHashMap<String, RequestKey> voucherCodeRequestKey =
-      // testServer.getVoucherCodeRequestKeyConfirmationRecords();
-      // ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords = testServer.getVoucherConfirmationRecords();
-      // RequestKey confirmationKey = new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, requestUuid);
+      // If voucher provision not yet confirmed
       if (confirmedExistingVouchers.get(voucherCode) == null) {
          ErrorDetail errorDetail =
                buildErrorDetail(
@@ -350,13 +344,34 @@ public class VoucherModelUtils extends SUVModelUtils {
          return Response.status(400).entity(errorDetail).build();
       }
 
+      // Confirm reversal request did not arrive before this
+      ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getRedemptionReversalRecords();
+      RequestKey requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, requestUuid);
+      BasicReversal reversal = reversalRecords.get(requestKey);
+      if (reversal != null) {
+         ErrorDetail errorDetail =
+                 buildErrorDetail(
+                         requestUuid,
+                         "Redemption reversed.",
+                         "Redemption reversal with UUID already processed with the associated fields.",
+                         reversal.getId(),
+                         ErrorType.REDEMPTION_ALREADY_REVERSED);
+
+         // Check for a response for this request, if found add to detailMessage
+         DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+         ConcurrentHashMap<RequestKey, RefundResponse> responseRecords = testServer.getRefundResponseRecords();
+         RefundResponse rsp = responseRecords.get(requestKey);
+         if (rsp != null) {
+            detailMessage.setVoucher(rsp.getVoucher());
+         }
+         return Response.status(400).entity(errorDetail).build();
+      }
+
       // If no redemptionRequests have been recorded, the voucher cannot fail the test of having already been redeemed.
       if (requestRecords.size() != 0) {
          // TODO Could make requestKey part of method args
-         // final ConcurrentHashMap<String, RequestKey> voucherCodeRequestKeyRedemptionRecords =
-         // SUVTestServerRunner.getTestServer().getVoucherCodeRequestKeyRedemptionRecords();
 
-         RequestKey requestKey = new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, requestUuid);
+         RequestKey key = new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, requestUuid);
          // RedemptionRequest originalRequest = requestRecords.get(requestKey);
 
          // If Voucher already redeemed
@@ -374,7 +389,7 @@ public class VoucherModelUtils extends SUVModelUtils {
             // Check for a response for this request
             ConcurrentHashMap<RequestKey, RedemptionResponse> responseRecords =
                   testServer.getRedemptionResponseRecords();
-            RedemptionResponse rsp = responseRecords.get(requestKey);
+            RedemptionResponse rsp = responseRecords.get(key);
             if (rsp != null) {
                detailMessage.setVoucher(rsp.getVoucher()); // TODO confirm this is !null
             }
@@ -400,6 +415,29 @@ public class VoucherModelUtils extends SUVModelUtils {
    /** Make sure the voucher is either in a redemptionConfiromed state */
    public static Response canRefundVoucher(String refundUuid, String username, String password, String voucherCode) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
+
+      // Confirm reversal request did not arrive before this
+      ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getRefundReversalRecords();
+      RequestKey requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, refundUuid);
+      BasicReversal reversal = reversalRecords.get(requestKey);
+      if (reversal != null) {
+         ErrorDetail errorDetail =
+               buildErrorDetail(
+                     refundUuid,
+                     "Refund reversed.",
+                     "Refund reversal with UUID already processed with the associated fields.",
+                     reversal.getId(),
+                     ErrorType.REFUND_ALREADY_REVERSED);
+
+         // Check for a response for this request, if found add to detailMessage
+         DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+         ConcurrentHashMap<RequestKey, RefundResponse> responseRecords = testServer.getRefundResponseRecords();
+         RefundResponse rsp = responseRecords.get(requestKey);
+         if (rsp != null) {
+            detailMessage.setVoucher(rsp.getVoucher());
+         }
+         return Response.status(400).entity(errorDetail).build();
+      }
 
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
@@ -714,8 +752,8 @@ public class VoucherModelUtils extends SUVModelUtils {
          errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No Refund Request")
                .detailMessage(
-                     new DetailMessage().freeString(
-                           "The Refund Request to which this Refund Reversal refers does not exist."));
+                     new DetailMessage()
+                           .freeString("No Refund Request located for given Refund UUID."));
          return Response.status(404).entity(errorDetail).build();
       }
 
@@ -729,7 +767,7 @@ public class VoucherModelUtils extends SUVModelUtils {
                .errorMessage("Redemption confirmed.")
                .detailMessage(
                      new DetailMessage().freeString(
-                           "This Refund Reversal cannot be processed as the relevant voucher is not in a refunded state." )
+                           "This Refund Reversal cannot be processed as the relevant voucher is not in a refunded state.")
                            .confirmationId(confirmation.getId())
                            .voucherId(refundUuid)
                            .reversalId(reversalUuid));
@@ -739,7 +777,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       // TODO Normalise these validation methods to be more similar (this)
       // Confirm Voucher redeemed
 
-      if (confirmedExistingVouchers.get(voucherCode) != VoucherState.CONFIRMED_PROVISIONED) {
+      if (confirmedExistingVouchers.get(voucherCode) == VoucherState.CONFIRMED_PROVISIONED) {
          errorDetail.errorType(ErrorType.REFUND_ALREADY_CONFIRMED)
                .errorMessage("Refund confirmed")
                .detailMessage(

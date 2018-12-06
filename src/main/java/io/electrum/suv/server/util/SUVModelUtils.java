@@ -184,7 +184,7 @@ public class SUVModelUtils {
 
    // TODO Do we validate for uuid format?
    /** Confirms UUID format valid using regex (8-4-4-4-12 hexadecimal) */
-   public static boolean isValidUuid(String uuid) {
+   public static boolean validateUuid(String uuid) {
       return uuid.matches("([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}");
    }
 

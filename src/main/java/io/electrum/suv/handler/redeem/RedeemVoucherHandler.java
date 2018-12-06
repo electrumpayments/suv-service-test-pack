@@ -1,11 +1,9 @@
 package io.electrum.suv.handler.redeem;
 
 import io.electrum.suv.api.models.ErrorDetail;
-import io.electrum.suv.api.models.ProvisionResponse;
 import io.electrum.suv.api.models.RedemptionRequest;
 import io.electrum.suv.api.models.RedemptionResponse;
 import io.electrum.suv.handler.BaseHandler;
-import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.resource.impl.SUVTestServer.VoucherState;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.util.RequestKey;
@@ -16,9 +14,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static io.electrum.suv.resource.impl.SUVTestServer.VoucherState.CONFIRMED_PROVISIONED;
-import static io.electrum.suv.resource.impl.SUVTestServer.VoucherState.REDEEMED;
 
 public class RedeemVoucherHandler extends BaseHandler {
    public RedeemVoucherHandler(HttpHeaders httpHeaders) {
@@ -35,13 +30,13 @@ public class RedeemVoucherHandler extends BaseHandler {
          Response rsp = null;
 
          String uuid = redemptionRequest.getId();
-         if (!VoucherModelUtils.isValidUuid(uuid)) {
+         if (!VoucherModelUtils.validateUuid(uuid)) {
             return VoucherModelUtils.buildInvalidUuidErrorResponse(
                   uuid,
                   redemptionRequest.getClient(),
                   username,
                   ErrorDetail.ErrorType.FORMAT_ERROR);
-         } else
+         }
 
          // Confirm that the basicAuth ID matches clientID in message body
          if (!redemptionRequest.getClient().getId().equals(username)) {

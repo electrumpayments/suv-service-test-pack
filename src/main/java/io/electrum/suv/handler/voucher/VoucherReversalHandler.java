@@ -1,13 +1,11 @@
 package io.electrum.suv.handler.voucher;
 
 import io.electrum.suv.api.models.ErrorDetail;
-import io.electrum.suv.api.models.ProvisionResponse;
 import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
-import io.electrum.vas.model.TenderAdvice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,13 +31,13 @@ public class VoucherReversalHandler extends BaseHandler {
          // The UUID identifying the request that this reversal relates to
          String voucherId = reversal.getRequestId();
 
-         if (!VoucherModelUtils.isValidUuid(reversalUuid)) {
+         if (!VoucherModelUtils.validateUuid(reversalUuid)) {
             return VoucherModelUtils.buildInvalidUuidErrorResponse(
                     reversalUuid,
                   null, // TODO Could overload method
                   username,
                   ErrorDetail.ErrorType.FORMAT_ERROR);
-         } else if (!VoucherModelUtils.isValidUuid(voucherId)) {
+         } else if (!VoucherModelUtils.validateUuid(voucherId)) {
             return VoucherModelUtils
                   .buildInvalidUuidErrorResponse(voucherId, null, username, ErrorDetail.ErrorType.FORMAT_ERROR);
          }

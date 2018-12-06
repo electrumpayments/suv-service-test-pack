@@ -10,7 +10,6 @@ import io.electrum.suv.server.util.VoucherModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -46,7 +45,7 @@ public class VoucherProvisionHandler extends BaseHandler {
          Response rsp;
 
          String uuid = provisionRequest.getId();
-         if (!VoucherModelUtils.isValidUuid(uuid)) {
+         if (!VoucherModelUtils.validateUuid(uuid)) {
             return VoucherModelUtils.buildInvalidUuidErrorResponse(
                     uuid,
                   provisionRequest.getClient(),

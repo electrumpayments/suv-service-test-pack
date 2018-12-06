@@ -31,13 +31,13 @@ public class RefundConfirmationHandler extends BaseHandler {
          String refundUuid = confirmation.getRequestId();
 
          // Validate uuid format in code until it can be ported to hibernate in the interface
-         if (!VoucherModelUtils.isValidUuid(confirmationUuid)) {
+         if (!VoucherModelUtils.validateUuid(confirmationUuid)) {
             return VoucherModelUtils.buildInvalidUuidErrorResponse(
                   confirmationUuid,
                   null, // TODO Could overload method
                   username,
                   ErrorDetail.ErrorType.FORMAT_ERROR);
-         } else if (!VoucherModelUtils.isValidUuid(refundUuid)) {
+         } else if (!VoucherModelUtils.validateUuid(refundUuid)) {
             return VoucherModelUtils
                   .buildInvalidUuidErrorResponse(refundUuid, null, username, ErrorDetail.ErrorType.FORMAT_ERROR);
          }

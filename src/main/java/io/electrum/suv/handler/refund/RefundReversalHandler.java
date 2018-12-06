@@ -29,13 +29,13 @@ public class RefundReversalHandler extends BaseHandler {
          // The UUID identifying the request that this reversal relates to
          String refundUuid = reversal.getRequestId();
 
-         if (!VoucherModelUtils.isValidUuid(reversalUuid)) {
+         if (!VoucherModelUtils.validateUuid(reversalUuid)) {
             return VoucherModelUtils.buildInvalidUuidErrorResponse(
                     reversalUuid,
                     null, // TODO Could overload method
                     username,
                     ErrorDetail.ErrorType.FORMAT_ERROR);
-         } else if (!VoucherModelUtils.isValidUuid(refundUuid)) {
+         } else if (!VoucherModelUtils.validateUuid(refundUuid)) {
             return VoucherModelUtils
                     .buildInvalidUuidErrorResponse(refundUuid, null, username, ErrorDetail.ErrorType.FORMAT_ERROR);
          }

@@ -3,7 +3,6 @@ package io.electrum.suv.handler.voucher;
 import io.electrum.suv.api.models.ErrorDetail;
 import io.electrum.suv.api.models.ProvisionResponse;
 import io.electrum.suv.handler.BaseHandler;
-import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.resource.impl.SUVTestServer.VoucherState;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.util.RequestKey;
@@ -14,8 +13,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static io.electrum.suv.resource.impl.SUVTestServer.VoucherState.*;
 
 public class VoucherConfirmationHandler extends BaseHandler {
    /** The UUID of this request */
@@ -42,13 +39,13 @@ public class VoucherConfirmationHandler extends BaseHandler {
          confirmationUuid = confirmation.getId();
          voucherId = confirmation.getRequestId();
          // TODO !!!Either remove validation or write postman test for confirmation!!!
-         if (!VoucherModelUtils.isValidUuid(confirmationUuid)) {
+         if (!VoucherModelUtils.validateUuid(confirmationUuid)) {
             return VoucherModelUtils.buildInvalidUuidErrorResponse(
                   confirmationUuid,
                   null, // TODO Could overload method
                   username,
                   ErrorDetail.ErrorType.FORMAT_ERROR);
-         } else if (!VoucherModelUtils.isValidUuid(voucherId)) {
+         } else if (!VoucherModelUtils.validateUuid(voucherId)) {
             return VoucherModelUtils
                   .buildInvalidUuidErrorResponse(voucherId, null, username, ErrorDetail.ErrorType.FORMAT_ERROR);
          }

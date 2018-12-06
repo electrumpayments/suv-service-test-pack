@@ -5,8 +5,10 @@ import io.dropwizard.jersey.validation.JerseyViolationException;
 import io.electrum.suv.server.util.SUVModelUtils;
 import org.glassfish.jersey.server.model.Invocable;
 
+import javax.validation.ConstraintViolationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,4 +24,6 @@ public class SUVViolationExceptionMapper implements ExceptionMapper<JerseyViolat
 
       return Response.status(Response.Status.BAD_REQUEST).entity(SUVModelUtils.buildFormatErrorRsp(errors)).build();
    }
+
+//   JerseyViolationException e = new JerseyViolationException(new HashSet<ConstraintViolationException>(), Invocable.create())
 }
