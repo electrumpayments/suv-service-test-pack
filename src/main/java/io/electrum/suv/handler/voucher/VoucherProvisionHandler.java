@@ -1,5 +1,14 @@
 package io.electrum.suv.handler.voucher;
 
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.electrum.suv.api.models.ErrorDetail;
 import io.electrum.suv.api.models.ProvisionRequest;
 import io.electrum.suv.api.models.ProvisionResponse;
@@ -8,15 +17,6 @@ import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class VoucherProvisionHandler extends BaseHandler {
    private static final Logger log = LoggerFactory.getLogger(VoucherProvisionHandler.class);
@@ -51,7 +51,6 @@ public class VoucherProvisionHandler extends BaseHandler {
          VoucherModelUtils.validateUuid(uuid);
 
          VoucherModelUtils.validateThirdPartyIdTransactionIds(provisionRequest.getThirdPartyIdentifiers());
-
 
          // Confirm that the basicAuth ID matches clientID in message body
          if (!provisionRequest.getClient().getId().equals(username)) {

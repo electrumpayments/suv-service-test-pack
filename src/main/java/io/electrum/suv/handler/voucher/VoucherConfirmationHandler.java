@@ -1,6 +1,11 @@
 package io.electrum.suv.handler.voucher;
 
-import io.electrum.suv.api.models.ErrorDetail;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+
 import io.electrum.suv.api.models.ProvisionResponse;
 import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.resource.impl.SUVTestServer.VoucherState;
@@ -9,11 +14,6 @@ import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.TenderAdvice;
-
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class VoucherConfirmationHandler extends BaseHandler {
    /** The UUID of this request */
@@ -43,7 +43,6 @@ public class VoucherConfirmationHandler extends BaseHandler {
          VoucherModelUtils.validateUuid(confirmationUuid);
          VoucherModelUtils.validateUuid(voucherId);
          VoucherModelUtils.validateThirdPartyIdTransactionIds(confirmation.getThirdPartyIdentifiers());
-
 
          rsp = VoucherModelUtils.canConfirmVoucher(voucherId, confirmationUuid, username, password);
          if (rsp != null) {

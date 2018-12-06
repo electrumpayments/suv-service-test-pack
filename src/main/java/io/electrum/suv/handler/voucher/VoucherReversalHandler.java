@@ -1,19 +1,20 @@
 package io.electrum.suv.handler.voucher;
 
-import io.electrum.suv.api.models.ErrorDetail;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class VoucherReversalHandler extends BaseHandler {
 
@@ -35,7 +36,6 @@ public class VoucherReversalHandler extends BaseHandler {
          VoucherModelUtils.validateUuid(reversalUuid);
          VoucherModelUtils.validateUuid(voucherId);
          VoucherModelUtils.validateThirdPartyIdTransactionIds(reversal.getThirdPartyIdentifiers());
-
 
          // TODO check this in airtime
          rsp = VoucherModelUtils.canReverseVoucher(voucherId, reversalUuid, username, password);

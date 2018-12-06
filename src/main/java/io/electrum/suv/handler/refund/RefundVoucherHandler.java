@@ -1,6 +1,14 @@
 package io.electrum.suv.handler.refund;
 
-import io.electrum.suv.api.models.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+
+import io.electrum.suv.api.models.ErrorDetail;
+import io.electrum.suv.api.models.RefundRequest;
+import io.electrum.suv.api.models.RefundResponse;
 import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
@@ -8,11 +16,6 @@ import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.util.RefundModelUtils;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
-
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class RefundVoucherHandler extends BaseHandler {
    private String refundUuid;
@@ -32,11 +35,10 @@ public class RefundVoucherHandler extends BaseHandler {
          VoucherModelUtils.validateUuid(refundUuid);
          VoucherModelUtils.validateThirdPartyIdTransactionIds(refundRequest.getThirdPartyIdentifiers());
 
-
          // Confirm that the basicAuth ID matches clientID in message body
          if (!refundRequest.getClient().getId().equals(username)) {
             return VoucherModelUtils.buildIncorrectUsernameErrorResponse(
-                    refundUuid,
+                  refundUuid,
                   refundRequest.getClient(),
                   username,
                   ErrorDetail.ErrorType.AUTHENTICATION_ERROR);
@@ -67,7 +69,7 @@ public class RefundVoucherHandler extends BaseHandler {
       ConcurrentHashMap<RequestKey, RefundResponse> refundResponseRecords =
             SUVTestServerRunner.getTestServer().getRefundResponseRecords();
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
-              SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
+            SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
 
       refundResponseRecords.put(key, request);
       confirmedExistingVouchers.put(voucherCode, SUVTestServer.VoucherState.REFUNDED);

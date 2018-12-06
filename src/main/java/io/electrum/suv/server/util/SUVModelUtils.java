@@ -3,29 +3,20 @@ package io.electrum.suv.server.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.core.Response;
-
-import io.electrum.suv.api.models.ErrorDetail;
-import io.electrum.suv.api.models.Voucher;
-import io.electrum.suv.resource.impl.SUVTestServer;
-import io.electrum.suv.server.model.FormatError;
-import io.electrum.suv.server.model.FormatException;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.electrum.suv.api.models.ErrorDetail;
+import io.electrum.suv.api.models.Voucher;
+import io.electrum.suv.resource.impl.SUVTestServer;
+import io.electrum.suv.server.model.DetailMessage;
+import io.electrum.suv.server.model.FormatError;
+import io.electrum.suv.server.model.FormatException;
+import io.electrum.vas.model.*;
+
 //import io.electrum.airtime.api.model.ErrorDetail;
 //import io.electrum.airtime.api.model.Voucher;
-import io.electrum.suv.server.model.DetailMessage;
-import io.electrum.vas.model.Amounts;
-import io.electrum.vas.model.BasicAdvice;
-import io.electrum.vas.model.BasicAdviceResponse;
-import io.electrum.vas.model.Institution;
-import io.electrum.vas.model.LedgerAmount;
-import io.electrum.vas.model.SlipData;
-import io.electrum.vas.model.SlipLine;
-import io.electrum.vas.model.ThirdPartyIdentifier;
-import io.electrum.vas.model.Transaction;
 
 public class SUVModelUtils {
    protected static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());

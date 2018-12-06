@@ -2,9 +2,8 @@ package io.electrum.suv.server.util;
 
 import java.util.Objects;
 
-
 public class RequestKey {
-   //TODO Enum?
+   // TODO Enum?
    public static final String VOUCHERS_RESOURCE = "vouchers";
    public static final String REVERSALS_RESOURCE = "reversals";
    public static final String CONFIRMATIONS_RESOURCE = "confirmations";

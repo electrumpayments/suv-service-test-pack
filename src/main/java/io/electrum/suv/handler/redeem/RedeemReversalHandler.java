@@ -1,6 +1,11 @@
 package io.electrum.suv.handler.redeem;
 
-import io.electrum.suv.api.models.ErrorDetail;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+
 import io.electrum.suv.api.models.RedemptionRequest;
 import io.electrum.suv.api.models.RedemptionResponse;
 import io.electrum.suv.handler.BaseHandler;
@@ -8,21 +13,15 @@ import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.util.RequestKey;
-import io.electrum.suv.server.util.SUVModelUtils;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import java.util.concurrent.ConcurrentHashMap;
-
 public class RedeemReversalHandler extends BaseHandler {
+   private String voucherCode;
+
    public RedeemReversalHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
    }
-
-   private String voucherCode;
 
    public Response handle(BasicReversal reversal, UriInfo uriInfo) {
       try {
@@ -36,7 +35,6 @@ public class RedeemReversalHandler extends BaseHandler {
          VoucherModelUtils.validateUuid(reversalUuid);
          VoucherModelUtils.validateUuid(redemptionUuid);
          VoucherModelUtils.validateThirdPartyIdTransactionIds(reversal.getThirdPartyIdentifiers());
-
 
          RedemptionResponse redemptionRsp =
                SUVTestServerRunner.getTestServer()

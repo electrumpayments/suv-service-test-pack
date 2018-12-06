@@ -5,8 +5,6 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-//import io.electrum.airtime.api.model.Product;
-//import io.electrum.airtime.api.model.Voucher;
 import io.electrum.suv.api.models.Voucher;
 import io.electrum.vas.Utils;
 import io.electrum.vas.model.Institution;
@@ -14,6 +12,9 @@ import io.electrum.vas.model.Originator;
 import io.electrum.vas.model.SlipData;
 import io.electrum.vas.model.ThirdPartyIdentifier;
 import io.swagger.annotations.ApiModelProperty;
+
+//import io.electrum.airtime.api.model.Product;
+//import io.electrum.airtime.api.model.Voucher;
 
 public class DetailMessage {
 

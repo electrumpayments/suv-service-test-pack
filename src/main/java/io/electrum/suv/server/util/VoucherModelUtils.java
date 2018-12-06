@@ -1,5 +1,13 @@
 package io.electrum.suv.server.util;
 
+import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.electrum.suv.api.models.*;
 import io.electrum.suv.api.models.ErrorDetail.ErrorType;
 import io.electrum.suv.resource.impl.SUVTestServer;
@@ -7,14 +15,10 @@ import io.electrum.suv.resource.impl.SUVTestServer.VoucherState;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.DetailMessage;
 import io.electrum.vas.JsonUtil;
-import io.electrum.vas.model.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import io.electrum.vas.model.BasicAdvice;
+import io.electrum.vas.model.BasicReversal;
+import io.electrum.vas.model.Institution;
+import io.electrum.vas.model.TenderAdvice;
 
 public class VoucherModelUtils extends SUVModelUtils {
    static Logger log = LoggerFactory.getLogger(VoucherModelUtils.class);
@@ -60,7 +64,6 @@ public class VoucherModelUtils extends SUVModelUtils {
          }
          return Response.status(400).entity(errorDetail).build(); // Bad Request
       }
-
 
       // If voucher reversal request already received
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getVoucherReversalRecords();
@@ -348,12 +351,12 @@ public class VoucherModelUtils extends SUVModelUtils {
       BasicReversal reversal = reversalRecords.get(requestKey);
       if (reversal != null) {
          ErrorDetail errorDetail =
-                 buildErrorDetail(
-                         requestUuid,
-                         "Redemption reversed.",
-                         "Redemption reversal with UUID already processed with the associated fields.",
-                         reversal.getId(),
-                         ErrorType.REDEMPTION_ALREADY_REVERSED);
+               buildErrorDetail(
+                     requestUuid,
+                     "Redemption reversed.",
+                     "Redemption reversal with UUID already processed with the associated fields.",
+                     reversal.getId(),
+                     ErrorType.REDEMPTION_ALREADY_REVERSED);
 
          // Check for a response for this request, if found add to detailMessage
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
@@ -749,9 +752,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       if (voucherCode == null) {
          errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No Refund Request")
-               .detailMessage(
-                     new DetailMessage()
-                           .freeString("No Refund Request located for given Refund UUID."));
+               .detailMessage(new DetailMessage().freeString("No Refund Request located for given Refund UUID."));
          return Response.status(404).entity(errorDetail).build();
       }
 
@@ -787,6 +788,5 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       return null;
    }
-
 
 }

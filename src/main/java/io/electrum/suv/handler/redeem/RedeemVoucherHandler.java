@@ -1,5 +1,11 @@
 package io.electrum.suv.handler.redeem;
 
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+
 import io.electrum.suv.api.models.ErrorDetail;
 import io.electrum.suv.api.models.RedemptionRequest;
 import io.electrum.suv.api.models.RedemptionResponse;
@@ -10,11 +16,6 @@ import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
-
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class RedeemVoucherHandler extends BaseHandler {
    public RedeemVoucherHandler(HttpHeaders httpHeaders) {
@@ -31,11 +32,10 @@ public class RedeemVoucherHandler extends BaseHandler {
          Response rsp = null;
 
          String uuid = redemptionRequest.getId();
-        VoucherModelUtils.validateUuid(uuid);
-          VoucherModelUtils.validateThirdPartyIdTransactionIds(redemptionRequest.getThirdPartyIdentifiers());
+         VoucherModelUtils.validateUuid(uuid);
+         VoucherModelUtils.validateThirdPartyIdTransactionIds(redemptionRequest.getThirdPartyIdentifiers());
 
-
-          // Confirm that the basicAuth ID matches clientID in message body
+         // Confirm that the basicAuth ID matches clientID in message body
          if (!redemptionRequest.getClient().getId().equals(username)) {
             return VoucherModelUtils.buildIncorrectUsernameErrorResponse(
                   uuid,
@@ -63,7 +63,7 @@ public class RedeemVoucherHandler extends BaseHandler {
 
          return rsp;
       } catch (FormatException fe) {
-          throw fe;
+         throw fe;
       } catch (Exception e) {
          return logAndBuildException(e);
       }

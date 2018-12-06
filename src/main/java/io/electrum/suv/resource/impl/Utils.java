@@ -19,6 +19,7 @@ import com.fasterxml.jackson.datatype.joda.JodaModule;
 public class Utils {
 
    private static ObjectMapper objectMapper = new ObjectMapper();
+   private static ObjectWriter objectWriter = objectMapper.writer();
 
    static {
       objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -37,8 +38,6 @@ public class Utils {
       dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
       return dateFormat;
    }
-
-   private static ObjectWriter objectWriter = objectMapper.writer();
 
    public static String objectToPrettyPrintedJson(Object object) throws JsonProcessingException {
       return objectWriter.withDefaultPrettyPrinter().writeValueAsString(object);

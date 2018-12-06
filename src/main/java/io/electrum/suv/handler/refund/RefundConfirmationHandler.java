@@ -1,6 +1,11 @@
 package io.electrum.suv.handler.refund;
 
-import io.electrum.suv.api.models.ErrorDetail;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+
 import io.electrum.suv.api.models.RefundResponse;
 import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.resource.impl.SUVTestServer;
@@ -9,11 +14,6 @@ import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicAdvice;
-
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class RefundConfirmationHandler extends BaseHandler {
    private String voucherCode;
@@ -35,7 +35,6 @@ public class RefundConfirmationHandler extends BaseHandler {
          VoucherModelUtils.validateUuid(confirmationUuid);
          VoucherModelUtils.validateUuid(refundUuid);
          VoucherModelUtils.validateThirdPartyIdTransactionIds(confirmation.getThirdPartyIdentifiers());
-
 
          // Check that there is actually a corresponding refund request
          RefundResponse refundRsp =

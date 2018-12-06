@@ -1,6 +1,8 @@
 package io.electrum.suv.server.util;
 
-import io.electrum.suv.api.RefundsResource;
+import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.electrum.suv.api.models.RefundRequest;
 import io.electrum.suv.api.models.RefundResponse;
 import io.electrum.suv.server.SUVTestServerRunner;
@@ -8,20 +10,17 @@ import io.electrum.vas.JsonUtil;
 import io.electrum.vas.model.BasicAdvice;
 import io.electrum.vas.model.BasicReversal;
 
-import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
-
 public class RefundModelUtils extends SUVModelUtils {
    public static RefundResponse refundRspFromReq(RefundRequest refundRequest) throws IOException {
-       RefundResponse refundResponse =
-               JsonUtil.deserialize(JsonUtil.serialize(refundRequest, RefundRequest.class), RefundResponse.class);
+      RefundResponse refundResponse =
+            JsonUtil.deserialize(JsonUtil.serialize(refundRequest, RefundRequest.class), RefundResponse.class);
 
-       updateWithRandomizedIdentifiers(refundResponse);
-//       refundResponse.setVoucher(createRandomizedVoucher());
-       refundResponse.setSlipData(createRandomizedSlipData());
+      updateWithRandomizedIdentifiers(refundResponse);
+      // refundResponse.setVoucher(createRandomizedVoucher());
+      refundResponse.setSlipData(createRandomizedSlipData());
 
-       //TODO Confirm not needed to populate more fields (optional)
-       return refundResponse;
+      // TODO Confirm not needed to populate more fields (optional)
+      return refundResponse;
    }
 
    // TODO Reimplement all these for new values
