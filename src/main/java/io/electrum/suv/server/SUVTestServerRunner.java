@@ -1,11 +1,7 @@
 package io.electrum.suv.server;
 
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.HttpConfiguration;
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
@@ -18,14 +14,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.electrum.suv.resource.impl.SUVTestServer;
+
 public class SUVTestServerRunner {
 
    private static Logger log_logger = LoggerFactory.getLogger("io.electrum.suv.server.log");
-   
+
    private static SUVTestServer testServer;
 
    public static void main(String[] args) throws Exception {
-      startSUVTestServer(args[0]);
+      if (args.length == 0)
+         startSUVTestServer("8080");
+      else
+         startSUVTestServer(args[0]);
    }
 
    public static void startSUVTestServer(String port) throws Exception {
@@ -84,7 +84,7 @@ public class SUVTestServerRunner {
          context.setHandler(sh);
 
          server.setHandler(context);
-        
+
          // Start the server
          server.start();
          server.join();
@@ -93,9 +93,8 @@ public class SUVTestServerRunner {
          throw e;
       }
    }
-   
-   public static SUVTestServer getTestServer()
-   {
+
+   public static SUVTestServer getTestServer() {
       return testServer;
    }
 }

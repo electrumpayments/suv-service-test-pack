@@ -12,8 +12,7 @@ import javax.ws.rs.Path;
 @Path(Paths.BASE_PATH)
 @Api(description = "the SUV API", authorizations = { @Authorization("httpBasic") })
 public class VouchersResource extends io.electrum.suv.api.VouchersResource {
-   static VouchersResourceImpl instance = null;
-   private static final Logger log = LoggerFactory.getLogger(VouchersResource.class);
+   private static VouchersResourceImpl instance = null;
 
    @Override
    protected IVouchersResource getResourceImplementation() {

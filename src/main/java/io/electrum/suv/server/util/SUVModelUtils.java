@@ -43,9 +43,6 @@ public class SUVModelUtils {
 
    /** Builds list of format errors to be returned as part of a detail message in an errorDetail. */
    public static ErrorDetail buildFormatErrorRsp(List<String> errors) {
-      if (errors.size() == 0) {
-         return null;
-      }
       List<FormatError> formatErrors = new ArrayList<>(errors.size());
       for (String error : errors) {
          formatErrors.add(new FormatError().msg(error));
@@ -147,7 +144,7 @@ public class SUVModelUtils {
             buildErrorDetail(
                   objectId,
                   "Duplicate UUID.",
-                  "Request with String already processed with the associated fields.",
+                  "Request with UUID already processed with the associated fields.",
                   originalMsgId,
                   // requestType,
                   ErrorDetail.ErrorType.DUPLICATE_RECORD);

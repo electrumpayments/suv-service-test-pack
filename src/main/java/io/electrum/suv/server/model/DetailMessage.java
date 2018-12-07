@@ -451,7 +451,6 @@ public class DetailMessage {
       sb.append("    reversalId: ").append(Utils.toIndentedString(reversalId)).append("\n");
       sb.append("    confirmationId: ").append(Utils.toIndentedString(confirmationId)).append("\n");
       sb.append("    voidId: ").append(Utils.toIndentedString(voidId)).append("\n");
-//      sb.append("    product: ").append(Utils.toIndentedString(product)).append("\n");
       sb.append("    requestTime: ").append(Utils.toIndentedString(requestTime)).append("\n");
       sb.append("    reversalTime: ").append(Utils.toIndentedString(reversalTime)).append("\n");
       sb.append("    confirmDate: ").append(Utils.toIndentedString(confirmDate)).append("\n");
@@ -460,7 +459,6 @@ public class DetailMessage {
       sb.append("    sender: ").append(Utils.toIndentedString(client)).append("\n");
       sb.append("    processor: ").append(Utils.toIndentedString(settlementEntity)).append("\n");
       sb.append("    vendor: ").append(Utils.toIndentedString(receiver)).append("\n");
-//      sb.append("    voucher: ").append(Utils.toIndentedString(voucher)).append("\n");
       sb.append("    slipData: ").append(Utils.toIndentedString(slipData)).append("\n");
       sb.append("    thirdPartyIdentifiers: ").append(Utils.toIndentedString(thirdPartyIdentifiers)).append("\n");
       sb.append("    freeString: ").append(Utils.toIndentedString(freeString)).append("\n");
