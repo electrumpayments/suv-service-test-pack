@@ -1,0 +1,40 @@
+{
+  "id": "68d07240-e604-431f-d5ca-974cee9bd60d",
+  "time": "2018-12-07T07:50:17.483Z",
+  "originator": {
+    "merchant": {
+      "merchantType": "4444",
+      "merchantId": "merchant1234567",
+      "merchantName": {
+        "name": "Buy Stuff Shop",
+        "city": "Cape Town",
+        "region": "WP",
+        "country": "ZA"
+      }
+    },
+    "terminalId": "term0001",
+    "institution": {
+      "id": "11111111",
+      "name": "Buy Stuff Shop"
+    }
+  },
+  "client": {
+    "id": "22222222",
+    "name": "TransAcquire Co"
+  },
+  "receiver": {
+    "id": "44444444",
+    "name": "MobiTalk"
+  },
+  "thirdPartyIdentifiers": [
+    {
+      "institutionId": "11111111",
+      "transactionIdentifier": "ORIGD60D"
+    },
+    {
+      "institutionId": "22222222",
+      "transactionIdentifier": "CLNTD60D"
+    }
+  ]
+}
+

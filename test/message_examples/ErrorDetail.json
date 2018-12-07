@@ -1,0 +1,11 @@
+{
+  "id": "735af4ed-87d0-a95b-2030-5c1f37909f42",
+  "originalId": "8308866b-934d-6a26-d64e-18d0a3244cbf",
+  "errorType": "VOUCHER_ALREADY_CONFIRMED",
+  "errorMessage": "Voucher confirmed.",
+  "detailMessage": {
+    "voucherId": "8308866b-934d-6a26-d64e-18d0a3244cbf",
+    "confirmationId": "59cdd1d3-7465-4eff-94a5-8dd985c7b13a",
+    "freeString": "The voucher cannot be reversed as it has already been confirmed with the associated details."
+  }
+}

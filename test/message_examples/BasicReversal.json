@@ -1,0 +1,24 @@
+{
+  "id": "aa75b479-3423-a523-56ec-971ee9aad17d",
+  "requestId": "787da363-58d9-4b6a-17e7-7c68ded7f040",
+  "time": "2018-12-07T10:02:18.769Z",
+  "thirdPartyIdentifiers": [
+    {
+      "institutionId": "11111111",
+      "transactionIdentifier": "ORIGF040"
+    },
+    {
+      "institutionId": "22222222",
+      "transactionIdentifier": "CLNTF040"
+    },
+    {
+      "institutionId": "33333333",
+      "transactionIdentifier": "29EQQ34"
+    },
+    {
+      "institutionId": "44444444",
+      "transactionIdentifier": "7738D"
+    }
+  ],
+  "reversalReason": "TIMEOUT"
+}

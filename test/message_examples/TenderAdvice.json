@@ -1,0 +1,33 @@
+{
+  "id": "de69f879-b208-51e5-58b5-50f21d6c90f9",
+  "requestId": "68d07240-e604-431f-d5ca-974cee9bd60d",
+  "time": "2018-12-07T10:01:32.989Z",
+  "thirdPartyIdentifiers": [
+    {
+      "institutionId": "11111111",
+      "transactionIdentifier": "ORIGD60D"
+    },
+    {
+      "institutionId": "22222222",
+      "transactionIdentifier": "CLNTD60D"
+    },
+    {
+      "institutionId": "33333333",
+      "transactionIdentifier": "6LE7T[07442C7Z4I"
+    },
+    {
+      "institutionId": "44444444",
+      "transactionIdentifier": "VJ98V016BOE2"
+    }
+  ],
+  "tenders": [
+    {
+      "accountType": "DEFAULT",
+      "amount": {
+        "amount": 1000,
+        "currency": "710"
+      },
+      "tenderType": "CASH"
+    }
+  ]
+}
