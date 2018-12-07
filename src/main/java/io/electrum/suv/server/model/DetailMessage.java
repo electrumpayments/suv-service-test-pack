@@ -18,24 +18,24 @@ import io.swagger.annotations.ApiModelProperty;
 
 public class DetailMessage {
 
-   protected String pathId = null;
-   protected String voucherId = null;
-   protected String reversalId = null;
-   protected String confirmationId = null;
-   protected String voidId = null;
-   protected String requestTime = null;
-   protected String reversalTime = null;
-   protected String confirmDate = null;
-   protected String voidDate = null;
-   protected Institution client = null;
-   protected Originator originator = null;
-   protected Institution settlementEntity = null;
-   protected Institution receiver = null;
-   protected Voucher voucher = null;
-   protected SlipData slipData = null;
-   protected String freeString = null;
-   protected List<ThirdPartyIdentifier> thirdPartyIdentifiers = null;
-   protected List<FormatError> formatErrors = null;
+   private String pathId = null;
+   private String voucherId = null;
+   private String reversalId = null;
+   private String confirmationId = null;
+   private String voidId = null;
+   private String requestTime = null;
+   private String reversalTime = null;
+   private String confirmDate = null;
+   private String voidDate = null;
+   private Institution client = null;
+   private Originator originator = null;
+   private Institution settlementEntity = null;
+   private Institution receiver = null;
+   private Voucher voucher = null;
+   private SlipData slipData = null;
+   private String freeString = null;
+   private List<ThirdPartyIdentifier> thirdPartyIdentifiers = null;
+   private List<FormatError> formatErrors = null;
 
    /**
     * The randomly generated String identifying this voucher request, as defined for a variant 4 String in [RFC
@@ -132,23 +132,8 @@ public class DetailMessage {
       this.voidId = voidId;
    }
 
-   /**
-    * The product for which the voucher should be provisioned.
-    **/
-   // public DetailMessage product(Product product) {
-   // this.product = product;
-   // return this;
-   // }
 
-   // @ApiModelProperty(value = "The product for which the voucher should be provisioned.")
-   // @JsonProperty("product")
-   // public Product getProduct() {
-   // return product;
-   // }
-   //
-   // public void setProduct(Product product) {
-   // this.product = product;
-   // }
+
 
    /**
     * The date and time of the request as recorded by the sender. The format shall be as defined for date-time in [RFC
@@ -444,29 +429,25 @@ public class DetailMessage {
 
    @Override
    public String toString() {
-      StringBuilder sb = new StringBuilder();
-      sb.append("class DetailMessage {\n");
-
-      sb.append("    pathId: ").append(Utils.toIndentedString(pathId)).append("\n");
-      sb.append("    voucherId: ").append(Utils.toIndentedString(voucherId)).append("\n");
-      sb.append("    reversalId: ").append(Utils.toIndentedString(reversalId)).append("\n");
-      sb.append("    confirmationId: ").append(Utils.toIndentedString(confirmationId)).append("\n");
-      sb.append("    voidId: ").append(Utils.toIndentedString(voidId)).append("\n");
-      // sb.append(" product: ").append(Utils.toIndentedString(product)).append("\n");
-      sb.append("    requestTime: ").append(Utils.toIndentedString(requestTime)).append("\n");
-      sb.append("    reversalTime: ").append(Utils.toIndentedString(reversalTime)).append("\n");
-      sb.append("    confirmDate: ").append(Utils.toIndentedString(confirmDate)).append("\n");
-      sb.append("    voidDate: ").append(Utils.toIndentedString(voidDate)).append("\n");
-      sb.append("    originator: ").append(Utils.toIndentedString(originator)).append("\n");
-      sb.append("    sender: ").append(Utils.toIndentedString(client)).append("\n");
-      sb.append("    processor: ").append(Utils.toIndentedString(settlementEntity)).append("\n");
-      sb.append("    vendor: ").append(Utils.toIndentedString(receiver)).append("\n");
-      // sb.append(" voucher: ").append(Utils.toIndentedString(voucher)).append("\n");
-      sb.append("    slipData: ").append(Utils.toIndentedString(slipData)).append("\n");
-      sb.append("    thirdPartyIdentifiers: ").append(Utils.toIndentedString(thirdPartyIdentifiers)).append("\n");
-      sb.append("    freeString: ").append(Utils.toIndentedString(freeString)).append("\n");
-      sb.append("    formatErrors: ").append(Utils.toIndentedString(formatErrors)).append("\n");
-      sb.append("}");
-      return sb.toString();
+      return "class DetailMessage {\n" +
+              "    pathId: " + Utils.toIndentedString(pathId) + "\n" +
+              "    voucherId: " + Utils.toIndentedString(voucherId) + "\n" +
+              "    reversalId: " + Utils.toIndentedString(reversalId) + "\n" +
+              "    confirmationId: " + Utils.toIndentedString(confirmationId) + "\n" +
+              "    voidId: " + Utils.toIndentedString(voidId) + "\n" +
+              "    requestTime: " + Utils.toIndentedString(requestTime) + "\n" +
+              "    reversalTime: " + Utils.toIndentedString(reversalTime) + "\n" +
+              "    confirmDate: " + Utils.toIndentedString(confirmDate) + "\n" +
+              "    voidDate: " + Utils.toIndentedString(voidDate) + "\n" +
+              "    originator: " + Utils.toIndentedString(originator) + "\n" +
+              "    sender: " + Utils.toIndentedString(client) + "\n" +
+              "    processor: " + Utils.toIndentedString(settlementEntity) + "\n" +
+              "    vendor: " + Utils.toIndentedString(receiver) + "\n" +
+              " voucher: " + Utils.toIndentedString(voucher) + "\n" +
+              "    slipData: " + Utils.toIndentedString(slipData) + "\n" +
+              "    thirdPartyIdentifiers: " + Utils.toIndentedString(thirdPartyIdentifiers) + "\n" +
+              "    freeString: " + Utils.toIndentedString(freeString) + "\n" +
+              "    formatErrors: " + Utils.toIndentedString(formatErrors) + "\n" +
+              "}";
    }
 }

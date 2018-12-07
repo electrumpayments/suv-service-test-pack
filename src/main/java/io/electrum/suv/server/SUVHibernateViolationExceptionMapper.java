@@ -12,6 +12,7 @@ import io.dropwizard.jersey.validation.ConstraintMessage;
 import io.dropwizard.jersey.validation.JerseyViolationException;
 import io.electrum.suv.server.util.SUVModelUtils;
 
+/** Handles any exceptions thrown due to hibernate validation annotations */
 public class SUVHibernateViolationExceptionMapper implements ExceptionMapper<JerseyViolationException> {
    @Override
    public Response toResponse(JerseyViolationException exception) {
@@ -24,7 +25,4 @@ public class SUVHibernateViolationExceptionMapper implements ExceptionMapper<Jer
 
       return Response.status(Response.Status.BAD_REQUEST).entity(SUVModelUtils.buildFormatErrorRsp(errors)).build();
    }
-
-   // JerseyViolationException e = new JerseyViolationException(new HashSet<ConstraintViolationException>(),
-   // Invocable.create())
 }

@@ -14,7 +14,7 @@ import io.electrum.vas.model.BasicAdvice;
 import io.electrum.vas.model.BasicReversal;
 
 //TODO Implement methods correctly
-public class RefundsResourceImpl implements IRefundsResource {
+class RefundsResourceImpl implements IRefundsResource {
    private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
 
    @Override
@@ -30,7 +30,7 @@ public class RefundsResourceImpl implements IRefundsResource {
       log.debug(String.format("%s %s\n%s", httpServletRequest.getMethod(), uriInfo.getPath(), body));
       Response rsp =
             SUVMessageHandlerFactory.getRefundConfirmationHandler(httpHeaders)
-                  .handle(/* requestId, confirmationId, */ body, uriInfo);
+                  .handle(/* requestId, confirmationId, */ body);
       log.debug(String.format("Entity returned:\n%s", rsp.getEntity()));
 
       asyncResponse.resume(rsp);
@@ -50,7 +50,7 @@ public class RefundsResourceImpl implements IRefundsResource {
       log.debug(String.format("%s %s\n%s", httpServletRequest.getMethod(), uriInfo.getPath(), body));
       Response rsp =
             SUVMessageHandlerFactory.getRefundReversalHandler(httpHeaders)
-                  .handle(/* requestId, confirmationId, */ body, uriInfo);
+                  .handle(/* requestId, confirmationId, */ body);
       log.debug(String.format("Entity returned:\n%s", rsp.getEntity()));
 
       asyncResponse.resume(rsp);

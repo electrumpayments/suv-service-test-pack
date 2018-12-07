@@ -18,11 +18,12 @@ import io.electrum.vas.model.*;
 //import io.electrum.airtime.api.model.ErrorDetail;
 //import io.electrum.airtime.api.model.Voucher;
 
+@SuppressWarnings("Annotator")
 public class SUVModelUtils {
-   protected static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
+   private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
 
-   protected static List<String> redeemInstructions = new ArrayList<>();
-   protected static List<SlipLine> messageLines = new ArrayList<>();
+   private static final List<String> redeemInstructions = new ArrayList<>();
+   private static final List<SlipLine> messageLines = new ArrayList<>();
 
    static {
       redeemInstructions.add("To redeem your voucher");
@@ -54,7 +55,7 @@ public class SUVModelUtils {
     */
 
    /** Create a new voucher with randomized values for ode, expiry date and instruction */
-   protected static Voucher createRandomizedVoucher() {
+   static Voucher createRandomizedVoucher() {
       Voucher voucher = new Voucher();
       voucher.setCode(RandomData.random09((int) ((Math.random() * 20) + 1)));
       voucher.setExpiryDate(new DateTime());
@@ -65,7 +66,7 @@ public class SUVModelUtils {
    }
 
    /** Returns a new randomized {@link SlipData} with message lines populated. */
-   protected static SlipData createRandomizedSlipData() {
+   static SlipData createRandomizedSlipData() {
       SlipData slipData = new SlipData();
       slipData.setMessageLines(messageLines);
       return slipData;
@@ -79,7 +80,7 @@ public class SUVModelUtils {
     * @param transaction
     *           to be updated
     */
-   protected static void updateWithRandomizedIdentifiers(Transaction transaction) {
+   static void updateWithRandomizedIdentifiers(Transaction transaction) {
       List<ThirdPartyIdentifier> thirdPartyIds = transaction.getThirdPartyIdentifiers();
       Institution settlementEntity = transaction.getSettlementEntity();
       if (settlementEntity == null) {
@@ -129,11 +130,11 @@ public class SUVModelUtils {
     */
 
    /** Builds an {@link ErrorDetail} for duplicate UUID errors */
-   public static ErrorDetail buildDuplicateUuidErrorDetail(
-         String objectId,
-         String originalMsgId,
-         // ErrorDetail.RequestType requestType,
-         Transaction transaction) {
+   static ErrorDetail buildDuplicateUuidErrorDetail(
+           String objectId,
+           String originalMsgId,
+           // ErrorDetail.RequestType requestType,
+           Transaction transaction) {
 
       ErrorDetail errorDetail =
             buildErrorDetail(
@@ -153,13 +154,13 @@ public class SUVModelUtils {
    }
 
    /** Builds a new error detail (including a detail message) from specific messages. */
-   public static ErrorDetail buildErrorDetail(
-         String objectId,
-         String errorMessage,
-         String detailMessageFreeString,
-         String originalMsgId,
-         // ErrorDetail.RequestType requestType,
-         ErrorDetail.ErrorType errorType) {
+   static ErrorDetail buildErrorDetail(
+           String objectId,
+           String errorMessage,
+           String detailMessageFreeString,
+           String originalMsgId,
+           // ErrorDetail.RequestType requestType,
+           ErrorDetail.ErrorType errorType) {
 
       ErrorDetail errorDetail =
             new ErrorDetail().errorType(errorType).errorMessage(errorMessage).id(objectId).originalId(originalMsgId);
@@ -175,6 +176,7 @@ public class SUVModelUtils {
    }
 
    /** Confirms UUID format valid using regex (8-4-4-4-12 hexadecimal) */
+   @SuppressWarnings("Annotator")
    public static void validateUuid(String uuid) {
       if (!uuid.matches("([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}"))
          throw new FormatException(

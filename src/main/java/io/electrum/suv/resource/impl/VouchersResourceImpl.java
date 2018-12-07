@@ -13,7 +13,7 @@ import io.electrum.suv.handler.SUVMessageHandlerFactory;
 import io.electrum.vas.model.BasicReversal;
 import io.electrum.vas.model.TenderAdvice;
 
-public class VouchersResourceImpl implements IVouchersResource {
+class VouchersResourceImpl implements IVouchersResource {
    private static final Logger log = LoggerFactory.getLogger(IVouchersResource.class);
 
    @Override
@@ -30,7 +30,7 @@ public class VouchersResourceImpl implements IVouchersResource {
       log.debug(String.format("%s %s\n%s", httpServletRequest.getMethod(), uriInfo.getPath(), body));
       Response rsp =
             SUVMessageHandlerFactory.getVoucherConfirmationHandler(httpHeaders)
-                  .handle(/* requestId, confirmationId, */ body, uriInfo);
+                  .handle(/* requestId, confirmationId, */ body);
       log.debug(String.format("Entity returned:\n%s", rsp.getEntity()));
 
       asyncResponse.resume(rsp);
@@ -50,7 +50,7 @@ public class VouchersResourceImpl implements IVouchersResource {
       log.debug(String.format("%s %s\n%s", httpServletRequest.getMethod(), uriInfo.getPath(), body));
       Response rsp =
             SUVMessageHandlerFactory.getVoucherProvisionHandler(httpHeaders)
-                  .handle(/* requestId, confirmationId, */ body, uriInfo);
+                  .handle(body, uriInfo);
       log.debug(String.format("Entity returned:\n%s", rsp.getEntity()));
 
       asyncResponse.resume(rsp);
@@ -70,7 +70,7 @@ public class VouchersResourceImpl implements IVouchersResource {
       log.debug(String.format("%s %s\n%s", httpServletRequest.getMethod(), uriInfo.getPath(), body));
       Response rsp =
             SUVMessageHandlerFactory.getVoucherReversalHandler(httpHeaders)
-                  .handle(/* requestId, confirmationId, */ body, uriInfo);
+                  .handle(/* requestId, confirmationId, */ body);
       log.debug(String.format("Entity returned:\n%s", rsp.getEntity()));
 
       asyncResponse.resume(rsp);

@@ -4,7 +4,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 import io.electrum.suv.api.models.ProvisionResponse;
 import io.electrum.suv.handler.BaseHandler;
@@ -16,35 +15,26 @@ import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.TenderAdvice;
 
 public class VoucherConfirmationHandler extends BaseHandler {
-   /** The UUID of this request */
-   private String confirmationUuid;
-   /** The UUID identifying the request that this confirmation relates to */
-   private String voucherId;
+    /** The UUID identifying the request that this confirmation relates to */
+   private String voucherProvisionUuid;
 
    public VoucherConfirmationHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
    }
 
-   public Response handle(TenderAdvice confirmation, UriInfo uriInfo) {
+   public Response handle(TenderAdvice confirmation) {
       try {
          Response rsp;
 
-         // TODO Should we enforce requirements from the docs (TenderAdvice)
-         // ArrayList<String> tempErrorList = new ArrayList<>();
-         // tempErrorList.add("tenders may not be null");
-         // if (confirmation.getTenders() == null)
-         // return Response.status(Response.Status.BAD_REQUEST)
-         // .entity(SUVModelUtils.buildFormatErrorRsp(tempErrorList))
-         // .build();
-
-         confirmationUuid = confirmation.getId();
-         voucherId = confirmation.getRequestId();
+          // The UUID of this request
+          String confirmationUuid = confirmation.getId();
+         voucherProvisionUuid = confirmation.getRequestId();
 
          VoucherModelUtils.validateUuid(confirmationUuid);
-         VoucherModelUtils.validateUuid(voucherId);
+         VoucherModelUtils.validateUuid(voucherProvisionUuid);
          VoucherModelUtils.validateThirdPartyIdTransactionIds(confirmation.getThirdPartyIdentifiers());
 
-         rsp = VoucherModelUtils.canConfirmVoucher(voucherId, confirmationUuid, username, password);
+         rsp = VoucherModelUtils.canConfirmVoucher(voucherProvisionUuid, confirmationUuid, username, password);
          if (rsp != null) {
             return rsp;
          }
@@ -76,11 +66,11 @@ public class VoucherConfirmationHandler extends BaseHandler {
       ProvisionResponse provisionRsp =
             SUVTestServerRunner.getTestServer()
                   .getVoucherResponseRecords()
-                  .get(new RequestKey(username, password, RequestKey.VOUCHERS_RESOURCE, voucherId));
+                  .get(new RequestKey(username, password, RequestKey.VOUCHERS_RESOURCE, voucherProvisionUuid));
 
       String voucherCode = provisionRsp.getVoucher().getCode();
 
-      RequestKey confirmationsKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherId);
+      RequestKey confirmationsKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherProvisionUuid);
       // quietly overwrites any existing confirmation
       confirmationRecords.put(confirmationsKey, confirmation);
       // voucherCodeRequestKeyRecords.put(voucherCode, confirmationsKey);

@@ -14,7 +14,7 @@ import io.electrum.vas.model.BasicAdvice;
 import io.electrum.vas.model.BasicReversal;
 
 //TODO Implement methods correctly
-public class RedemptionsResourceImpl implements IRedemptionsResource {
+class RedemptionsResourceImpl implements IRedemptionsResource {
    private static final Logger log = LoggerFactory.getLogger(RedemptionsResourceImpl.class);
 
    @Override
@@ -51,7 +51,7 @@ public class RedemptionsResourceImpl implements IRedemptionsResource {
       log.debug(String.format("%s %s\n%s", httpServletRequest.getMethod(), uriInfo.getPath(), body));
       Response rsp =
             SUVMessageHandlerFactory.getRedeemReversalHandler(httpHeaders)
-                  .handle(/* requestId, confirmationId, */ body, uriInfo);
+                  .handle(/* requestId, confirmationId, */ body);
       log.debug(String.format("Entity returned:\n%s", rsp.getEntity()));
 
       asyncResponse.resume(rsp);
@@ -70,7 +70,7 @@ public class RedemptionsResourceImpl implements IRedemptionsResource {
       log.debug(String.format("%s %s\n%s", httpServletRequest.getMethod(), uriInfo.getPath(), body));
       Response rsp =
             SUVMessageHandlerFactory.getRedeemConfirmationHandler(httpHeaders)
-                  .handle(/* requestId, confirmationId, */ body, uriInfo);
+                  .handle(/* requestId, confirmationId, */ body);
       log.debug(String.format("Entity returned:\n%s", rsp.getEntity()));
 
       asyncResponse.resume(rsp);

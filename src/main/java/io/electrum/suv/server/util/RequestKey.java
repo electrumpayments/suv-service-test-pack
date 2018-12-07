@@ -77,15 +77,13 @@ public class RequestKey {
 
    @Override
    public String toString() {
-      StringBuilder sb = new StringBuilder();
-      sb.append(username);
-      sb.append("|");
-      sb.append(password);
-      sb.append("|");
-      sb.append(resourceType);
-      sb.append("|");
-      sb.append(uuid);
-      return sb.toString();
+      return username +
+              "|" +
+              password +
+              "|" +
+              resourceType +
+              "|" +
+              uuid;
    }
 
 }

@@ -4,7 +4,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 import io.electrum.suv.api.models.RefundRequest;
 import io.electrum.suv.api.models.RefundResponse;
@@ -17,13 +16,12 @@ import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
 
 public class RefundReversalHandler extends BaseHandler {
-   private String voucherCode;
 
    public RefundReversalHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
    }
 
-   public Response handle(BasicReversal reversal, UriInfo uriInfo) {
+   public Response handle(BasicReversal reversal) {
       try {
          Response rsp;
 
@@ -41,6 +39,7 @@ public class RefundReversalHandler extends BaseHandler {
                      .getRefundResponseRecords()
                      .get(new RequestKey(username, password, RequestKey.REFUNDS_RESOURCE, refundUuid));
 
+         String voucherCode;
          if (refundRsp == null)
             voucherCode = null;
          else

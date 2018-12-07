@@ -6,7 +6,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import io.electrum.suv.api.models.ErrorDetail;
 import io.electrum.suv.api.models.RefundRequest;
 import io.electrum.suv.api.models.RefundResponse;
 import io.electrum.suv.handler.BaseHandler;
@@ -18,8 +17,7 @@ import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 
 public class RefundVoucherHandler extends BaseHandler {
-   private String refundUuid;
-   private String voucherCode;
+    private String voucherCode;
 
    public RefundVoucherHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
@@ -28,7 +26,7 @@ public class RefundVoucherHandler extends BaseHandler {
    public Response handle(RefundRequest refundRequest, UriInfo uriInfo) {
       try {
          Response rsp;
-         refundUuid = refundRequest.getId();
+          String refundUuid = refundRequest.getId();
          voucherCode = refundRequest.getVoucher().getCode();
 
          // Validate uuid format in code until it can be ported to hibernate in the interface
@@ -38,10 +36,10 @@ public class RefundVoucherHandler extends BaseHandler {
          // Confirm that the basicAuth ID matches clientID in message body
          if (!refundRequest.getClient().getId().equals(username)) {
             return VoucherModelUtils.buildIncorrectUsernameErrorResponse(
-                  refundUuid,
+                    refundUuid,
                   refundRequest.getClient(),
-                  username,
-                  ErrorDetail.ErrorType.AUTHENTICATION_ERROR);
+                  username
+            );
          }
 
          // Confirm voucher not already provisioned or reversed.

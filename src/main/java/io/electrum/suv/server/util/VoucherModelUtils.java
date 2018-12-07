@@ -21,7 +21,7 @@ import io.electrum.vas.model.Institution;
 import io.electrum.vas.model.TenderAdvice;
 
 public class VoucherModelUtils extends SUVModelUtils {
-   static Logger log = LoggerFactory.getLogger(VoucherModelUtils.class);
+   private static final Logger log = LoggerFactory.getLogger(VoucherModelUtils.class);
 
    // TODO confirm correct function
    // TODO documentation
@@ -145,15 +145,20 @@ public class VoucherModelUtils extends SUVModelUtils {
    }
 
    /**
-    * Require the voucher has been provisioned and has not been reversed
+    * Determine whether a given Voucher Confirmation request can be completed.
+    *
+    * Checks that there is a corresponding voucher provision request and that the provision request is not reversed.
     *
     * @param voucherUuid
     *           identifies the request to which this confirmation refers
     * @param confirmationUuid
     *           uniquely identifies this confirmation request
     * @param username
+    *           from BasicAuth
     * @param password
-    * @return
+    *           from BasicAuth
+    * @return Null if the confirmation can complete, a 404 response if a corresponding request is not found, and a 400
+    *         response if the provision request has been reversed.
     */
    public static Response canConfirmVoucher(
          String voucherUuid,
@@ -188,16 +193,13 @@ public class VoucherModelUtils extends SUVModelUtils {
                      new DetailMessage()
                            .freeString("Voucher provision has already been reversed with the associated details.")
                            .reversalId(reversal.getId()));
-         // TODO Pick a better ErrorType
 
-         // TODO what is this here for
-         // Check for a response for this request, if found add to detailMessage
-         // DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-         // ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getVoucherResponseRecords();
-         // ProvisionResponse rsp = responseRecords.get(requestKey);
-         // if (rsp != null) {
-         // detailMessage.setVoucher(rsp.getVoucher());
-         // }
+         DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getVoucherResponseRecords();
+         ProvisionResponse rsp = responseRecords.get(requestKey);
+         if (rsp != null) {
+            detailMessage.setVoucher(rsp.getVoucher());
+         }
          return Response.status(400).entity(errorDetail).build();
       }
       return null;
@@ -209,11 +211,7 @@ public class VoucherModelUtils extends SUVModelUtils {
     * Builds a 400 error response indicating the BasicAuth username is inconsistent with the username in the body of the
     * request.
     */
-   public static Response buildIncorrectUsernameErrorResponse(
-         String objectId,
-         Institution client,
-         String username,
-         ErrorType requestType) {
+   public static Response buildIncorrectUsernameErrorResponse(String objectId, Institution client, String username) {
 
       ErrorDetail errorDetail =
             buildErrorDetail(
@@ -231,48 +229,48 @@ public class VoucherModelUtils extends SUVModelUtils {
       return Response.status(400).entity(errorDetail).build();
    }
 
-   /** Build a 400 error response indicating the UUID format is invalid. Provides details of expected format. */
-   public static Response buildInvalidUuidErrorResponse(
-         String objectId,
-         Institution client,
-         String username, // TODO remove redundant param
-         ErrorType requestType) {
+// --Commented out by Inspection START (2018/12/07, 09:35):
+//   /** Build a 400 error response indicating the UUID format is invalid. Provides details of expected format. */
+//   public static Response buildInvalidUuidErrorResponse(String objectId, Institution client, ErrorType requestType) {
+//
+//      ErrorDetail errorDetail =
+//            buildErrorDetail(
+//                  objectId,
+//                  "Invalid UUID",
+//                  "The UUID in the request body is not a vail UUID format."
+//                        + "\nUUID must conform to the format 8-4-4-4-12 hexedecimal values."
+//                        + "\nExample: 58D5E212-165B-4CA0-909B-C86B9CEE0111",
+//                  null,
+//
+//                  requestType);
+//
+//      DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+//      detailMessage.setClient(client);
+//
+//      return Response.status(400).entity(errorDetail).build();
+//   }
+// --Commented out by Inspection STOP (2018/12/07, 09:35)
 
-      ErrorDetail errorDetail =
-            buildErrorDetail(
-                  objectId,
-                  "Invalid UUID",
-                  "The UUID in the request body is not a vail UUID format."
-                        + "\nUUID must conform to the format 8-4-4-4-12 hexedecimal values."
-                        + "\nExample: 58D5E212-165B-4CA0-909B-C86B9CEE0111",
-                  null,
-
-                  requestType);
-
-      DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-      detailMessage.setClient(client);
-
-      return Response.status(400).entity(errorDetail).build();
-   }
-
-   // TODO remove redundant method
-   public static ErrorDetail buildInconsistentIdErrorDetail(String pathId, String objectId, String originalMsgId
-   /* ErrorDetail.RequestType requestType */) {
-
-      ErrorDetail errorDetail =
-            buildErrorDetail(
-                  objectId,
-                  "String inconsistent",
-                  "The ID path parameter is not the same as the object's ID.",
-                  originalMsgId,
-                  // requestType,
-                  ErrorType.FORMAT_ERROR);
-
-      DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-      detailMessage.setPathId(pathId);
-
-      return errorDetail;
-   }
+   // --Commented out by Inspection START (2018/12/06, 18:31):
+   // // TODO remove redundant method
+   // public static ErrorDetail buildInconsistentIdErrorDetail(String pathId, String objectId, String originalMsgId
+   // /* ErrorDetail.RequestType requestType */) {
+   //
+   // ErrorDetail errorDetail =
+   // buildErrorDetail(
+   // objectId,
+   // "String inconsistent",
+   // "The ID path parameter is not the same as the object's ID.",
+   // originalMsgId,
+   // // requestType,
+   // ErrorType.FORMAT_ERROR);
+   //
+   // DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+   // detailMessage.setPathId(pathId);
+   //
+   // return errorDetail;
+   // }
+   // --Commented out by Inspection STOP (2018/12/06, 18:31)
 
    // TODO Ensure method actually does what it should do
    /** Creates a corresponding ProvisionResponse from a ProvisionRequest */
@@ -300,7 +298,8 @@ public class VoucherModelUtils extends SUVModelUtils {
     *           from BasicAuth
     * @return whether voucher with this UUID has been provisioned.
     */
-   public static boolean isVoucherProvisioned( // TODO Refactor naming
+   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+   private static boolean isVoucherProvisioned( // TODO Refactor naming
          String voucherId,
          ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords,
          String username,
@@ -443,7 +442,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
 
-      ErrorDetail errorDetail = null;
+      ErrorDetail errorDetail;
       switch (confirmedExistingVouchers.get(voucherCode).getValue()) {
       case 0:
          errorDetail =
@@ -498,9 +497,10 @@ public class VoucherModelUtils extends SUVModelUtils {
    /**
     * Determine whether the corresponding {@link RedemptionRequest} can be reversed.
     *
-    * Ensures the corresponding voucher has been redeemed and the redemption is not yet confirmed. The redemption
-    * request referred to by the reversal must have been received and a redemption confirmation request must not have
-    * been received yet. have been received
+    * Checks to ensure that the corresponding Redemption Request exists. If it does, the relevant vouchers state is
+    * checked to determine whether this reversal can proceed. If the voucher is not currently in a redeemed state, an
+    * appropriate error response is returned.
+    *
     * 
     * @param redemptionUuid
     *           the unique identifier of the redemptionRequest to be reversed
@@ -511,8 +511,9 @@ public class VoucherModelUtils extends SUVModelUtils {
     * @param password
     *           from BasicAuth
     * @param voucherCode
-    * @return A 404 Error response if a voucher corresponding to redemptionUuid cannot be found (not redeemed), a 400
-    *         Error if the voucher redemtion is already confirmed. Null if redemption can be reversed.
+    *           the unique code for the voucher, used to identify it in the cache
+    * @return A 404 Error response if the redemption request was not received or the voucher, a 400 Error response if
+    *         the voucher redemption is already confirmed. Null if redemption can be reversed.
     */
    public static Response canReverseRedemption(
          String redemptionUuid,
@@ -521,20 +522,9 @@ public class VoucherModelUtils extends SUVModelUtils {
          String password,
          String voucherCode) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
-
-      // TODO Convert to switch-cases
       ErrorDetail errorDetail = new ErrorDetail().id(reversalUuid).originalId(redemptionUuid);
-
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
-
-      ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRequestRecords =
-            testServer.getRedemptionRequestRecords();
-
-      // check it's not confirmed
-      ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords = testServer.getRedemptionConfirmationRecords();
-      RequestKey requestKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, redemptionUuid);
-      BasicAdvice confirmation = confirmationRecords.get(requestKey);
 
       if (voucherCode == null) {
          errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
@@ -545,10 +535,14 @@ public class VoucherModelUtils extends SUVModelUtils {
          return Response.status(404).entity(errorDetail).build();
       }
 
-      if (confirmedExistingVouchers.get(voucherCode) == VoucherState.REDEEMED)
+      switch (confirmedExistingVouchers.get(voucherCode)) {
+      case REDEEMED:
          return null;
+      case CONFIRMED_REDEEMED:
+         ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords = testServer.getRedemptionConfirmationRecords();
+         RequestKey requestKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, redemptionUuid);
+         BasicAdvice confirmation = confirmationRecords.get(requestKey);
 
-      if (confirmedExistingVouchers.get(voucherCode) == VoucherState.CONFIRMED_REDEEMED) {
          errorDetail.errorType(ErrorType.REDEMPTION_ALREADY_CONFIRMED)
                .errorMessage("Redemption confirmed.")
                .detailMessage(
@@ -558,80 +552,66 @@ public class VoucherModelUtils extends SUVModelUtils {
                            .voucherId(redemptionUuid)
                            .reversalId(reversalUuid));
          return Response.status(400).entity(errorDetail).build();
-      }
-
-      // TODO Normalise these validation methods to be more similar (this)
-      // Confirm Voucher redeemed
-
-      if (confirmedExistingVouchers.get(voucherCode) != VoucherState.REDEEMED) {
+      default:
          errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
-               .errorMessage("No redemption req.")
+               .errorMessage("No Redemption Request")
                .detailMessage(
-                     new DetailMessage()
-                           .freeString("No RedemptionRequest located for given redemptionUuid. (originalId)")
-                           .reversalId(reversalUuid));
+                     new DetailMessage().freeString(
+                           "The Redemption Request to which this Redemption Reversal refers does not exist."));
          return Response.status(404).entity(errorDetail).build();
       }
-
-      return null;
    }
 
-   /**
-    * Determine whether a voucher had been redeemed or not.
-    *
-    * @param redemptionRequestUuid
-    *           the uuid of the request to be checked
-    * @param provisionRecords
-    *           to be searched
-    * @param username
-    *           from BasicAuth
-    * @param password
-    *           from BasicAuth
-    * @return whether voucher with this UUID has been provisioned.
-    */
-   public static boolean isVoucherRedeemed( // TODO Refactor naming
-         String redemptionRequestUuid,
-         ConcurrentHashMap<RequestKey, RedemptionRequest> provisionRecords,
-         String username,
-         String password) {
-      RequestKey provisionKey =
-            new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, redemptionRequestUuid);
-      log.debug(
-            String.format("Searching for redemptionRequest record under following key: %s", provisionKey.toString()));
-      return provisionRecords.get(provisionKey) != null;
-   }
+   // --Commented out by Inspection START (2018/12/07, 07:28):
+   // /**
+   // * Determine whether a voucher had been redeemed or not.
+   // *
+   // * @param redemptionRequestUuid
+   // * the uuid of the request to be checked
+   // * @param provisionRecords
+   // * to be searched
+   // * @param username
+   // * from BasicAuth
+   // * @param password
+   // * from BasicAuth
+   // * @return whether voucher with this UUID has been provisioned.
+   // */
+   // public static boolean isVoucherRedeemed( // TODO Refactor naming
+   // String redemptionRequestUuid,
+   // ConcurrentHashMap<RequestKey, RedemptionRequest> provisionRecords,
+   // String username,
+   // String password) {
+   // RequestKey provisionKey =
+   // new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, redemptionRequestUuid);
+   // log.debug(
+   // String.format("Searching for redemptionRequest record under following key: %s", provisionKey.toString()));
+   // return provisionRecords.get(provisionKey) != null;
+   // }
+   // --Commented out by Inspection STOP (2018/12/07, 07:28)
 
    /**
-    * Requires the Voucher corresponding to the RedemptionRequest referred to in the Redemption Confirmation to be in a
-    * redeemed state. If he voucher is in an unredeemed state, either due to having been Refunded, the redemption being
-    * reversed or no redemption request having been received the confirmation will fail.
+    * Determine whether this Redemption Confirmation can proceed.
     *
-    *
+    * Requires the Voucher corresponding to the Redemption Request referenced in this Redemption Confirmation to be in a
+    * redeemed state. If he voucher is in an unredeemed state or the Redemption Request cannot be found, an appropriate
+    * error response will be returned.
     * 
     * @param redemptionUuid
     *           identifies the request to which this confirmation refers
     * @param confirmationUuid
     *           uniquely identifies this confirmation request
-    * @param username
-    * @param password
     * @param voucherCode
-    *           the code for the corresponding voucher
-    * @return
+    *           the code for the corresponding voucher. Null indicates that the request referenced by this confirmation
+    *           was not found.
+    * @return a 404 error response if the referenced redemption request was not found, a 400 error response if the
+    *         corresponding voucher is not in a redeemed state, null if it is in a redeemed state and the confirmation can
+    *         proceed.
     */
-   public static Response canConfirmRedemption(
-         String redemptionUuid,
-         String confirmationUuid,
-         String username,
-         String password,
-         String voucherCode) {
-      final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
+   public static Response canConfirmRedemption(String redemptionUuid, String confirmationUuid, String voucherCode) {
 
       ErrorDetail errorDetail = new ErrorDetail().id(confirmationUuid).originalId(redemptionUuid);
 
       // TODO Extract method
-      // TODO Normalise these validation methods to be more similar (this)
-      // Confirm Voucher in Redeemed state.
-      // No other checks are needed as a confirmation can only occur from this state.
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
 
@@ -653,8 +633,8 @@ public class VoucherModelUtils extends SUVModelUtils {
                                  "The voucher referenced in the Redemption Request to which this Redemption Confirmation pertains is not currently in the redeemed state. "
                                        + "The Voucher is currently in a %s state.",
                                  confirmedExistingVouchers.get(voucherCode).name())));
-         // .voucherId(redemptionUuid)); TODO Removed this, didn't make sense to duplicate information
-         return Response.status(400).entity(errorDetail).build(); // TODO Error codes ok?
+
+         return Response.status(400).entity(errorDetail).build();
       }
 
       // check it's not reversed
@@ -684,24 +664,34 @@ public class VoucherModelUtils extends SUVModelUtils {
       return null;
    }
 
-   public static Response canConfirmRefund(
-         String refundUuid,
-         String confirmationUuid,
-         String username,
-         String password,
-         String voucherCode) {
-      final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
-
+   /**
+    * Determine whether this Refund Confirmation can proceed.
+    *
+    * Requires the Voucher corresponding to the Refund Request referenced in this Refund Confirmation to be in a
+    * refunded state. If he voucher is in an unrefunded state or the Refund Request cannot be found, an appropriate
+    * error response will be returned.
+    *
+    * @param refundUuid
+    *           identifies the request to which this confirmation refers
+    * @param confirmationUuid
+    *           uniquely identifies this confirmation request
+    * @param voucherCode
+    *           the code for the corresponding voucher. Null indicates that the request referenced by this confirmation
+    *           was not found.
+    * @return a 404 error response if the referenced request was not found, a 400 error response if the
+    *         corresponding voucher is not in a redeemed state, null if it is in a redeemed state and the confirmation can
+    *         proceed.
+    */
+   public static Response canConfirmRefund(String refundUuid, String confirmationUuid, String voucherCode) {
       ErrorDetail errorDetail = new ErrorDetail().id(confirmationUuid).originalId(refundUuid);
 
       // TODO Extract method
       // TODO Normalise these validation methods to be more similar (this)
       // Confirm Voucher in Refunded state.
-      // No other checks are needed as a confirmation can only occur from this state.
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
 
-      // No correcponding request
+      // No corresponding request
       if (voucherCode == null) {
          errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No Refund Request")
@@ -741,8 +731,8 @@ public class VoucherModelUtils extends SUVModelUtils {
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
 
-      ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRequestRecords =
-            testServer.getRedemptionRequestRecords();
+      // ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRequestRecords =
+      // testServer.getRedemptionRequestRecords();
 
       ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords = testServer.getRedemptionConfirmationRecords();
       RequestKey requestKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, refundUuid);

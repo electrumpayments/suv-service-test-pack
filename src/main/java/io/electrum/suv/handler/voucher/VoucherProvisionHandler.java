@@ -6,10 +6,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.electrum.suv.api.models.ErrorDetail;
 import io.electrum.suv.api.models.ProvisionRequest;
 import io.electrum.suv.api.models.ProvisionResponse;
 import io.electrum.suv.handler.BaseHandler;
@@ -19,7 +15,7 @@ import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 
 public class VoucherProvisionHandler extends BaseHandler {
-   private static final Logger log = LoggerFactory.getLogger(VoucherProvisionHandler.class);
+   // --Commented out by Inspection (2018/12/07, 07:29):private static final Logger log = LoggerFactory.getLogger(VoucherProvisionHandler.class);
 
    public VoucherProvisionHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
@@ -57,8 +53,8 @@ public class VoucherProvisionHandler extends BaseHandler {
             return VoucherModelUtils.buildIncorrectUsernameErrorResponse(
                   uuid,
                   provisionRequest.getClient(),
-                  username,
-                  ErrorDetail.ErrorType.AUTHENTICATION_ERROR);
+                  username
+            );
          }
 
          // Confirm voucher not already provisioned or reversed.

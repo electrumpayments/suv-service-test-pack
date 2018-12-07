@@ -4,10 +4,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.server.SUVTestServerRunner;
@@ -18,13 +14,13 @@ import io.electrum.vas.model.BasicReversal;
 
 public class VoucherReversalHandler extends BaseHandler {
 
-   private static final Logger log = LoggerFactory.getLogger(VoucherProvisionHandler.class);
+   // --Commented out by Inspection (2018/12/07, 07:29):private static final Logger log = LoggerFactory.getLogger(VoucherProvisionHandler.class);
 
    public VoucherReversalHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
    }
 
-   public Response handle(BasicReversal reversal, UriInfo uriInfo) {
+   public Response handle(BasicReversal reversal) {
       try {
          Response rsp;
 

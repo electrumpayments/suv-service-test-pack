@@ -16,10 +16,10 @@ import com.fasterxml.jackson.datatype.joda.JodaModule;
 /**
  *
  */
-public class Utils {
+class Utils {
 
-   private static ObjectMapper objectMapper = new ObjectMapper();
-   private static ObjectWriter objectWriter = objectMapper.writer();
+   private static final ObjectMapper objectMapper = new ObjectMapper();
+   private static final ObjectWriter objectWriter = objectMapper.writer();
 
    static {
       objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -31,7 +31,7 @@ public class Utils {
       objectMapper.setDateFormat(getDefaultDateFormat());
    }
 
-   public static DateFormat getDefaultDateFormat() {
+   private static DateFormat getDefaultDateFormat() {
       // Use RFC3339 format for date and datetime.
       // See http://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14
       DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");

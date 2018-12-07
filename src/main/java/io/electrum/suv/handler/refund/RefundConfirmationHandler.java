@@ -4,7 +4,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 import io.electrum.suv.api.models.RefundResponse;
 import io.electrum.suv.handler.BaseHandler;
@@ -22,7 +21,7 @@ public class RefundConfirmationHandler extends BaseHandler {
       super(httpHeaders);
    }
 
-   public Response handle(BasicAdvice confirmation, UriInfo uriInfo) {
+   public Response handle(BasicAdvice confirmation) {
       try {
          Response rsp;
 
@@ -47,7 +46,7 @@ public class RefundConfirmationHandler extends BaseHandler {
          else
             voucherCode = refundRsp.getVoucher().getCode();
 
-         rsp = VoucherModelUtils.canConfirmRefund(refundUuid, confirmationUuid, username, password, voucherCode);
+         rsp = VoucherModelUtils.canConfirmRefund(refundUuid, confirmationUuid, voucherCode);
          if (rsp != null) {
             return rsp;
          }

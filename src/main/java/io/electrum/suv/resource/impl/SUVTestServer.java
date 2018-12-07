@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 
@@ -36,35 +35,22 @@ public class SUVTestServer extends ResourceConfig {
    private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
    // The value of the hashmap is a class in the models,
    // can be found (with its record name pair) in the docs under params/schema for each request type.
-   private ConcurrentHashMap<RequestKey, ProvisionRequest> voucherProvisionRecords;
-   private ConcurrentHashMap<RequestKey, ProvisionResponse> voucherResponseRecords; // Holds response returned to vendor
+   private final ConcurrentHashMap<RequestKey, ProvisionRequest> voucherProvisionRecords;
+   private final ConcurrentHashMap<RequestKey, ProvisionResponse> voucherResponseRecords; // Holds response returned to vendor
                                                                                     // after voucher is provisioned.
-   private ConcurrentHashMap<RequestKey, TenderAdvice> voucherConfirmationRecords;
-   private ConcurrentHashMap<RequestKey, BasicReversal> voucherReversalRecords;
-   private ConcurrentHashMap<RequestKey, BasicAdvice> redemptionConfirmationRecords;
-   private ConcurrentHashMap<RequestKey, BasicReversal> redemptionReversalRecords;
-   private ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRequestRecords;
-   private ConcurrentHashMap<RequestKey, RedemptionResponse> redemptionResponseRecords;
-   private ConcurrentHashMap<RequestKey, BasicAdvice> refundConfirmationRecords;
-   private ConcurrentHashMap<RequestKey, BasicReversal> refundReversalRecords;
-   private ConcurrentHashMap<RequestKey, RefundRequest> refundRequestRecords;
-   private ConcurrentHashMap<RequestKey, RefundResponse> refundResponseRecords;
+   private final ConcurrentHashMap<RequestKey, TenderAdvice> voucherConfirmationRecords;
+   private final ConcurrentHashMap<RequestKey, BasicReversal> voucherReversalRecords;
+   private final ConcurrentHashMap<RequestKey, BasicAdvice> redemptionConfirmationRecords;
+   private final ConcurrentHashMap<RequestKey, BasicReversal> redemptionReversalRecords;
+   private final ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRequestRecords;
+   private final ConcurrentHashMap<RequestKey, RedemptionResponse> redemptionResponseRecords;
+   private final ConcurrentHashMap<RequestKey, BasicAdvice> refundConfirmationRecords;
+   private final ConcurrentHashMap<RequestKey, BasicReversal> refundReversalRecords;
+   private final ConcurrentHashMap<RequestKey, RefundRequest> refundRequestRecords;
+   private final ConcurrentHashMap<RequestKey, RefundResponse> refundResponseRecords;
 
-   /**
-    * This hashmap stores the mapping between a voucher code and the request key to access its
-    * {@link SUVTestServer#voucherConfirmationRecords} entry.
-    */
-   // private ConcurrentHashMap<String, RequestKey> voucherCodeRequestKeyConfirmationRecords;
-   // This hashmap stores the relationship between purchase references and purchase request id's so a purchase reference
-   // can be used to retrieve the correlated purchase request id
-   private ConcurrentHashMap<RequestKey, String> purchaseReferenceRecords;
-   /**
-    * This hashmap stores the mapping between a voucher code and the request key to access its
-    * {@link SUVTestServer#redemptionRequestRecords} entry.
-    */
-   // private ConcurrentHashMap<String, RequestKey> voucherCodeRequestKeyRedemptionRecords;
 
-   private ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers;
+   private final ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers;
 
    public SUVTestServer() {
       packages(SUVTestServer.class.getPackage().getName());
@@ -93,7 +79,9 @@ public class SUVTestServer extends ResourceConfig {
       refundRequestRecords = new ConcurrentHashMap<>();
       refundResponseRecords = new ConcurrentHashMap<>();
 
-      purchaseReferenceRecords = new ConcurrentHashMap<>();
+      // This hashmap stores the relationship between purchase references and purchase request id's so a purchase reference
+      // can be used to retrieve the correlated purchase request id
+      ConcurrentHashMap<RequestKey, String> purchaseReferenceRecords = new ConcurrentHashMap<>();
 
       // voucherCodeRequestKeyConfirmationRecords = new ConcurrentHashMap<>();
       // voucherCodeRequestKeyRedemptionRecords = new ConcurrentHashMap<>();
@@ -138,9 +126,11 @@ public class SUVTestServer extends ResourceConfig {
       return voucherReversalRecords;
    }
 
-   public ConcurrentHashMap<RequestKey, String> getPurchaseReferenceRecords() {
-      return purchaseReferenceRecords;
-   }
+// --Commented out by Inspection START (2018/12/06, 18:30):
+//   public ConcurrentHashMap<RequestKey, String> getPurchaseReferenceRecords() {
+//      return purchaseReferenceRecords;
+//   }
+// --Commented out by Inspection STOP (2018/12/06, 18:30)
 
    public ConcurrentHashMap<RequestKey, RedemptionRequest> getRedemptionRequestRecords() {
       return redemptionRequestRecords;
@@ -174,7 +164,7 @@ public class SUVTestServer extends ResourceConfig {
    public enum VoucherState {
       CONFIRMED_PROVISIONED(0), REDEEMED(1), CONFIRMED_REDEEMED(2), REFUNDED(3);
 
-      private int value;
+      private final int value;
 
       VoucherState(int value) {
          this.value = value;
@@ -216,12 +206,4 @@ public class SUVTestServer extends ResourceConfig {
       }
    }
 
-   @SuppressWarnings("serial")
-   private static class LowerCaseWitHyphenStrategy extends PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy {
-      @Override
-      public String translate(String input) {
-         String output = super.translate(input);
-         return output == null ? null : output.replace('_', '-');
-      }
-   }
 }

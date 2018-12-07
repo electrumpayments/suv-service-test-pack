@@ -13,8 +13,8 @@ public abstract class BaseHandler {
    // TODO Convert to SUVTestServer
    private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
 
-   protected String username;
-   protected String password;
+   protected final String username;
+   protected final String password;
 
    protected BaseHandler(HttpHeaders httpHeaders) {
       String authString = Utils.getBasicAuthString(httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION));

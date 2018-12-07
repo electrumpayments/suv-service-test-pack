@@ -4,7 +4,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 import io.electrum.suv.api.models.RedemptionResponse;
 import io.electrum.suv.handler.BaseHandler;
@@ -23,7 +22,7 @@ public class RedeemConfirmationHandler extends BaseHandler {
       super(httpHeaders);
    }
 
-   public Response handle(BasicAdvice confirmation, UriInfo uriInfo) {
+   public Response handle(BasicAdvice confirmation) {
       try {
          Response rsp;
 
@@ -49,7 +48,7 @@ public class RedeemConfirmationHandler extends BaseHandler {
 
          rsp =
                VoucherModelUtils
-                     .canConfirmRedemption(redemptionUuid, confirmationUuid, username, password, voucherCode);
+                     .canConfirmRedemption(redemptionUuid, confirmationUuid, voucherCode);
          if (rsp != null) {
             return rsp;
          }
@@ -66,12 +65,7 @@ public class RedeemConfirmationHandler extends BaseHandler {
       }
    }
 
-   /**
-    * Adds the voucher confirmation request to the cache and stores an entry to the voucher in the list of existing
-    * vouchers //TODO documentation
-    * 
-    * @param confirmation
-    */
+   /** Caches a record of this redemption confirmation updates the corresponding vouchers state. */
    private void addRedemptionConfirmationToCache(BasicAdvice confirmation) {
       ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords =
             SUVTestServerRunner.getTestServer().getRedemptionConfirmationRecords();

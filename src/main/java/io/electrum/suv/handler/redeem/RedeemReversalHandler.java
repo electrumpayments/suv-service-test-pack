@@ -4,7 +4,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 import io.electrum.suv.api.models.RedemptionRequest;
 import io.electrum.suv.api.models.RedemptionResponse;
@@ -17,13 +16,12 @@ import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
 
 public class RedeemReversalHandler extends BaseHandler {
-   private String voucherCode;
 
    public RedeemReversalHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
    }
 
-   public Response handle(BasicReversal reversal, UriInfo uriInfo) {
+   public Response handle(BasicReversal reversal) {
       try {
          Response rsp;
 
@@ -41,6 +39,7 @@ public class RedeemReversalHandler extends BaseHandler {
                      .getRedemptionResponseRecords()
                      .get(new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, redemptionUuid));
 
+         String voucherCode;
          if (redemptionRsp == null)
             voucherCode = null;
          else
@@ -70,7 +69,7 @@ public class RedeemReversalHandler extends BaseHandler {
 
    /**
     * Must check for a corresponding redemption request to get voucher from so that vouchers state may be updated. If no
-    * corresponding redmption exists, that voucher must still exist in provision_confirmed state (this is fine) //TODO
+    * corresponding redemption exists, that voucher must still exist in provision_confirmed state (this is fine) //TODO
     * Docs
     */
    private void addRedemptionReversalToCache(BasicReversal basicReversal) {

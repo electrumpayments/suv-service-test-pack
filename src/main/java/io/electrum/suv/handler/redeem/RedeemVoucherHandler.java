@@ -6,7 +6,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import io.electrum.suv.api.models.ErrorDetail;
 import io.electrum.suv.api.models.RedemptionRequest;
 import io.electrum.suv.api.models.RedemptionResponse;
 import io.electrum.suv.handler.BaseHandler;
@@ -29,7 +28,7 @@ public class RedeemVoucherHandler extends BaseHandler {
 
    public Response handle(RedemptionRequest redemptionRequest, UriInfo uriInfo) {
       try {
-         Response rsp = null;
+         Response rsp;
 
          String uuid = redemptionRequest.getId();
          VoucherModelUtils.validateUuid(uuid);
@@ -40,8 +39,8 @@ public class RedeemVoucherHandler extends BaseHandler {
             return VoucherModelUtils.buildIncorrectUsernameErrorResponse(
                   uuid,
                   redemptionRequest.getClient(),
-                  username,
-                  ErrorDetail.ErrorType.AUTHENTICATION_ERROR);
+                  username
+            );
          }
 
          String voucherCode = redemptionRequest.getVoucher().getCode();
@@ -97,13 +96,8 @@ public class RedeemVoucherHandler extends BaseHandler {
       RequestKey key = new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, requestUuid);
       ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRecords =
             SUVTestServerRunner.getTestServer().getRedemptionRequestRecords();
-      // ConcurrentHashMap<String, RequestKey> voucherCodeRequestKeyRedemptionRecords =
-      // SUVTestServerRunner.getTestServer().getVoucherCodeRequestKeyRedemptionRecords();
-
-      String voucherCode = request.getVoucher().getCode();
 
       redemptionRecords.put(key, request);
-      // voucherCodeRequestKeyRedemptionRecords.put(voucherCode, key);
 
       return key;
    }
