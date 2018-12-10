@@ -249,7 +249,7 @@
 											"",
 											"var jsonData = JSON.parse(responseBody);",
 											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
-											"tests[\"No original ID returned\"] = jsonData.originalId == null;",
+											"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;;",
 											"tests[\"Request ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"requestId\");"
 										],
 										"type": "text/javascript"
@@ -1297,7 +1297,7 @@
 											"",
 											"var jsonData = JSON.parse(responseBody);",
 											"tests[\"Error type is DUPLICATE_RECORD\"] = jsonData.errorType === \"DUPLICATE_RECORD\";",
-											"tests[\"No original ID returned\"] = jsonData.originalId == null;",
+											"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;;",
 											"tests[\"Request ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"requestId\");"
 										],
 										"type": "text/javascript"
@@ -5354,7 +5354,7 @@
 											"",
 											"var jsonData = JSON.parse(responseBody);",
 											"tests[\"Error type is VOUCHER_NOT_REDEEMABLE\"] = jsonData.errorType === \"VOUCHER_NOT_REDEEMABLE\";",
-											"tests[\"No original ID returned\"] = jsonData.originalId == null;",
+											"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;;",
 											"tests[\"Redemption ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"redemptionId\");"
 										],
 										"type": "text/javascript"
@@ -6179,7 +6179,7 @@
 											"",
 											"var jsonData = JSON.parse(responseBody);",
 											"tests[\"Error type is VOUCHER_ALREADY_REDEEMED\"] = jsonData.errorType === \"VOUCHER_ALREADY_REDEEMED\";",
-											"tests[\"No original ID returned\"] = jsonData.originalId == null;",
+											"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;;",
 											"tests[\"Redemption ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"redemptionId\");"
 										],
 										"type": "text/javascript"
@@ -11858,7 +11858,7 @@
 													"",
 													"var jsonData = JSON.parse(responseBody);",
 													"tests[\"Error type is REDEMPTION_NOT_CONFIRMED\"] = jsonData.errorType === \"REDEMPTION_NOT_CONFIRMED\";",
-													"tests[\"No original ID returned\"] = jsonData.originalId == null;",
+													"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;;",
 													"tests[\"Refund ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"refundId\");"
 												],
 												"type": "text/javascript"
@@ -12153,7 +12153,7 @@
 													"",
 													"var jsonData = JSON.parse(responseBody);",
 													"tests[\"Error type is VOUCHER_ALREADY_REFUNDED\"] = jsonData.errorType === \"VOUCHER_ALREADY_REFUNDED\";",
-													"tests[\"No original ID returned\"] = jsonData.originalId == null;",
+													"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;;",
 													"tests[\"Refund ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"refundId\");"
 												],
 												"type": "text/javascript"
@@ -14228,7 +14228,7 @@
 													"",
 													"var jsonData = JSON.parse(responseBody);",
 													"tests[\"Error type is VOUCHER_NOT_REDEEMED\"] = jsonData.errorType === \"VOUCHER_NOT_REDEEMED\";",
-													"tests[\"No original ID returned\"] = jsonData.originalId == null;",
+													"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;;",
 													"tests[\"Refund ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"refundId\");"
 												],
 												"type": "text/javascript"
