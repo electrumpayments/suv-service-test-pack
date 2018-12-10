@@ -3,14 +3,17 @@ package io.electrum.suv.handler;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
-import io.electrum.suv.resource.impl.SUVTestServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.electrum.suv.api.models.ErrorDetail;
+import io.electrum.suv.resource.impl.SUVTestServer;
+import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.Utils;
+import io.electrum.vas.model.Transaction;
 
 public abstract class BaseHandler {
-   //TODO Convert to SUVTestServer
+   // TODO Convert to SUVTestServer
    private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
 
    protected String username;
@@ -28,6 +31,17 @@ public abstract class BaseHandler {
          log.debug(ste.toString());
       }
       return Response.serverError().entity(e.getMessage()).build();
+   }
+
+   protected Response validateClientIdUsernameMatch(Transaction transaction, String uuid) {
+      if (!transaction.getClient().getId().equals(username)) {
+         return VoucherModelUtils.buildIncorrectUsernameErrorResponse(
+               uuid,
+               transaction.getClient(),
+               username,
+               ErrorDetail.ErrorType.AUTHENTICATION_ERROR);
+      }
+      return null;
    }
 
    protected abstract String getRequestName();

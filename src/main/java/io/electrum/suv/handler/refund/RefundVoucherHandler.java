@@ -34,13 +34,8 @@ public class RefundVoucherHandler extends BaseHandler {
          }
 
          // Confirm that the basicAuth ID matches clientID in message body
-         if (!refundRequest.getClient().getId().equals(username)) {
-            return VoucherModelUtils.buildIncorrectUsernameErrorResponse(
-                  uuid,
-                  refundRequest.getClient(),
-                  username,
-                  ErrorDetail.ErrorType.AUTHENTICATION_ERROR);
-         }
+         Response validUsernameRsp = validateClientIdUsernameMatch(refundRequest,uuid);
+         if(validUsernameRsp != null) return validUsernameRsp;
 
          // Confirm voucher not already provisioned or reversed.
          rsp = VoucherModelUtils.canRefundVoucher(uuid, username, password);
