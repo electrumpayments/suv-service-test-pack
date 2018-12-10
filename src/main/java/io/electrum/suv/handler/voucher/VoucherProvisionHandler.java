@@ -49,13 +49,8 @@ public class VoucherProvisionHandler extends BaseHandler {
          VoucherModelUtils.validateThirdPartyIdTransactionIds(provisionRequest.getThirdPartyIdentifiers());
 
          // Confirm that the basicAuth ID matches clientID in message body
-         if (!provisionRequest.getClient().getId().equals(username)) {
-            return VoucherModelUtils.buildIncorrectUsernameErrorResponse(
-                  uuid,
-                  provisionRequest.getClient(),
-                  username
-            );
-         }
+         Response validUsernameRsp = validateClientIdUsernameMatch(provisionRequest,uuid);
+         if(validUsernameRsp != null) return validUsernameRsp;
 
          // Confirm voucher not already provisioned or reversed.
          rsp = VoucherModelUtils.canProvisionVoucher(uuid, username, password);

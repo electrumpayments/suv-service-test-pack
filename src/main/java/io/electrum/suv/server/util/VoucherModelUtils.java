@@ -221,7 +221,7 @@ public class VoucherModelUtils extends SUVModelUtils {
                         + ") is not the same as the value in the Client.Id field (" + client.getId() + ").",
                   null,
 
-                  ErrorType.FORMAT_ERROR);
+                  ErrorType.AUTHENTICATION_ERROR);
 
       DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
       detailMessage.setClient(client);

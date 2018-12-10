@@ -35,13 +35,9 @@ public class RedeemVoucherHandler extends BaseHandler {
          VoucherModelUtils.validateThirdPartyIdTransactionIds(redemptionRequest.getThirdPartyIdentifiers());
 
          // Confirm that the basicAuth ID matches clientID in message body
-         if (!redemptionRequest.getClient().getId().equals(username)) {
-            return VoucherModelUtils.buildIncorrectUsernameErrorResponse(
-                  uuid,
-                  redemptionRequest.getClient(),
-                  username
-            );
-         }
+         Response validUsernameRsp = validateClientIdUsernameMatch(redemptionRequest, uuid);
+         if (validUsernameRsp != null)
+            return validUsernameRsp;
 
          String voucherCode = redemptionRequest.getVoucher().getCode();
          // Confirm voucher not already provisioned or reversed.

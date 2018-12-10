@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.electrum.suv.resource.impl.SUVTestServer;
+import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.Utils;
+import io.electrum.vas.model.Transaction;
 
 public abstract class BaseHandler {
    // TODO Convert to SUVTestServer
@@ -28,6 +30,13 @@ public abstract class BaseHandler {
          log.debug(ste.toString());
       }
       return Response.serverError().entity(e.getMessage()).build();
+   }
+
+   protected Response validateClientIdUsernameMatch(Transaction transaction, String uuid) {
+      if (!transaction.getClient().getId().equals(username)) {
+         return VoucherModelUtils.buildIncorrectUsernameErrorResponse(uuid, transaction.getClient(), username);
+      }
+      return null;
    }
 
    protected abstract String getRequestName();
