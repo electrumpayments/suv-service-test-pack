@@ -54,7 +54,7 @@ public class RefundVoucherHandler extends BaseHandler {
          validationRsp.setResponse(Response.created(uriInfo.getRequestUri()).entity(refundRsp).build());
 
          return validationRsp.getResponse();
-         
+
       } catch (FormatException fe) {
          throw fe;
       } catch (Exception e) {

@@ -10,7 +10,6 @@ import io.swagger.annotations.Authorization;
 @Path(Paths.BASE_PATH)
 @Api(description = "the SUV API", authorizations = { @Authorization("httpBasic") })
 public class VouchersResource extends io.electrum.suv.api.VouchersResource {
-   // --Commented out by Inspection (2018/12/07, 07:29):private static final Logger log = LoggerFactory.getLogger(VouchersResource.class);
    private static VouchersResourceImpl instance = null;
 
    @Override

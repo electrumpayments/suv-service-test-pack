@@ -17,12 +17,15 @@ import io.electrum.suv.resource.impl.SUVTestServer;
 
 public class SUVTestServerRunner {
 
-   private static final Logger log_logger = LoggerFactory.getLogger("io.electrum.suv.server.log");
+   private static Logger log_logger = LoggerFactory.getLogger("io.electrum.suv.server.log");
 
    private static SUVTestServer testServer;
 
    public static void main(String[] args) throws Exception {
-      startSUVTestServer(args[0]);
+      if (args.length == 0)
+         startSUVTestServer("8080");
+      else
+         startSUVTestServer(args[0]);
    }
 
    private static void startSUVTestServer(String port) throws Exception {
