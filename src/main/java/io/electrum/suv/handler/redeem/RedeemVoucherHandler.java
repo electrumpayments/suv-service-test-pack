@@ -12,6 +12,7 @@ import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.resource.impl.SUVTestServer.VoucherState;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
+import io.electrum.suv.server.model.ValidationResponse;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
@@ -28,22 +29,22 @@ public class RedeemVoucherHandler extends BaseHandler {
 
    public Response handle(RedemptionRequest redemptionRequest, UriInfo uriInfo) {
       try {
-         Response rsp;
+         ValidationResponse validationRsp = new ValidationResponse(null);
 
          String uuid = redemptionRequest.getId();
          VoucherModelUtils.validateUuid(uuid);
          VoucherModelUtils.validateThirdPartyIdTransactionIds(redemptionRequest.getThirdPartyIdentifiers());
 
          // Confirm that the basicAuth ID matches clientID in message body
-         Response validUsernameRsp = validateClientIdUsernameMatch(redemptionRequest, uuid);
-         if (validUsernameRsp != null)
-            return validUsernameRsp;
+         validationRsp = validateClientIdUsernameMatch(redemptionRequest, uuid);
+         if (validationRsp.hasErrorResponse())
+            return validationRsp.getResponse();
 
-         String voucherCode = redemptionRequest.getVoucher().getCode();
          // Confirm voucher not already provisioned or reversed.
-         rsp = VoucherModelUtils.canRedeemVoucher(voucherCode, username, password, uuid);
-         if (rsp != null) {
-            return rsp;
+         String voucherCode = redemptionRequest.getVoucher().getCode();
+         validationRsp = VoucherModelUtils.canRedeemVoucher(voucherCode, username, password, uuid);
+         if (validationRsp.hasErrorResponse()) {
+            return validationRsp.getResponse();
          }
 
          // The voucher can be redeemed and stored.
@@ -54,9 +55,10 @@ public class RedeemVoucherHandler extends BaseHandler {
                                                                                                        // user
                                                                                                        // voucherCode...?
          addRedemptionResponseToCache(key, redemptionRsp);
-         rsp = Response.created(uriInfo.getRequestUri()).entity(redemptionRsp).build();
+         validationRsp.setResponse(Response.created(uriInfo.getRequestUri()).entity(redemptionRsp).build());
 
-         return rsp;
+         return validationRsp.getResponse();
+
       } catch (FormatException fe) {
          throw fe;
       } catch (Exception e) {

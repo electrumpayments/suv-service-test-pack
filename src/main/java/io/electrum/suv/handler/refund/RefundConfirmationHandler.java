@@ -10,6 +10,7 @@ import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
+import io.electrum.suv.server.model.ValidationResponse;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicAdvice;
@@ -23,7 +24,7 @@ public class RefundConfirmationHandler extends BaseHandler {
 
    public Response handle(BasicAdvice confirmation) {
       try {
-         Response rsp;
+         ValidationResponse validationRsp;
 
          // THe UUID of this request
          String confirmationUuid = confirmation.getId();
@@ -46,16 +47,16 @@ public class RefundConfirmationHandler extends BaseHandler {
          else
             voucherCode = refundRsp.getVoucher().getCode();
 
-         rsp = VoucherModelUtils.canConfirmRefund(refundUuid, confirmationUuid, voucherCode);
-         if (rsp != null) {
-            return rsp;
+         validationRsp = VoucherModelUtils.canConfirmRefund(refundUuid, confirmationUuid, voucherCode);
+         if (validationRsp.hasErrorResponse()) {
+            return validationRsp.getResponse();
          }
 
          addRefundConfirmationToCache(confirmation);
 
-         rsp = Response.accepted((confirmation)).build(); // TODO Ask Casey if this is ok
+         validationRsp.setResponse(Response.accepted((confirmation)).build());
 
-         return rsp;
+         return validationRsp.getResponse();
       } catch (FormatException fe) {
          throw fe;
       } catch (Exception e) {

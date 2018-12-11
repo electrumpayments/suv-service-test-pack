@@ -3,6 +3,7 @@ package io.electrum.suv.handler;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
+import io.electrum.suv.server.model.ValidationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,11 +33,11 @@ public abstract class BaseHandler {
       return Response.serverError().entity(e.getMessage()).build();
    }
 
-   protected Response validateClientIdUsernameMatch(Transaction transaction, String uuid) {
+   protected ValidationResponse validateClientIdUsernameMatch(Transaction transaction, String uuid) {
       if (!transaction.getClient().getId().equals(username)) {
-         return VoucherModelUtils.buildIncorrectUsernameErrorResponse(uuid, transaction.getClient(), username);
+         return new ValidationResponse(VoucherModelUtils.buildIncorrectUsernameErrorResponse(uuid, transaction.getClient(), username));
       }
-      return null;
+      return new ValidationResponse(null);
    }
 
    protected abstract String getRequestName();

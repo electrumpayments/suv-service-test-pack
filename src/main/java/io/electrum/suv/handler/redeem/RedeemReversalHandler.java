@@ -11,6 +11,7 @@ import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
+import io.electrum.suv.server.model.ValidationResponse;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
@@ -23,7 +24,7 @@ public class RedeemReversalHandler extends BaseHandler {
 
    public Response handle(BasicReversal reversal) {
       try {
-         Response rsp;
+         ValidationResponse validatioRsp;
 
          // The UUID of this request
          String reversalUuid = reversal.getId();
@@ -46,20 +47,20 @@ public class RedeemReversalHandler extends BaseHandler {
             voucherCode = redemptionRsp.getVoucher().getCode();
 
          // TODO check this in airtime
-         rsp = VoucherModelUtils.canReverseRedemption(redemptionUuid, reversalUuid, username, password, voucherCode);
-         if (rsp != null) {
-            if (rsp.getStatus() == 404) {
+         validatioRsp = VoucherModelUtils.canReverseRedemption(redemptionUuid, reversalUuid, username, password, voucherCode);
+         if (validatioRsp.hasErrorResponse()) {
+            if (validatioRsp.getResponse().getStatus() == 404) {
                // make sure to record the reversal in case we get the request late.
                addRedemptionReversalToCache(reversal);
             }
-            return rsp;
+            return validatioRsp.getResponse();
          }
 
          addRedemptionReversalToCache(reversal);
 
-         rsp = Response.accepted((reversal)).build(); // TODO Ask Casey if this is ok
+         validatioRsp.setResponse(Response.accepted((reversal)).build()); // TODO Ask Casey if this is ok
 
-         return rsp;
+         return validatioRsp.getResponse();
       } catch (FormatException fe) {
          throw fe;
       } catch (Exception e) {

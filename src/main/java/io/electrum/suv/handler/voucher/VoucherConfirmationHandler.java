@@ -15,7 +15,7 @@ import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.TenderAdvice;
 
 public class VoucherConfirmationHandler extends BaseHandler {
-    /** The UUID identifying the request that this confirmation relates to */
+   /** The UUID identifying the request that this confirmation relates to */
    private String voucherProvisionUuid;
 
    public VoucherConfirmationHandler(HttpHeaders httpHeaders) {
@@ -26,8 +26,8 @@ public class VoucherConfirmationHandler extends BaseHandler {
       try {
          Response rsp;
 
-          // The UUID of this request
-          String confirmationUuid = confirmation.getId();
+         // The UUID of this request
+         String confirmationUuid = confirmation.getId();
          voucherProvisionUuid = confirmation.getRequestId();
 
          VoucherModelUtils.validateUuid(confirmationUuid);
@@ -70,7 +70,8 @@ public class VoucherConfirmationHandler extends BaseHandler {
 
       String voucherCode = provisionRsp.getVoucher().getCode();
 
-      RequestKey confirmationsKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherProvisionUuid);
+      RequestKey confirmationsKey =
+            new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherProvisionUuid);
       // quietly overwrites any existing confirmation
       confirmationRecords.put(confirmationsKey, confirmation);
       // voucherCodeRequestKeyRecords.put(voucherCode, confirmationsKey);

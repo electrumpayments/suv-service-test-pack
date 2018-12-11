@@ -12,12 +12,13 @@ import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
+import io.electrum.suv.server.model.ValidationResponse;
 import io.electrum.suv.server.util.RefundModelUtils;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 
 public class RefundVoucherHandler extends BaseHandler {
-    private String voucherCode;
+   private String voucherCode;
 
    public RefundVoucherHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
@@ -25,7 +26,7 @@ public class RefundVoucherHandler extends BaseHandler {
 
    public Response handle(RefundRequest refundRequest, UriInfo uriInfo) {
       try {
-         Response rsp;
+         ValidationResponse validationRsp;
           String refundUuid = refundRequest.getId();
          voucherCode = refundRequest.getVoucher().getCode();
 
@@ -34,13 +35,14 @@ public class RefundVoucherHandler extends BaseHandler {
          VoucherModelUtils.validateThirdPartyIdTransactionIds(refundRequest.getThirdPartyIdentifiers());
 
          // Confirm that the basicAuth ID matches clientID in message body
-         Response validUsernameRsp = validateClientIdUsernameMatch(refundRequest,refundUuid);
-         if(validUsernameRsp != null) return validUsernameRsp;
+         validationRsp = validateClientIdUsernameMatch(refundRequest, refundUuid);
+         if (validationRsp.hasErrorResponse())
+            return validationRsp.getResponse();
 
          // Confirm voucher not already provisioned or reversed.
-         rsp = VoucherModelUtils.canRefundVoucher(refundUuid, username, password, voucherCode);
-         if (rsp != null) {
-            return rsp;
+         validationRsp = VoucherModelUtils.canRefundVoucher(refundUuid, username, password, voucherCode);
+         if (validationRsp.hasErrorResponse()) {
+            return validationRsp.getResponse();
          }
 
          // The voucher can be Refunded
@@ -49,8 +51,10 @@ public class RefundVoucherHandler extends BaseHandler {
          // TODO See Giftcard, should this all be done differently
          RefundResponse refundRsp = RefundModelUtils.refundRspFromReq(refundRequest);
          addRefundResponseToCache(key, refundRsp);
-         rsp = Response.created(uriInfo.getRequestUri()).entity(refundRsp).build();
-         return rsp;
+         validationRsp.setResponse(Response.created(uriInfo.getRequestUri()).entity(refundRsp).build());
+
+         return validationRsp.getResponse();
+         
       } catch (FormatException fe) {
          throw fe;
       } catch (Exception e) {

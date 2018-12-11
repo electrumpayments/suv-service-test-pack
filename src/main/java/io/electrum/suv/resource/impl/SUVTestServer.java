@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
-import io.electrum.suv.server.SUVUnrecognizedFieldViolationExceptionMapper;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
@@ -26,6 +25,7 @@ import io.dropwizard.jersey.validation.Validators;
 import io.electrum.suv.api.models.*;
 import io.electrum.suv.server.SUVFormatViolationExceptionMapper;
 import io.electrum.suv.server.SUVHibernateViolationExceptionMapper;
+import io.electrum.suv.server.SUVUnrecognizedFieldViolationExceptionMapper;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.vas.model.BasicAdvice;
 import io.electrum.vas.model.BasicReversal;
@@ -37,8 +37,9 @@ public class SUVTestServer extends ResourceConfig {
    // The value of the hashmap is a class in the models,
    // can be found (with its record name pair) in the docs under params/schema for each request type.
    private final ConcurrentHashMap<RequestKey, ProvisionRequest> voucherProvisionRecords;
-   private final ConcurrentHashMap<RequestKey, ProvisionResponse> voucherResponseRecords; // Holds response returned to vendor
-                                                                                    // after voucher is provisioned.
+   private final ConcurrentHashMap<RequestKey, ProvisionResponse> voucherResponseRecords; // Holds response returned to
+                                                                                          // vendor
+   // after voucher is provisioned.
    private final ConcurrentHashMap<RequestKey, TenderAdvice> voucherConfirmationRecords;
    private final ConcurrentHashMap<RequestKey, BasicReversal> voucherReversalRecords;
    private final ConcurrentHashMap<RequestKey, BasicAdvice> redemptionConfirmationRecords;
@@ -49,7 +50,6 @@ public class SUVTestServer extends ResourceConfig {
    private final ConcurrentHashMap<RequestKey, BasicReversal> refundReversalRecords;
    private final ConcurrentHashMap<RequestKey, RefundRequest> refundRequestRecords;
    private final ConcurrentHashMap<RequestKey, RefundResponse> refundResponseRecords;
-
 
    private final ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers;
 
@@ -81,7 +81,8 @@ public class SUVTestServer extends ResourceConfig {
       refundRequestRecords = new ConcurrentHashMap<>();
       refundResponseRecords = new ConcurrentHashMap<>();
 
-      // This hashmap stores the relationship between purchase references and purchase request id's so a purchase reference
+      // This hashmap stores the relationship between purchase references and purchase request id's so a purchase
+      // reference
       // can be used to retrieve the correlated purchase request id
       ConcurrentHashMap<RequestKey, String> purchaseReferenceRecords = new ConcurrentHashMap<>();
 
@@ -128,11 +129,11 @@ public class SUVTestServer extends ResourceConfig {
       return voucherReversalRecords;
    }
 
-// --Commented out by Inspection START (2018/12/06, 18:30):
-//   public ConcurrentHashMap<RequestKey, String> getPurchaseReferenceRecords() {
-//      return purchaseReferenceRecords;
-//   }
-// --Commented out by Inspection STOP (2018/12/06, 18:30)
+   // --Commented out by Inspection START (2018/12/06, 18:30):
+   // public ConcurrentHashMap<RequestKey, String> getPurchaseReferenceRecords() {
+   // return purchaseReferenceRecords;
+   // }
+   // --Commented out by Inspection STOP (2018/12/06, 18:30)
 
    public ConcurrentHashMap<RequestKey, RedemptionRequest> getRedemptionRequestRecords() {
       return redemptionRequestRecords;
@@ -193,7 +194,8 @@ public class SUVTestServer extends ResourceConfig {
          // DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
          // mapper.setDateFormat(DATE_FORMAT);
          mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true); //TODO Make this fail and get caught
+         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true); // TODO Make this fail and get
+                                                                                    // caught
          mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
          mapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
          mapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);

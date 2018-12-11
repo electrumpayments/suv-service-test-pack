@@ -14,6 +14,7 @@ import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.resource.impl.SUVTestServer.VoucherState;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.DetailMessage;
+import io.electrum.suv.server.model.ValidationResponse;
 import io.electrum.vas.JsonUtil;
 import io.electrum.vas.model.BasicAdvice;
 import io.electrum.vas.model.BasicReversal;
@@ -41,8 +42,9 @@ public class VoucherModelUtils extends SUVModelUtils {
     *           from BasicAuth
     * @return A 400 error response indicating the voucher could not be provisioned, null if able to provision.
     */
-   public static Response canProvisionVoucher(String voucherId, String username, String password) {
+   public static ValidationResponse canProvisionVoucher(String voucherId, String username, String password) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
+      ValidationResponse validationResponse = new ValidationResponse(null);
 
       ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getVoucherProvisionRecords();
       // TODO Could make requestKey part of method args
@@ -62,7 +64,8 @@ public class VoucherModelUtils extends SUVModelUtils {
          if (rsp != null) {
             detailMessage.setVoucher(rsp.getVoucher());
          }
-         return Response.status(400).entity(errorDetail).build(); // Bad Request
+
+         return new ValidationResponse(Response.status(400).entity(errorDetail).build()); // Bad Request
       }
 
       // If voucher reversal request already received
@@ -86,10 +89,10 @@ public class VoucherModelUtils extends SUVModelUtils {
          if (rsp != null) {
             detailMessage.setVoucher(rsp.getVoucher());
          }
-         return Response.status(400).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(400).entity(errorDetail).build());
       }
 
-      return null; // Voucher can be provisioned
+      return new ValidationResponse(null); // Voucher can be provisioned
    }
 
    /**
@@ -109,7 +112,11 @@ public class VoucherModelUtils extends SUVModelUtils {
     * @return A 404 Error response if a voucher corresponding to voucherUuid cannot be found (not provisioned), a 400
     *         Error if the voucher is already confirmed. Null if voucher can be reversed.
     */
-   public static Response canReverseVoucher(String voucherUuid, String reversalUuid, String username, String password) {
+   public static ValidationResponse canReverseVoucher(
+         String voucherUuid,
+         String reversalUuid,
+         String username,
+         String password) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
 
       ErrorDetail errorDetail = new ErrorDetail().id(reversalUuid).originalId(voucherUuid);
@@ -123,7 +130,7 @@ public class VoucherModelUtils extends SUVModelUtils {
                .detailMessage(
                      new DetailMessage().freeString("No VoucherRequest located for given voucherUuid.")
                            .voucherId(voucherUuid));
-         return Response.status(404).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(404).entity(errorDetail).build());
       } // TODO extract this to confirmVoucherRedeemed() returns response code or null
 
       // check it's not confirmed
@@ -138,10 +145,10 @@ public class VoucherModelUtils extends SUVModelUtils {
                            "The voucher cannot be reversed as it has already been confirmed with the associated details.")
                            .confirmationId(confirmation.getId())
                            .voucherId(voucherUuid));
-         return Response.status(400).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(400).entity(errorDetail).build());
       }
 
-      return null;
+      return new ValidationResponse(null);
    }
 
    /**
@@ -229,27 +236,27 @@ public class VoucherModelUtils extends SUVModelUtils {
       return Response.status(400).entity(errorDetail).build();
    }
 
-// --Commented out by Inspection START (2018/12/07, 09:35):
-//   /** Build a 400 error response indicating the UUID format is invalid. Provides details of expected format. */
-//   public static Response buildInvalidUuidErrorResponse(String objectId, Institution client, ErrorType requestType) {
-//
-//      ErrorDetail errorDetail =
-//            buildErrorDetail(
-//                  objectId,
-//                  "Invalid UUID",
-//                  "The UUID in the request body is not a vail UUID format."
-//                        + "\nUUID must conform to the format 8-4-4-4-12 hexedecimal values."
-//                        + "\nExample: 58D5E212-165B-4CA0-909B-C86B9CEE0111",
-//                  null,
-//
-//                  requestType);
-//
-//      DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-//      detailMessage.setClient(client);
-//
-//      return Response.status(400).entity(errorDetail).build();
-//   }
-// --Commented out by Inspection STOP (2018/12/07, 09:35)
+   // --Commented out by Inspection START (2018/12/07, 09:35):
+   // /** Build a 400 error response indicating the UUID format is invalid. Provides details of expected format. */
+   // public static Response buildInvalidUuidErrorResponse(String objectId, Institution client, ErrorType requestType) {
+   //
+   // ErrorDetail errorDetail =
+   // buildErrorDetail(
+   // objectId,
+   // "Invalid UUID",
+   // "The UUID in the request body is not a vail UUID format."
+   // + "\nUUID must conform to the format 8-4-4-4-12 hexedecimal values."
+   // + "\nExample: 58D5E212-165B-4CA0-909B-C86B9CEE0111",
+   // null,
+   //
+   // requestType);
+   //
+   // DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+   // detailMessage.setClient(client);
+   //
+   // return Response.status(400).entity(errorDetail).build();
+   // }
+   // --Commented out by Inspection STOP (2018/12/07, 09:35)
 
    // --Commented out by Inspection START (2018/12/06, 18:31):
    // // TODO remove redundant method
@@ -325,7 +332,11 @@ public class VoucherModelUtils extends SUVModelUtils {
     *           the unique identifier of this request
     * @return A 400 error response indicating the voucher could not be redeemed, null if able to redeem.
     */
-   public static Response canRedeemVoucher(String voucherCode, String username, String password, String requestUuid) {
+   public static ValidationResponse canRedeemVoucher(
+         String voucherCode,
+         String username,
+         String password,
+         String requestUuid) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
 
       ConcurrentHashMap<RequestKey, RedemptionRequest> requestRecords = testServer.getRedemptionRequestRecords();
@@ -341,7 +352,7 @@ public class VoucherModelUtils extends SUVModelUtils {
                      "Voucher confirmation for this voucher has not been processed. Cannot redeem unconfirmed vouchers.",
                      null,
                      ErrorType.VOUCHER_NOT_REDEEMABLE);
-         return Response.status(400).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(400).entity(errorDetail).build());
       }
 
       // Confirm reversal request did not arrive before this
@@ -364,7 +375,7 @@ public class VoucherModelUtils extends SUVModelUtils {
          if (rsp != null) {
             detailMessage.setVoucher(rsp.getVoucher());
          }
-         return Response.status(400).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(400).entity(errorDetail).build());
       }
 
       // If no redemptionRequests have been recorded, the voucher cannot fail the test of having already been redeemed.
@@ -393,11 +404,11 @@ public class VoucherModelUtils extends SUVModelUtils {
             if (rsp != null) {
                detailMessage.setVoucher(rsp.getVoucher()); // TODO confirm this is !null
             }
-            return Response.status(400).entity(errorDetail).build();
+            return new ValidationResponse(Response.status(400).entity(errorDetail).build());
          }
       }
 
-      return null;
+      return new ValidationResponse(null);
    }
 
    public static RedemptionResponse redemptionRspFromReq(RedemptionRequest redemptionRequest) throws IOException {
@@ -413,7 +424,11 @@ public class VoucherModelUtils extends SUVModelUtils {
    }
 
    /** Make sure the voucher is either in a redemptionConfiromed state */
-   public static Response canRefundVoucher(String refundUuid, String username, String password, String voucherCode) {
+   public static ValidationResponse canRefundVoucher(
+         String refundUuid,
+         String username,
+         String password,
+         String voucherCode) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
 
       // Confirm reversal request did not arrive before this
@@ -436,15 +451,15 @@ public class VoucherModelUtils extends SUVModelUtils {
          if (rsp != null) {
             detailMessage.setVoucher(rsp.getVoucher());
          }
-         return Response.status(400).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(400).entity(errorDetail).build());
       }
 
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
 
       ErrorDetail errorDetail;
-      switch (confirmedExistingVouchers.get(voucherCode).getValue()) {
-      case 0:
+      switch (confirmedExistingVouchers.get(voucherCode)) {
+      case CONFIRMED_PROVISIONED:
          errorDetail =
                buildErrorDetail(
                      refundUuid,
@@ -453,9 +468,9 @@ public class VoucherModelUtils extends SUVModelUtils {
                            + "redemption confirmation message have been received may be refunded.",
                      null, // TODO update message
                      ErrorType.VOUCHER_NOT_REDEEMED);
-         return Response.status(400).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(400).entity(errorDetail).build());
 
-      case 1:
+      case REDEEMED:
          errorDetail =
                buildErrorDetail(
                      refundUuid,
@@ -463,11 +478,11 @@ public class VoucherModelUtils extends SUVModelUtils {
                      "There is a current redemption request for this voucher pending confirmation. Cannot refund in the current state.",
                      null,
                      ErrorType.REDEMPTION_NOT_CONFIRMED);
-         return Response.status(400).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(400).entity(errorDetail).build());
 
-      case 2:
-         return null;
-      case 3:
+      // case CONFIRMED_REDEEMED: Handled by default so as not to duplicate code
+
+      case REFUNDED:
          errorDetail =
                buildErrorDetail(
                      refundUuid,
@@ -475,23 +490,10 @@ public class VoucherModelUtils extends SUVModelUtils {
                      "There is a current refund request for this voucher pending confirmation. Cannot refund in the current state.",
                      null,
                      ErrorType.VOUCHER_ALREADY_REFUNDED);
-         return Response.status(400).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(400).entity(errorDetail).build());
+      default:
+         return new ValidationResponse(null);
       }
-
-      // // If it is not redeemed at least
-      // if (confirmedExistingVouchers.get(voucherCode).getValue() != 1) {
-      // ErrorDetail errorDetail =
-      // buildErrorDetail(
-      // refundUuid,
-      // "Voucher not refundable",
-      // "The voucher is currently in a non-refundable state. Only vouchers for which "
-      // + "redemption confirmation message have been received may be refunded.",
-      // null,
-      // ErrorType.VOUCHER_NOT_REDEEMED);
-      // return Response.status(400).entity(errorDetail).build();
-      // }
-
-      return null;
    }
 
    /**
@@ -515,7 +517,7 @@ public class VoucherModelUtils extends SUVModelUtils {
     * @return A 404 Error response if the redemption request was not received or the voucher, a 400 Error response if
     *         the voucher redemption is already confirmed. Null if redemption can be reversed.
     */
-   public static Response canReverseRedemption(
+   public static ValidationResponse canReverseRedemption(
          String redemptionUuid,
          String reversalUuid,
          String username,
@@ -532,12 +534,12 @@ public class VoucherModelUtils extends SUVModelUtils {
                .detailMessage(
                      new DetailMessage().freeString(
                            "The Redemption Request to which this Redemption Reversal refers does not exist."));
-         return Response.status(404).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(404).entity(errorDetail).build());
       }
 
       switch (confirmedExistingVouchers.get(voucherCode)) {
       case REDEEMED:
-         return null;
+         return new ValidationResponse(null);
       case CONFIRMED_REDEEMED:
          ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords = testServer.getRedemptionConfirmationRecords();
          RequestKey requestKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, redemptionUuid);
@@ -551,43 +553,16 @@ public class VoucherModelUtils extends SUVModelUtils {
                            .confirmationId(confirmation.getId())
                            .voucherId(redemptionUuid)
                            .reversalId(reversalUuid));
-         return Response.status(400).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(400).entity(errorDetail).build());
       default:
          errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No Redemption Request")
                .detailMessage(
                      new DetailMessage().freeString(
                            "The Redemption Request to which this Redemption Reversal refers does not exist."));
-         return Response.status(404).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(404).entity(errorDetail).build());
       }
    }
-
-   // --Commented out by Inspection START (2018/12/07, 07:28):
-   // /**
-   // * Determine whether a voucher had been redeemed or not.
-   // *
-   // * @param redemptionRequestUuid
-   // * the uuid of the request to be checked
-   // * @param provisionRecords
-   // * to be searched
-   // * @param username
-   // * from BasicAuth
-   // * @param password
-   // * from BasicAuth
-   // * @return whether voucher with this UUID has been provisioned.
-   // */
-   // public static boolean isVoucherRedeemed( // TODO Refactor naming
-   // String redemptionRequestUuid,
-   // ConcurrentHashMap<RequestKey, RedemptionRequest> provisionRecords,
-   // String username,
-   // String password) {
-   // RequestKey provisionKey =
-   // new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, redemptionRequestUuid);
-   // log.debug(
-   // String.format("Searching for redemptionRequest record under following key: %s", provisionKey.toString()));
-   // return provisionRecords.get(provisionKey) != null;
-   // }
-   // --Commented out by Inspection STOP (2018/12/07, 07:28)
 
    /**
     * Determine whether this Redemption Confirmation can proceed.
@@ -604,10 +579,13 @@ public class VoucherModelUtils extends SUVModelUtils {
     *           the code for the corresponding voucher. Null indicates that the request referenced by this confirmation
     *           was not found.
     * @return a 404 error response if the referenced redemption request was not found, a 400 error response if the
-    *         corresponding voucher is not in a redeemed state, null if it is in a redeemed state and the confirmation can
-    *         proceed.
+    *         corresponding voucher is not in a redeemed state, null if it is in a redeemed state and the confirmation
+    *         can proceed.
     */
-   public static Response canConfirmRedemption(String redemptionUuid, String confirmationUuid, String voucherCode) {
+   public static ValidationResponse canConfirmRedemption(
+         String redemptionUuid,
+         String confirmationUuid,
+         String voucherCode) {
 
       ErrorDetail errorDetail = new ErrorDetail().id(confirmationUuid).originalId(redemptionUuid);
 
@@ -621,7 +599,7 @@ public class VoucherModelUtils extends SUVModelUtils {
                .detailMessage(
                      new DetailMessage().freeString(
                            "The Redemption Request to which this Redemption Confirmation refers does not exist."));
-         return Response.status(404).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(404).entity(errorDetail).build());
       }
 
       if (confirmedExistingVouchers.get(voucherCode) != VoucherState.REDEEMED) {
@@ -634,34 +612,10 @@ public class VoucherModelUtils extends SUVModelUtils {
                                        + "The Voucher is currently in a %s state.",
                                  confirmedExistingVouchers.get(voucherCode).name())));
 
-         return Response.status(400).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(400).entity(errorDetail).build());
       }
 
-      // check it's not reversed
-      // ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getVoucherReversalRecords();
-      // RequestKey requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, redemptionUuid);
-      // BasicReversal reversal = reversalRecords.get(requestKey);
-      // if()
-      // if (reversal != null) {
-      // errorDetail.errorType(ErrorDetail.ErrorType.VOUCHER_ALREADY_REVERSED)
-      // .errorMessage("Voucher reversed.")
-      // .detailMessage(
-      // new DetailMessage()
-      // .freeString("Voucher provision has already been reversed with the associated details.")
-      // .reversalId(reversal.getId()));
-      // // TODO Pick a better ErrorType
-      //
-      // // TODO what is this here for
-      // // Check for a response for this request, if found add to detailMessage
-      // // DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-      // // ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getVoucherResponseRecords();
-      // // ProvisionResponse rsp = responseRecords.get(requestKey);
-      // // if (rsp != null) {
-      // // detailMessage.setVoucher(rsp.getVoucher());
-      // // }
-      // return Response.status(400).entity(errorDetail).build();
-      // }
-      return null;
+      return new ValidationResponse(null);
    }
 
    /**
@@ -678,11 +632,10 @@ public class VoucherModelUtils extends SUVModelUtils {
     * @param voucherCode
     *           the code for the corresponding voucher. Null indicates that the request referenced by this confirmation
     *           was not found.
-    * @return a 404 error response if the referenced request was not found, a 400 error response if the
-    *         corresponding voucher is not in a redeemed state, null if it is in a redeemed state and the confirmation can
-    *         proceed.
+    * @return a 404 error response if the referenced request was not found, a 400 error response if the corresponding
+    *         voucher is not in a redeemed state, null if it is in a redeemed state and the confirmation can proceed.
     */
-   public static Response canConfirmRefund(String refundUuid, String confirmationUuid, String voucherCode) {
+   public static ValidationResponse canConfirmRefund(String refundUuid, String confirmationUuid, String voucherCode) {
       ErrorDetail errorDetail = new ErrorDetail().id(confirmationUuid).originalId(refundUuid);
 
       // TODO Extract method
@@ -698,7 +651,7 @@ public class VoucherModelUtils extends SUVModelUtils {
                .detailMessage(
                      new DetailMessage()
                            .freeString("The Refund Request to which this Refund Confirmation refers does not exist."));
-         return Response.status(404).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(404).entity(errorDetail).build());
       }
 
       if (confirmedExistingVouchers.get(voucherCode) != VoucherState.REFUNDED) {
@@ -711,13 +664,13 @@ public class VoucherModelUtils extends SUVModelUtils {
                                        + "The Voucher is currently in a %s state.",
                                  confirmedExistingVouchers.get(voucherCode).name())));
          // .voucherId(redemptionUuid)); TODO Removed this, didn't make sense to duplicate information
-         return Response.status(400).entity(errorDetail).build(); // TODO Error codes ok?
+         return new ValidationResponse(Response.status(400).entity(errorDetail).build());
       }
 
-      return null;
+      return new ValidationResponse(null);
    }
 
-   public static Response canReverseRefund(
+   public static ValidationResponse canReverseRefund(
          String refundUuid,
          String reversalUuid,
          String username,
@@ -743,15 +696,21 @@ public class VoucherModelUtils extends SUVModelUtils {
          errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No Refund Request")
                .detailMessage(new DetailMessage().freeString("No Refund Request located for given Refund UUID."));
-         return Response.status(404).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(404).entity(errorDetail).build());
       }
 
-      // Happy days
-      if (confirmedExistingVouchers.get(voucherCode) == VoucherState.REFUNDED)
-         return null;
+      switch (confirmedExistingVouchers.get(voucherCode)) {
 
-      // Reversal already processed
-      if (confirmedExistingVouchers.get(voucherCode) == VoucherState.CONFIRMED_REDEEMED) {
+      case CONFIRMED_PROVISIONED:
+         errorDetail.errorType(ErrorType.REFUND_ALREADY_CONFIRMED)
+               .errorMessage("Refund confirmed")
+               .detailMessage(
+                     new DetailMessage()
+                           .freeString("The voucher related to this Refund Reversal has already been refunded.")
+                           .reversalId(reversalUuid));
+         return new ValidationResponse(Response.status(400).entity(errorDetail).build());
+
+      case CONFIRMED_REDEEMED:
          errorDetail.errorType(ErrorType.REDEMPTION_ALREADY_CONFIRMED)
                .errorMessage("Redemption confirmed.")
                .detailMessage(
@@ -760,23 +719,13 @@ public class VoucherModelUtils extends SUVModelUtils {
                            .confirmationId(confirmation.getId())
                            .voucherId(refundUuid)
                            .reversalId(reversalUuid));
-         return Response.status(400).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(400).entity(errorDetail).build());
+      case REFUNDED:
+      default:
+         return new ValidationResponse(null);
+
       }
 
-      // TODO Normalise these validation methods to be more similar (this)
-      // Confirm Voucher redeemed
-
-      if (confirmedExistingVouchers.get(voucherCode) == VoucherState.CONFIRMED_PROVISIONED) {
-         errorDetail.errorType(ErrorType.REFUND_ALREADY_CONFIRMED)
-               .errorMessage("Refund confirmed")
-               .detailMessage(
-                     new DetailMessage()
-                           .freeString("The voucher related to this Refund Reversal has already been refunded.")
-                           .reversalId(reversalUuid));
-         return Response.status(400).entity(errorDetail).build();
-      }
-
-      return null;
    }
 
 }

@@ -11,11 +11,13 @@ import io.electrum.suv.api.models.ProvisionResponse;
 import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
+import io.electrum.suv.server.model.ValidationResponse;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 
 public class VoucherProvisionHandler extends BaseHandler {
-   // --Commented out by Inspection (2018/12/07, 07:29):private static final Logger log = LoggerFactory.getLogger(VoucherProvisionHandler.class);
+   // --Commented out by Inspection (2018/12/07, 07:29):private static final Logger log =
+   // LoggerFactory.getLogger(VoucherProvisionHandler.class);
 
    public VoucherProvisionHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
@@ -41,7 +43,7 @@ public class VoucherProvisionHandler extends BaseHandler {
     */
    public Response handle(ProvisionRequest provisionRequest, UriInfo uriInfo) {
       try {
-         Response rsp;
+         ValidationResponse validationRsp = new ValidationResponse(null);
 
          String uuid = provisionRequest.getId();
          VoucherModelUtils.validateUuid(uuid);
@@ -49,22 +51,23 @@ public class VoucherProvisionHandler extends BaseHandler {
          VoucherModelUtils.validateThirdPartyIdTransactionIds(provisionRequest.getThirdPartyIdentifiers());
 
          // Confirm that the basicAuth ID matches clientID in message body
-         Response validUsernameRsp = validateClientIdUsernameMatch(provisionRequest,uuid);
-         if(validUsernameRsp != null) return validUsernameRsp;
+         validationRsp = validateClientIdUsernameMatch(provisionRequest, uuid);
+         if (validationRsp.hasErrorResponse())
+            return validationRsp.getResponse();
 
          // Confirm voucher not already provisioned or reversed.
-         rsp = VoucherModelUtils.canProvisionVoucher(uuid, username, password);
-         if (rsp != null) {
-            return rsp;
-         }
+         validationRsp = VoucherModelUtils.canProvisionVoucher(uuid, username, password);
+         if (validationRsp.hasErrorResponse())
+            return validationRsp.getResponse();
 
          // The voucher can be provisioned and stored.
          RequestKey key = addVoucherRequestToCache(uuid, provisionRequest);
+
          // TODO See Giftcard, should this all be done differently
          ProvisionResponse provisionRsp = VoucherModelUtils.voucherRspFromReq(provisionRequest);
          addVoucherResponseToCache(key, provisionRsp);
-         rsp = Response.created(uriInfo.getRequestUri()).entity(provisionRsp).build();
-         return rsp;
+         validationRsp.setResponse(Response.created(uriInfo.getRequestUri()).entity(provisionRsp).build());
+         return validationRsp.getResponse();
 
       } catch (FormatException fe) {
          throw fe;

@@ -10,6 +10,7 @@ import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
+import io.electrum.suv.server.model.ValidationResponse;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicAdvice;
@@ -24,7 +25,7 @@ public class RedeemConfirmationHandler extends BaseHandler {
 
    public Response handle(BasicAdvice confirmation) {
       try {
-         Response rsp;
+         ValidationResponse validationRsp;
 
          // THe UUID of this request
          String confirmationUuid = confirmation.getId();
@@ -40,24 +41,21 @@ public class RedeemConfirmationHandler extends BaseHandler {
                SUVTestServerRunner.getTestServer()
                      .getRedemptionResponseRecords()
                      .get(new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, redemptionUuid));
-
          if (redemptionRsp == null)
             voucherCode = null;
          else
             voucherCode = redemptionRsp.getVoucher().getCode();
 
-         rsp =
-               VoucherModelUtils
-                     .canConfirmRedemption(redemptionUuid, confirmationUuid, voucherCode);
-         if (rsp != null) {
-            return rsp;
+         validationRsp = VoucherModelUtils.canConfirmRedemption(redemptionUuid, confirmationUuid, voucherCode);
+         if (validationRsp.hasErrorResponse()) {
+            return validationRsp.getResponse();
          }
 
          addRedemptionConfirmationToCache(confirmation);
 
-         rsp = Response.accepted((confirmation)).build(); // TODO Ask Casey if this is ok
+         validationRsp.setResponse(Response.accepted((confirmation)).build());
 
-         return rsp;
+         return validationRsp.getResponse();
       } catch (FormatException fe) {
          throw fe;
       } catch (Exception e) {

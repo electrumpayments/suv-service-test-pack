@@ -8,13 +8,15 @@ import javax.ws.rs.core.Response;
 import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
+import io.electrum.suv.server.model.ValidationResponse;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
 
 public class VoucherReversalHandler extends BaseHandler {
 
-   // --Commented out by Inspection (2018/12/07, 07:29):private static final Logger log = LoggerFactory.getLogger(VoucherProvisionHandler.class);
+   // --Commented out by Inspection (2018/12/07, 07:29):private static final Logger log =
+   // LoggerFactory.getLogger(VoucherProvisionHandler.class);
 
    public VoucherReversalHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
@@ -22,7 +24,7 @@ public class VoucherReversalHandler extends BaseHandler {
 
    public Response handle(BasicReversal reversal) {
       try {
-         Response rsp;
+         ValidationResponse validationRsp = new ValidationResponse(null);
 
          // The UUID of this request
          String reversalUuid = reversal.getId();
@@ -34,20 +36,21 @@ public class VoucherReversalHandler extends BaseHandler {
          VoucherModelUtils.validateThirdPartyIdTransactionIds(reversal.getThirdPartyIdentifiers());
 
          // TODO check this in airtime
-         rsp = VoucherModelUtils.canReverseVoucher(voucherId, reversalUuid, username, password);
-         if (rsp != null) {
-            if (rsp.getStatus() == 404) {
+         validationRsp = VoucherModelUtils.canReverseVoucher(voucherId, reversalUuid, username, password);
+         if (validationRsp.hasErrorResponse()) {
+            if (validationRsp.getResponse().getStatus() == 404) {
                // make sure to record the reversal in case we get the request late.
                addVoucherReversalToCache(reversal);
             }
-            return rsp;
+            return validationRsp.getResponse();
          }
 
          addVoucherReversalToCache(reversal);
 
-         rsp = Response.accepted((reversal)).build(); // TODO Ask Casey if this is ok
+         validationRsp.setResponse(Response.accepted((reversal)).build()); // TODO Ask Casey if this is ok
 
-         return rsp;
+         return validationRsp.getResponse();
+
       } catch (FormatException fe) {
          throw fe;
       } catch (Exception e) {
