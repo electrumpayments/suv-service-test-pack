@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "973feaa9-668e-4931-8475-7f75fd54df12",
+		"_postman_id": "051ef13c-5d5b-4acf-8e04-0a0a9d9a631c",
 		"name": "SUV",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -249,7 +249,7 @@
 											"",
 											"var jsonData = JSON.parse(responseBody);",
 											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";",
-											"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;;",
+											"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;",
 											"tests[\"Request ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"requestId\");"
 										],
 										"type": "text/javascript"
@@ -1297,7 +1297,7 @@
 											"",
 											"var jsonData = JSON.parse(responseBody);",
 											"tests[\"Error type is DUPLICATE_RECORD\"] = jsonData.errorType === \"DUPLICATE_RECORD\";",
-											"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;;",
+											"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;",
 											"tests[\"Request ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"requestId\");"
 										],
 										"type": "text/javascript"
@@ -1376,6 +1376,111 @@
 								"body": {
 									"mode": "raw",
 									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"product\": {\n        \"productId\": \"{{fixedPriceProduct}}\"\n    },\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{host}}/suv/{{version}}/vouchers",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"suv",
+										"{{version}}",
+										"vouchers"
+									]
+								},
+								"description": "Voucher provision request with a non-unique UUID"
+							},
+							"response": []
+						},
+						{
+							"name": "3.Unexpected Field",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "2630cfab-c956-45c0-8705-c4c077f00e34",
+										"exec": [
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is FORMAT_ERROR\"] = jsonData.errorType === \"FORMAT_ERROR\";"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "e3bc267c-7805-41fa-af7b-b34a5523b197",
+										"exec": [
+											"function _p8(s) {",
+											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
+											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
+											"   }",
+											"",
+											"function uuid() {",
+											"   ",
+											"   return _p8() + _p8(true) + _p8(true) + _p8();",
+											"}",
+											"",
+											"var requestId = uuid();",
+											"//don't update the UUID for this test",
+											"//postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"",
+											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
+											"",
+											"postman.setEnvironmentVariable(\"originatorRef\", (\"orig\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"clientRef\", (\"clnt\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"settlementEntityRef\", (\"seEn\"+uuidLast4).toUpperCase());",
+											"postman.setEnvironmentVariable(\"receiverRef\", (\"receiver\"+uuidLast4).toUpperCase());",
+											"",
+											"var dateTime = new Date().toISOString();",
+											"postman.setEnvironmentVariable(\"timestamp\", dateTime);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{clientInstId}}",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic MjIyMjIyMjI6cGFzc3dvcmQ="
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"aabbcc\":\"ccbbaa\",\n\t\"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{host}}/suv/{{version}}/vouchers",
@@ -5354,7 +5459,7 @@
 											"",
 											"var jsonData = JSON.parse(responseBody);",
 											"tests[\"Error type is VOUCHER_NOT_REDEEMABLE\"] = jsonData.errorType === \"VOUCHER_NOT_REDEEMABLE\";",
-											"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;;",
+											"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;",
 											"tests[\"Redemption ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"redemptionId\");"
 										],
 										"type": "text/javascript"
@@ -6179,7 +6284,7 @@
 											"",
 											"var jsonData = JSON.parse(responseBody);",
 											"tests[\"Error type is VOUCHER_ALREADY_REDEEMED\"] = jsonData.errorType === \"VOUCHER_ALREADY_REDEEMED\";",
-											"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;;",
+											"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;",
 											"tests[\"Redemption ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"redemptionId\");"
 										],
 										"type": "text/javascript"
@@ -11858,7 +11963,7 @@
 													"",
 													"var jsonData = JSON.parse(responseBody);",
 													"tests[\"Error type is REDEMPTION_NOT_CONFIRMED\"] = jsonData.errorType === \"REDEMPTION_NOT_CONFIRMED\";",
-													"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;;",
+													"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;",
 													"tests[\"Refund ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"refundId\");"
 												],
 												"type": "text/javascript"
@@ -12153,7 +12258,7 @@
 													"",
 													"var jsonData = JSON.parse(responseBody);",
 													"tests[\"Error type is VOUCHER_ALREADY_REFUNDED\"] = jsonData.errorType === \"VOUCHER_ALREADY_REFUNDED\";",
-													"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;;",
+													"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;",
 													"tests[\"Refund ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"refundId\");"
 												],
 												"type": "text/javascript"
@@ -14228,7 +14333,7 @@
 													"",
 													"var jsonData = JSON.parse(responseBody);",
 													"tests[\"Error type is VOUCHER_NOT_REDEEMED\"] = jsonData.errorType === \"VOUCHER_NOT_REDEEMED\";",
-													"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;;",
+													"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;",
 													"tests[\"Refund ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"refundId\");"
 												],
 												"type": "text/javascript"

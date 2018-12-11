@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
+import io.electrum.suv.server.SUVUnrecognizedFieldViolationExceptionMapper;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
@@ -63,6 +64,7 @@ public class SUVTestServer extends ResourceConfig {
                   new DropwizardConfiguredValidator(Validators.newValidatorFactory().getValidator())));
       register(new SUVHibernateViolationExceptionMapper());
       register(new SUVFormatViolationExceptionMapper());
+      register(new SUVUnrecognizedFieldViolationExceptionMapper());
 
       voucherProvisionRecords = new ConcurrentHashMap<>();
       voucherResponseRecords = new ConcurrentHashMap<>();
@@ -191,7 +193,7 @@ public class SUVTestServer extends ResourceConfig {
          // DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
          // mapper.setDateFormat(DATE_FORMAT);
          mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true); //TODO Make this fail and get caught
          mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
          mapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
          mapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
