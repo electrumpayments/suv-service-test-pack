@@ -12,6 +12,7 @@ import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.model.ValidationResponse;
 import io.electrum.suv.server.util.RequestKey;
+import io.electrum.suv.server.util.RequestKey.ResourceType;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicAdvice;
 
@@ -53,7 +54,7 @@ public class RefundConfirmationHandler extends BaseHandler {
          RefundResponse refundRsp =
                SUVTestServerRunner.getTestServer()
                      .getRefundResponseRecords()
-                     .get(new RequestKey(username, password, RequestKey.REFUNDS_RESOURCE, refundUuid));
+                     .get(new RequestKey(username, password, ResourceType.REFUNDS_RESOURCE, refundUuid));
 
          if (refundRsp == null)
             voucherCode = null;
@@ -88,7 +89,7 @@ public class RefundConfirmationHandler extends BaseHandler {
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
 
       RequestKey confirmationsKey =
-            new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, confirmation.getRequestId());
+            new RequestKey(username, password, ResourceType.CONFIRMATIONS_RESOURCE, confirmation.getRequestId());
       // quietly overwrites any existing confirmation
       confirmationRecords.put(confirmationsKey, confirmation);
 

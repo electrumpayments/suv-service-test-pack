@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.Response;
 
+import io.electrum.suv.server.util.RequestKey.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +50,7 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getVoucherProvisionRecords();
       // TODO Could make requestKey part of method args
-      RequestKey requestKey = new RequestKey(username, password, RequestKey.VOUCHERS_RESOURCE, voucherId);
+      RequestKey requestKey = new RequestKey(username, password, ResourceType.VOUCHERS_RESOURCE, voucherId);
       ProvisionRequest originalRequest = provisionRecords.get(requestKey);
 
       // If Voucher already provisioned
@@ -71,7 +72,7 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       // If voucher reversal request already received
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getVoucherReversalRecords();
-      requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, voucherId);
+      requestKey = new RequestKey(username, password, ResourceType.REVERSALS_RESOURCE, voucherId);
       BasicReversal reversal = reversalRecords.get(requestKey);
       if (reversal != null) {
          ErrorDetail errorDetail =
@@ -137,7 +138,7 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       // check it's not confirmed
       ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords = testServer.getVoucherConfirmationRecords();
-      RequestKey requestKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherUuid);
+      RequestKey requestKey = new RequestKey(username, password, ResourceType.CONFIRMATIONS_RESOURCE, voucherUuid);
       TenderAdvice confirmation = confirmationRecords.get(requestKey);
       if (confirmation != null) {
          errorDetail.errorType(ErrorType.VOUCHER_ALREADY_CONFIRMED)
@@ -193,7 +194,7 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       // check it's not reversed
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getVoucherReversalRecords();
-      RequestKey requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, voucherUuid);
+      RequestKey requestKey = new RequestKey(username, password, ResourceType.REVERSALS_RESOURCE, voucherUuid);
       BasicReversal reversal = reversalRecords.get(requestKey);
       if (reversal != null) {
          errorDetail.errorType(ErrorType.VOUCHER_ALREADY_REVERSED)
@@ -313,7 +314,7 @@ public class VoucherModelUtils extends SUVModelUtils {
          ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords,
          String username,
          String password) {
-      RequestKey provisionKey = new RequestKey(username, password, RequestKey.VOUCHERS_RESOURCE, voucherId);
+      RequestKey provisionKey = new RequestKey(username, password, ResourceType.VOUCHERS_RESOURCE, voucherId);
       log.debug(String.format("Searching for provision record under following key: %s", provisionKey.toString()));
       return provisionRecords.get(provisionKey) != null;
    }
@@ -359,7 +360,7 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       // Confirm reversal request did not arrive before this
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getRedemptionReversalRecords();
-      RequestKey requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, requestUuid);
+      RequestKey requestKey = new RequestKey(username, password, ResourceType.REVERSALS_RESOURCE, requestUuid);
       BasicReversal reversal = reversalRecords.get(requestKey);
       if (reversal != null) {
          ErrorDetail errorDetail =
@@ -384,7 +385,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       if (requestRecords.size() != 0) {
          // TODO Could make requestKey part of method args
 
-         RequestKey key = new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, requestUuid);
+         RequestKey key = new RequestKey(username, password, ResourceType.REDEMPTIONS_RESOURCE, requestUuid);
          // RedemptionRequest originalRequest = requestRecords.get(requestKey);
 
          // If Voucher already redeemed
@@ -457,7 +458,7 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       // Confirm reversal request did not arrive before this
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getRefundReversalRecords();
-      RequestKey requestKey = new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, refundUuid);
+      RequestKey requestKey = new RequestKey(username, password, ResourceType.REVERSALS_RESOURCE, refundUuid);
       BasicReversal reversal = reversalRecords.get(requestKey);
       if (reversal != null) {
          ErrorDetail errorDetail =
@@ -567,7 +568,7 @@ public class VoucherModelUtils extends SUVModelUtils {
          return new ValidationResponse(null);
       case CONFIRMED_REDEEMED:
          ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords = testServer.getRedemptionConfirmationRecords();
-         RequestKey requestKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, redemptionUuid);
+         RequestKey requestKey = new RequestKey(username, password, ResourceType.CONFIRMATIONS_RESOURCE, redemptionUuid);
          BasicAdvice confirmation = confirmationRecords.get(requestKey);
 
          errorDetail.errorType(ErrorType.REDEMPTION_ALREADY_CONFIRMED)
@@ -732,7 +733,7 @@ public class VoucherModelUtils extends SUVModelUtils {
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
 
       ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords = testServer.getRedemptionConfirmationRecords();
-      RequestKey requestKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, refundUuid);
+      RequestKey requestKey = new RequestKey(username, password, ResourceType.CONFIRMATIONS_RESOURCE, refundUuid);
       BasicAdvice confirmation = confirmationRecords.get(requestKey);
 
       // No corresponding refund request

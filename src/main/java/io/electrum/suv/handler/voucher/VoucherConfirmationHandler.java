@@ -12,6 +12,7 @@ import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.model.ValidationResponse;
 import io.electrum.suv.server.util.RequestKey;
+import io.electrum.suv.server.util.RequestKey.ResourceType;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.TenderAdvice;
 
@@ -79,12 +80,12 @@ public class VoucherConfirmationHandler extends BaseHandler {
       ProvisionResponse provisionRsp =
             SUVTestServerRunner.getTestServer()
                   .getProvisionResponseRecords()
-                  .get(new RequestKey(username, password, RequestKey.VOUCHERS_RESOURCE, voucherProvisionUuid));
+                  .get(new RequestKey(username, password, ResourceType.VOUCHERS_RESOURCE, voucherProvisionUuid));
 
       String voucherCode = provisionRsp.getVoucher().getCode();
 
       RequestKey confirmationsKey =
-            new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherProvisionUuid);
+            new RequestKey(username, password, ResourceType.CONFIRMATIONS_RESOURCE, voucherProvisionUuid);
 
       // quietly overwrites any existing confirmation
       confirmationRecords.put(confirmationsKey, confirmation);

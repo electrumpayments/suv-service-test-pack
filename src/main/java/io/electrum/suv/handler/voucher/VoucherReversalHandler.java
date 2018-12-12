@@ -10,6 +10,7 @@ import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.model.ValidationResponse;
 import io.electrum.suv.server.util.RequestKey;
+import io.electrum.suv.server.util.RequestKey.ResourceType;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
 
@@ -71,7 +72,7 @@ public class VoucherReversalHandler extends BaseHandler {
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
             SUVTestServerRunner.getTestServer().getVoucherReversalRecords();
       RequestKey reversalKey =
-            new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, reversal.getRequestId());
+            new RequestKey(username, password, ResourceType.REVERSALS_RESOURCE, reversal.getRequestId());
       reversalRecords.put(reversalKey, reversal);
    }
 

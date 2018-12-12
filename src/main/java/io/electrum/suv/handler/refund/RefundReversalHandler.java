@@ -13,6 +13,7 @@ import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.model.ValidationResponse;
 import io.electrum.suv.server.util.RequestKey;
+import io.electrum.suv.server.util.RequestKey.ResourceType;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
 
@@ -51,7 +52,7 @@ public class RefundReversalHandler extends BaseHandler {
          RefundResponse refundRsp =
                SUVTestServerRunner.getTestServer()
                      .getRefundResponseRecords()
-                     .get(new RequestKey(username, password, RequestKey.REFUNDS_RESOURCE, refundUuid));
+                     .get(new RequestKey(username, password, ResourceType.REFUNDS_RESOURCE, refundUuid));
 
          String voucherCode;
          if (refundRsp == null)
@@ -88,7 +89,7 @@ public class RefundReversalHandler extends BaseHandler {
    private void addRefundReversalToCache() {
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
             SUVTestServerRunner.getTestServer().getRefundReversalRecords();
-      RequestKey key = new RequestKey(username, password, RequestKey.REFUNDS_RESOURCE, reversal.getRequestId());
+      RequestKey key = new RequestKey(username, password, ResourceType.REFUNDS_RESOURCE, reversal.getRequestId());
 
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
@@ -96,7 +97,7 @@ public class RefundReversalHandler extends BaseHandler {
             SUVTestServerRunner.getTestServer().getRefundRequestRecords();
 
       RefundRequest refundRequest = refundRequestRecords.get(key);
-      key.setResourceType(RequestKey.REVERSALS_RESOURCE);
+      key.setResourceType(ResourceType.REVERSALS_RESOURCE);
       reversalRecords.put(key, reversal);
       if (refundRequest != null) {
          confirmedExistingVouchers

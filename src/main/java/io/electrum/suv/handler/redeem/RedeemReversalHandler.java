@@ -13,6 +13,7 @@ import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.model.ValidationResponse;
 import io.electrum.suv.server.util.RequestKey;
+import io.electrum.suv.server.util.RequestKey.ResourceType;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
 
@@ -52,7 +53,7 @@ public class RedeemReversalHandler extends BaseHandler {
          RedemptionResponse redemptionRsp =
                SUVTestServerRunner.getTestServer()
                      .getRedemptionResponseRecords()
-                     .get(new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, redemptionUuid));
+                     .get(new RequestKey(username, password, ResourceType.REDEMPTIONS_RESOURCE, redemptionUuid));
 
          String voucherCode;
          if (redemptionRsp == null)
@@ -90,7 +91,7 @@ public class RedeemReversalHandler extends BaseHandler {
    private void addRedemptionReversalToCache() {
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
             SUVTestServerRunner.getTestServer().getRedemptionReversalRecords();
-      RequestKey key = new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, reversal.getRequestId());
+      RequestKey key = new RequestKey(username, password, ResourceType.REDEMPTIONS_RESOURCE, reversal.getRequestId());
 
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
@@ -98,7 +99,7 @@ public class RedeemReversalHandler extends BaseHandler {
             SUVTestServerRunner.getTestServer().getRedemptionRequestRecords();
 
       RedemptionRequest redemptionRequest = redemptionRequestRecords.get(key);
-      key.setResourceType(RequestKey.REVERSALS_RESOURCE);
+      key.setResourceType(ResourceType.REVERSALS_RESOURCE);
       reversalRecords.put(key, reversal);
       if (redemptionRequest != null) {
          confirmedExistingVouchers

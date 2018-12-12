@@ -15,6 +15,7 @@ import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.model.ValidationResponse;
 import io.electrum.suv.server.util.RefundModelUtils;
 import io.electrum.suv.server.util.RequestKey;
+import io.electrum.suv.server.util.RequestKey.ResourceType;
 import io.electrum.suv.server.util.VoucherModelUtils;
 
 public class RefundVoucherHandler extends BaseHandler {
@@ -103,7 +104,7 @@ public class RefundVoucherHandler extends BaseHandler {
     * @return the corresponding {@link RequestKey} for this entry.
     */
    private RequestKey addRefundRequestToCache(String voucherId, RefundRequest request) {
-      RequestKey key = new RequestKey(username, password, RequestKey.REFUNDS_RESOURCE, voucherId);
+      RequestKey key = new RequestKey(username, password, ResourceType.REFUNDS_RESOURCE, voucherId);
 
       ConcurrentHashMap<RequestKey, RefundRequest> voucherRefundRecords =
             SUVTestServerRunner.getTestServer().getRefundRequestRecords();

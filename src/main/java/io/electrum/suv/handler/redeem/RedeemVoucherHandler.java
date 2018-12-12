@@ -15,6 +15,7 @@ import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.model.ValidationResponse;
 import io.electrum.suv.server.util.RequestKey;
+import io.electrum.suv.server.util.RequestKey.ResourceType;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
 
@@ -110,7 +111,7 @@ public class RedeemVoucherHandler extends BaseHandler {
     * @return the corresponding {@link RequestKey} for this entry.
     */
    private RequestKey addRedemptionRequestToCache(String requestUuid, RedemptionRequest request) {
-      RequestKey key = new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, requestUuid);
+      RequestKey key = new RequestKey(username, password, ResourceType.REDEMPTIONS_RESOURCE, requestUuid);
       ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRecords =
             SUVTestServerRunner.getTestServer().getRedemptionRequestRecords();
 

@@ -13,6 +13,7 @@ import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.model.ValidationResponse;
 import io.electrum.suv.server.util.RequestKey;
+import io.electrum.suv.server.util.RequestKey.ResourceType;
 import io.electrum.suv.server.util.VoucherModelUtils;
 
 public class VoucherProvisionHandler extends BaseHandler {
@@ -97,7 +98,7 @@ public class VoucherProvisionHandler extends BaseHandler {
     * @return the corresponding {@link RequestKey} for this entry.
     */
    private RequestKey addVoucherRequestToCache(String voucherId, ProvisionRequest request) {
-      RequestKey key = new RequestKey(username, password, RequestKey.VOUCHERS_RESOURCE, voucherId);
+      RequestKey key = new RequestKey(username, password, ResourceType.VOUCHERS_RESOURCE, voucherId);
       ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords =
             SUVTestServerRunner.getTestServer().getVoucherProvisionRecords();
       provisionRecords.put(key, request);
