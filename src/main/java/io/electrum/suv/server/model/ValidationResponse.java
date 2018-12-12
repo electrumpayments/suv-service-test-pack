@@ -14,8 +14,9 @@ public class ValidationResponse {
    }
 
    /**
-    * Setting the response field to null indicates that no error response was created. This method abstracts that null
-    * check away.
+    * Abstracts away the use of null to indicate whether an error is present
+    *
+    * @returns whether an error response is stored or not
     */
    public boolean hasErrorResponse() {
       return response != null;
