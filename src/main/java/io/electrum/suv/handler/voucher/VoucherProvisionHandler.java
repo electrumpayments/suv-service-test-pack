@@ -73,8 +73,6 @@ public class VoucherProvisionHandler extends BaseHandler {
       }
    }
 
-
-
    /**
     * Adds the voucher provision response to the VoucherResponseRecords
     * 
@@ -101,7 +99,7 @@ public class VoucherProvisionHandler extends BaseHandler {
    private RequestKey addVoucherRequestToCache(String voucherId, ProvisionRequest request) {
       RequestKey key = new RequestKey(username, password, RequestKey.VOUCHERS_RESOURCE, voucherId);
       ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords =
-              SUVTestServerRunner.getTestServer().getVoucherProvisionRecords();
+            SUVTestServerRunner.getTestServer().getVoucherProvisionRecords();
       provisionRecords.put(key, request);
       return key;
    }

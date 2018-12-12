@@ -18,12 +18,11 @@ import io.electrum.vas.model.TenderAdvice;
 public class VoucherConfirmationHandler extends BaseHandler {
    /** The UUID identifying the request that this confirmation relates to */
    private String voucherProvisionUuid;
+   private TenderAdvice confirmation;
 
    public VoucherConfirmationHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
    }
-
-   private TenderAdvice confirmation;
 
    /**
     * Handle the response to a confirmVoucher request.

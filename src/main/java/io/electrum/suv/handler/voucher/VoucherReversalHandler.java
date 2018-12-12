@@ -14,11 +14,11 @@ import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
 
 public class VoucherReversalHandler extends BaseHandler {
+   private BasicReversal reversal;
+
    public VoucherReversalHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
    }
-
-   private BasicReversal reversal;
 
    /**
     * Handle the response to a reverseVoucher request.

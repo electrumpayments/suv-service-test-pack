@@ -34,8 +34,8 @@ public class RefundVoucherHandler extends BaseHandler {
     * @param refundRequest
     *           from request body
     * @param uriInfo
-    * @return a {@link RefundResponse} for this transaction or a 400 Error if there is a format error or the voucher
-    *         is already redeemed or reversed.
+    * @return a {@link RefundResponse} for this transaction or a 400 Error if there is a format error or the voucher is
+    *         already redeemed or reversed.
     */
    public Response handle(RefundRequest refundRequest, UriInfo uriInfo) {
       try {
@@ -74,6 +74,7 @@ public class RefundVoucherHandler extends BaseHandler {
          return logAndBuildException(e);
       }
    }
+
    /**
     * Adds the refund response to the RefundResponseRecords
     *
@@ -92,6 +93,7 @@ public class RefundVoucherHandler extends BaseHandler {
       confirmedExistingVouchers.put(voucherCode, SUVTestServer.VoucherState.REFUNDED);
 
    }
+
    /**
     * Adds the voucher refund request to the RefundRequestRecords
     *

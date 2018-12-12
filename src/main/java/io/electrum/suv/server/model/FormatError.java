@@ -79,10 +79,7 @@ public class FormatError {
    @Override
    public String toString() {
 
-      return "class DetailMessage {\n" +
-              "    field: " + Utils.toIndentedString(field) + "\n" +
-              "    msg: " + Utils.toIndentedString(msg) + "\n" +
-              "    value: " + Utils.toIndentedString(value) + "\n" +
-              "}";
+      return "class DetailMessage {\n" + "    field: " + Utils.toIndentedString(field) + "\n" + "    msg: "
+            + Utils.toIndentedString(msg) + "\n" + "    value: " + Utils.toIndentedString(value) + "\n" + "}";
    }
 }

@@ -426,25 +426,18 @@ public class DetailMessage {
 
    @Override
    public String toString() {
-      return "class DetailMessage {\n" +
-              "    pathId: " + Utils.toIndentedString(pathId) + "\n" +
-              "    voucherId: " + Utils.toIndentedString(voucherId) + "\n" +
-              "    reversalId: " + Utils.toIndentedString(reversalId) + "\n" +
-              "    confirmationId: " + Utils.toIndentedString(confirmationId) + "\n" +
-              "    voidId: " + Utils.toIndentedString(voidId) + "\n" +
-              "    requestTime: " + Utils.toIndentedString(requestTime) + "\n" +
-              "    reversalTime: " + Utils.toIndentedString(reversalTime) + "\n" +
-              "    confirmDate: " + Utils.toIndentedString(confirmDate) + "\n" +
-              "    voidDate: " + Utils.toIndentedString(voidDate) + "\n" +
-              "    originator: " + Utils.toIndentedString(originator) + "\n" +
-              "    sender: " + Utils.toIndentedString(client) + "\n" +
-              "    processor: " + Utils.toIndentedString(settlementEntity) + "\n" +
-              "    vendor: " + Utils.toIndentedString(receiver) + "\n" +
-              " voucher: " + Utils.toIndentedString(voucher) + "\n" +
-              "    slipData: " + Utils.toIndentedString(slipData) + "\n" +
-              "    thirdPartyIdentifiers: " + Utils.toIndentedString(thirdPartyIdentifiers) + "\n" +
-              "    freeString: " + Utils.toIndentedString(freeString) + "\n" +
-              "    formatErrors: " + Utils.toIndentedString(formatErrors) + "\n" +
-              "}";
+      return "class DetailMessage {\n" + "    pathId: " + Utils.toIndentedString(pathId) + "\n" + "    voucherId: "
+            + Utils.toIndentedString(voucherId) + "\n" + "    reversalId: " + Utils.toIndentedString(reversalId) + "\n"
+            + "    confirmationId: " + Utils.toIndentedString(confirmationId) + "\n" + "    voidId: "
+            + Utils.toIndentedString(voidId) + "\n" + "    requestTime: " + Utils.toIndentedString(requestTime) + "\n"
+            + "    reversalTime: " + Utils.toIndentedString(reversalTime) + "\n" + "    confirmDate: "
+            + Utils.toIndentedString(confirmDate) + "\n" + "    voidDate: " + Utils.toIndentedString(voidDate) + "\n"
+            + "    originator: " + Utils.toIndentedString(originator) + "\n" + "    sender: "
+            + Utils.toIndentedString(client) + "\n" + "    processor: " + Utils.toIndentedString(settlementEntity)
+            + "\n" + "    vendor: " + Utils.toIndentedString(receiver) + "\n" + " voucher: "
+            + Utils.toIndentedString(voucher) + "\n" + "    slipData: " + Utils.toIndentedString(slipData) + "\n"
+            + "    thirdPartyIdentifiers: " + Utils.toIndentedString(thirdPartyIdentifiers) + "\n" + "    freeString: "
+            + Utils.toIndentedString(freeString) + "\n" + "    formatErrors: " + Utils.toIndentedString(formatErrors)
+            + "\n" + "}";
    }
 }

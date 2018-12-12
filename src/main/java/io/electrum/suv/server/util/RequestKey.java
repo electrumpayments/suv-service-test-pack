@@ -77,13 +77,7 @@ public class RequestKey {
 
    @Override
    public String toString() {
-      return username +
-              "|" +
-              password +
-              "|" +
-              resourceType +
-              "|" +
-              uuid;
+      return username + "|" + password + "|" + resourceType + "|" + uuid;
    }
 
 }

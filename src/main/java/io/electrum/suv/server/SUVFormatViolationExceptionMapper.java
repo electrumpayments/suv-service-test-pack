@@ -17,7 +17,7 @@ import io.electrum.suv.server.model.FormatException;
  */
 @Provider
 public class SUVFormatViolationExceptionMapper implements ExceptionMapper<FormatException> {
-   
+
    @Override
    public Response toResponse(FormatException exception) {
       List<String> errors = new ArrayList<>();

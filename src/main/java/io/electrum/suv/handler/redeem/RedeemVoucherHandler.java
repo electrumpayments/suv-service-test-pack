@@ -49,7 +49,6 @@ public class RedeemVoucherHandler extends BaseHandler {
          VoucherModelUtils.validateUuid(uuid);
          VoucherModelUtils.validateThirdPartyIdTransactionIds(redemptionRequest.getThirdPartyIdentifiers());
 
-
          validationRsp = validateClientIdUsernameMatch(redemptionRequest);
          if (validationRsp.hasErrorResponse())
             return validationRsp.getResponse();

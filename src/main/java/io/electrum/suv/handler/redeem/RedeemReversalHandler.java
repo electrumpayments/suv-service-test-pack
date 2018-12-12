@@ -18,11 +18,11 @@ import io.electrum.vas.model.BasicReversal;
 
 public class RedeemReversalHandler extends BaseHandler {
 
+   private BasicReversal reversal;
+
    public RedeemReversalHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
    }
-
-   private BasicReversal reversal;
 
    /**
     * Handle the response to a reverseRedeem request.

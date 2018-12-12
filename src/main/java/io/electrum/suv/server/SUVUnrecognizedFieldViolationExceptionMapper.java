@@ -10,7 +10,6 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import io.electrum.suv.server.model.FormatException;
 
 /**
  * Custom exception mapper for {@link com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
@@ -24,7 +23,7 @@ public class SUVUnrecognizedFieldViolationExceptionMapper implements ExceptionMa
    @Override
    public Response toResponse(UnrecognizedPropertyException exception) {
       List<String> errors = new ArrayList<>();
-      errors.add("Unrecognized field '"+exception.getPropertyName()+"'");
+      errors.add("Unrecognized field '" + exception.getPropertyName() + "'");
       return Response.status(Response.Status.BAD_REQUEST).entity(buildFormatErrorRsp(errors)).build();
    }
 }
