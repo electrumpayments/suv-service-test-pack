@@ -17,6 +17,7 @@ import io.electrum.vas.model.BasicAdvice;
 
 public class RefundConfirmationHandler extends BaseHandler {
    private String voucherCode;
+   private BasicAdvice confirmation;
 
    public RefundConfirmationHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
@@ -36,12 +37,12 @@ public class RefundConfirmationHandler extends BaseHandler {
     */
    public Response handle(BasicAdvice confirmation) {
       try {
-         ValidationResponse validationRsp;
-
-         // THe UUID of this request
+         // The UUID of this request
          String confirmationUuid = confirmation.getId();
          // The UUID identifying the request that this confirmation relates to
          String refundUuid = confirmation.getRequestId();
+         ValidationResponse validationRsp;
+         this.confirmation = confirmation;
 
          // Validate uuid format in code until it can be ported to hibernate in the interface
          VoucherModelUtils.validateUuid(confirmationUuid);
@@ -64,7 +65,7 @@ public class RefundConfirmationHandler extends BaseHandler {
             return validationRsp.getResponse();
          }
 
-         addRefundConfirmationToCache(confirmation);
+         addRefundConfirmationToCache();
 
          validationRsp.setResponse(Response.accepted((confirmation)).build());
 

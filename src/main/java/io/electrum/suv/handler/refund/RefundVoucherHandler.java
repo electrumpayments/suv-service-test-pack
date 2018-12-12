@@ -40,7 +40,7 @@ public class RefundVoucherHandler extends BaseHandler {
    public Response handle(RefundRequest refundRequest, UriInfo uriInfo) {
       try {
          ValidationResponse validationRsp;
-          String refundUuid = refundRequest.getId();
+         String refundUuid = refundRequest.getId();
          voucherCode = refundRequest.getVoucher().getCode();
 
          // Validate uuid format in code until it can be ported to hibernate in the interface
@@ -88,7 +88,7 @@ public class RefundVoucherHandler extends BaseHandler {
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
 
-      refundResponseRecords.put(key, request);
+      refundResponseRecords.put(key, refundResponse);
       confirmedExistingVouchers.put(voucherCode, SUVTestServer.VoucherState.REFUNDED);
 
    }

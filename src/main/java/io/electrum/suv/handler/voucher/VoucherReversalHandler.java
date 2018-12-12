@@ -14,10 +14,6 @@ import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
 
 public class VoucherReversalHandler extends BaseHandler {
-
-   // --Commented out by Inspection (2018/12/07, 07:29):private static final Logger log =
-   // LoggerFactory.getLogger(VoucherProvisionHandler.class);
-
    public VoucherReversalHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
    }
@@ -38,12 +34,12 @@ public class VoucherReversalHandler extends BaseHandler {
     */
    public Response handle(BasicReversal reversal) {
       try {
-         ValidationResponse validationRsp = new ValidationResponse(null);
-
          // The UUID of this request
          String reversalUuid = reversal.getId();
          // The UUID identifying the request that this reversal relates to
          String voucherId = reversal.getRequestId();
+         ValidationResponse validationRsp;
+         this.reversal = reversal;
 
          VoucherModelUtils.validateUuid(reversalUuid);
          VoucherModelUtils.validateUuid(voucherId);
@@ -53,14 +49,14 @@ public class VoucherReversalHandler extends BaseHandler {
          if (validationRsp.hasErrorResponse()) {
             if (validationRsp.getResponse().getStatus() == 404) {
                // make sure to record the reversal in case we get the request late.
-               addVoucherReversalToCache(reversal);
+               addVoucherReversalToCache();
             }
             return validationRsp.getResponse();
          }
 
-         addVoucherReversalToCache(reversal);
+         addVoucherReversalToCache();
 
-         validationRsp.setResponse(Response.accepted((reversal)).build()); // TODO Ask Casey if this is ok
+         validationRsp.setResponse(Response.accepted((reversal)).build());
 
          return validationRsp.getResponse();
 
@@ -71,12 +67,12 @@ public class VoucherReversalHandler extends BaseHandler {
       }
    }
 
-   private void addVoucherReversalToCache(BasicReversal basicReversal) {
+   private void addVoucherReversalToCache() {
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
             SUVTestServerRunner.getTestServer().getVoucherReversalRecords();
       RequestKey reversalKey =
-            new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, basicReversal.getRequestId());
-      reversalRecords.put(reversalKey, basicReversal);
+            new RequestKey(username, password, RequestKey.REVERSALS_RESOURCE, reversal.getRequestId());
+      reversalRecords.put(reversalKey, reversal);
    }
 
    @Override

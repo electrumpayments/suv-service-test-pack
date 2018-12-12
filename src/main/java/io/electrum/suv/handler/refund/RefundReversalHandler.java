@@ -17,6 +17,7 @@ import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.BasicReversal;
 
 public class RefundReversalHandler extends BaseHandler {
+   private BasicReversal reversal;
 
    public RefundReversalHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
@@ -36,12 +37,12 @@ public class RefundReversalHandler extends BaseHandler {
     */
    public Response handle(BasicReversal reversal) {
       try {
-         ValidationResponse validationRsp;
-
          // The UUID of this request
          String reversalUuid = reversal.getId();
          // The UUID identifying the request that this reversal relates to
          String refundUuid = reversal.getRequestId();
+         ValidationResponse validationRsp;
+         this.reversal = reversal;
 
          VoucherModelUtils.validateUuid(reversalUuid);
          VoucherModelUtils.validateUuid(refundUuid);
@@ -62,12 +63,12 @@ public class RefundReversalHandler extends BaseHandler {
          if (validationRsp.hasErrorResponse()) {
             if (validationRsp.getResponse().getStatus() == 404) {
                // make sure to record the reversal in case we get the request late.
-               addRefundReversalToCache(reversal);
+               addRefundReversalToCache();
             }
             return validationRsp.getResponse();
          }
 
-         addRefundReversalToCache(reversal);
+         addRefundReversalToCache();
 
          validationRsp.setResponse(Response.accepted((reversal)).build());
 
@@ -87,7 +88,7 @@ public class RefundReversalHandler extends BaseHandler {
    private void addRefundReversalToCache() {
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
             SUVTestServerRunner.getTestServer().getRefundReversalRecords();
-      RequestKey key = new RequestKey(username, password, RequestKey.REFUNDS_RESOURCE, basicReversal.getRequestId());
+      RequestKey key = new RequestKey(username, password, RequestKey.REFUNDS_RESOURCE, reversal.getRequestId());
 
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
@@ -96,7 +97,7 @@ public class RefundReversalHandler extends BaseHandler {
 
       RefundRequest refundRequest = refundRequestRecords.get(key);
       key.setResourceType(RequestKey.REVERSALS_RESOURCE);
-      reversalRecords.put(key, basicReversal);
+      reversalRecords.put(key, reversal);
       if (refundRequest != null) {
          confirmedExistingVouchers
                .put(refundRequest.getVoucher().getCode(), SUVTestServer.VoucherState.CONFIRMED_REDEEMED);

@@ -128,10 +128,10 @@ public class SUVModelUtils {
 
    /** Builds an {@link ErrorDetail} for duplicate UUID errors */
    static ErrorDetail buildDuplicateUuidErrorDetail(
-           String objectId,
-           String originalMsgId,
-           // ErrorDetail.RequestType requestType,
-           Transaction transaction) {
+         String objectId,
+         String originalMsgId,
+         // ErrorDetail.RequestType requestType,
+         Transaction transaction) {
 
       ErrorDetail errorDetail =
             buildErrorDetail(
@@ -152,12 +152,12 @@ public class SUVModelUtils {
 
    /** Builds a new error detail (including a detail message) from specific messages. */
    static ErrorDetail buildErrorDetail(
-           String objectId,
-           String errorMessage,
-           String detailMessageFreeString,
-           String originalMsgId,
-           // ErrorDetail.RequestType requestType,
-           ErrorDetail.ErrorType errorType) {
+         String objectId,
+         String errorMessage,
+         String detailMessageFreeString,
+         String originalMsgId,
+         // ErrorDetail.RequestType requestType,
+         ErrorDetail.ErrorType errorType) {
 
       ErrorDetail errorDetail =
             new ErrorDetail().errorType(errorType).errorMessage(errorMessage).id(objectId).originalId(originalMsgId);

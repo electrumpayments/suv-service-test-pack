@@ -38,12 +38,12 @@ public class RedeemReversalHandler extends BaseHandler {
     */
    public Response handle(BasicReversal reversal) {
       try {
-         ValidationResponse validatioRsp;
-
          // The UUID of this request
          String reversalUuid = reversal.getId();
          // The UUID identifying the request that this reversal relates to
          String redemptionUuid = reversal.getRequestId();
+         ValidationResponse validationRsp;
+         this.reversal = reversal;
 
          VoucherModelUtils.validateUuid(reversalUuid);
          VoucherModelUtils.validateUuid(redemptionUuid);
@@ -60,21 +60,22 @@ public class RedeemReversalHandler extends BaseHandler {
          else
             voucherCode = redemptionRsp.getVoucher().getCode();
 
-         // TODO check this in airtime
-         validatioRsp = VoucherModelUtils.canReverseRedemption(redemptionUuid, reversalUuid, username, password, voucherCode);
-         if (validatioRsp.hasErrorResponse()) {
-            if (validatioRsp.getResponse().getStatus() == 404) {
+         validationRsp =
+               VoucherModelUtils.canReverseRedemption(redemptionUuid, reversalUuid, username, password, voucherCode);
+         if (validationRsp.hasErrorResponse()) {
+            if (validationRsp.getResponse().getStatus() == 404) {
                // make sure to record the reversal in case we get the request late.
-               addRedemptionReversalToCache(reversal);
+               addRedemptionReversalToCache();
             }
-            return validatioRsp.getResponse();
+            return validationRsp.getResponse();
          }
 
-         addRedemptionReversalToCache(reversal);
+         addRedemptionReversalToCache();
 
-         validatioRsp.setResponse(Response.accepted((reversal)).build()); // TODO Ask Casey if this is ok
+         validationRsp.setResponse(Response.accepted((reversal)).build());
 
-         return validatioRsp.getResponse();
+         return validationRsp.getResponse();
+
       } catch (FormatException fe) {
          throw fe;
       } catch (Exception e) {
@@ -86,11 +87,10 @@ public class RedeemReversalHandler extends BaseHandler {
     * Check for a corresponding redemption request and update the voucher's state if it exists. Add the reversal to the
     * cache.
     */
-   private void addRedemptionReversalToCache(BasicReversal basicReversal) {
+   private void addRedemptionReversalToCache() {
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
             SUVTestServerRunner.getTestServer().getRedemptionReversalRecords();
-      RequestKey key =
-            new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, basicReversal.getRequestId());
+      RequestKey key = new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, reversal.getRequestId());
 
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
@@ -99,7 +99,7 @@ public class RedeemReversalHandler extends BaseHandler {
 
       RedemptionRequest redemptionRequest = redemptionRequestRecords.get(key);
       key.setResourceType(RequestKey.REVERSALS_RESOURCE);
-      reversalRecords.put(key, basicReversal);
+      reversalRecords.put(key, reversal);
       if (redemptionRequest != null) {
          confirmedExistingVouchers
                .put(redemptionRequest.getVoucher().getCode(), SUVTestServer.VoucherState.CONFIRMED_PROVISIONED);

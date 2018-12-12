@@ -6,6 +6,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import io.electrum.suv.api.models.ProvisionResponse;
 import io.electrum.suv.api.models.RedemptionRequest;
 import io.electrum.suv.api.models.RedemptionResponse;
 import io.electrum.suv.handler.BaseHandler;
@@ -42,7 +43,7 @@ public class RedeemVoucherHandler extends BaseHandler {
     */
    public Response handle(RedemptionRequest redemptionRequest, UriInfo uriInfo) {
       try {
-         ValidationResponse validationRsp = new ValidationResponse(null);
+         ValidationResponse validationRsp;
 
          String uuid = redemptionRequest.getId();
          VoucherModelUtils.validateUuid(uuid);

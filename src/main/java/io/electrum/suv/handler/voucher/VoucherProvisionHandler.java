@@ -41,7 +41,7 @@ public class VoucherProvisionHandler extends BaseHandler {
     */
    public Response handle(ProvisionRequest provisionRequest, UriInfo uriInfo) {
       try {
-         ValidationResponse validationRsp = new ValidationResponse(null);
+         ValidationResponse validationRsp;
 
          String uuid = provisionRequest.getId();
          VoucherModelUtils.validateUuid(uuid);
@@ -49,7 +49,7 @@ public class VoucherProvisionHandler extends BaseHandler {
          VoucherModelUtils.validateThirdPartyIdTransactionIds(provisionRequest.getThirdPartyIdentifiers());
 
          // Confirm that the basicAuth ID matches clientID in message body
-         validationRsp = validateClientIdUsernameMatch(provisionRequest, uuid);
+         validationRsp = validateClientIdUsernameMatch(provisionRequest);
          if (validationRsp.hasErrorResponse())
             return validationRsp.getResponse();
 
@@ -101,7 +101,7 @@ public class VoucherProvisionHandler extends BaseHandler {
    private RequestKey addVoucherRequestToCache(String voucherId, ProvisionRequest request) {
       RequestKey key = new RequestKey(username, password, RequestKey.VOUCHERS_RESOURCE, voucherId);
       ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords =
-            SUVTestServerRunner.getTestServer().getVoucherProvisionRecords();
+              SUVTestServerRunner.getTestServer().getVoucherProvisionRecords();
       provisionRecords.put(key, request);
       return key;
    }

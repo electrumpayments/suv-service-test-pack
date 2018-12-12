@@ -169,7 +169,7 @@ public class VoucherModelUtils extends SUVModelUtils {
     * @return A {@Link ValidationResponse} set to no error response if the confirmation can complete, a 404 response if
     *         a corresponding request is not found, and a 400 response if the provision request has been confirmed.
     */
-   public static Response canConfirmVoucher(
+   public static ValidationResponse canConfirmVoucher(
          String voucherUuid,
          String confirmationUuid,
          String username,
@@ -188,7 +188,7 @@ public class VoucherModelUtils extends SUVModelUtils {
                .detailMessage(
                      new DetailMessage().freeString("No VoucherRequest located for given voucherId.")
                            .voucherId(voucherUuid));
-         return Response.status(404).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(404).entity(errorDetail).build());
       }
 
       // check it's not reversed
@@ -209,9 +209,9 @@ public class VoucherModelUtils extends SUVModelUtils {
          if (rsp != null) {
             detailMessage.setVoucher(rsp.getVoucher());
          }
-         return Response.status(400).entity(errorDetail).build();
+         return new ValidationResponse(Response.status(400).entity(errorDetail).build());
       }
-      return null;
+      return new ValidationResponse(null);
    }
 
    // TODO Ensure method is correct
@@ -287,7 +287,8 @@ public class VoucherModelUtils extends SUVModelUtils {
             JsonUtil.deserialize(JsonUtil.serialize(req, ProvisionRequest.class), ProvisionResponse.class);
 
       updateWithRandomizedIdentifiers(voucherResponse);
-      voucherResponse.setVoucher(createRandomizedVoucher());
+      if (req.getVoucher() == null)
+         voucherResponse.setVoucher(createRandomizedVoucher());
       voucherResponse.setSlipData(createRandomizedSlipData());
       // voucherResponse.setResponseProduct(req.getProduct().name("TalkALot").type(Product.ProductType.AIRTIME_FIXED));
       return voucherResponse;
@@ -307,7 +308,7 @@ public class VoucherModelUtils extends SUVModelUtils {
     * @return whether voucher with this UUID has been provisioned.
     */
    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-   private static boolean isVoucherProvisioned( // TODO Refactor naming
+   private static boolean isVoucherProvisioned(
          String voucherId,
          ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords,
          String username,

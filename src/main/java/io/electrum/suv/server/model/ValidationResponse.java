@@ -28,8 +28,4 @@ public class ValidationResponse {
    public void setResponse(Response response) {
       this.response = response;
    }
-
-   public ValidationResponse(Response rsp) {
-      response = rsp;
-   }
 }

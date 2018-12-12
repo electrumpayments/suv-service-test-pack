@@ -10,6 +10,7 @@ import io.electrum.suv.handler.BaseHandler;
 import io.electrum.suv.resource.impl.SUVTestServer.VoucherState;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
+import io.electrum.suv.server.model.ValidationResponse;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 import io.electrum.vas.model.TenderAdvice;
@@ -38,26 +39,27 @@ public class VoucherConfirmationHandler extends BaseHandler {
     */
    public Response handle(TenderAdvice confirmation) {
       try {
-         Response rsp;
-
          // The UUID of this request
          String confirmationUuid = confirmation.getId();
          voucherProvisionUuid = confirmation.getRequestId();
+         ValidationResponse validationRsp;
+         this.confirmation = confirmation;
 
          VoucherModelUtils.validateUuid(confirmationUuid);
          VoucherModelUtils.validateUuid(voucherProvisionUuid);
          VoucherModelUtils.validateThirdPartyIdTransactionIds(confirmation.getThirdPartyIdentifiers());
 
-         rsp = VoucherModelUtils.canConfirmVoucher(voucherProvisionUuid, confirmationUuid, username, password);
-         if (rsp != null) {
-            return rsp;
+         validationRsp =
+               VoucherModelUtils.canConfirmVoucher(voucherProvisionUuid, confirmationUuid, username, password);
+         if (validationRsp.hasErrorResponse()) {
+            return validationRsp.getResponse();
          }
 
-         addVoucherConfirmationToCache(confirmation);
+         addVoucherConfirmationToCache();
 
-         rsp = Response.accepted((confirmation)).build(); // TODO Ask Casey if this is ok
+         validationRsp.setResponse(Response.accepted((confirmation)).build());
 
-         return rsp;
+         return validationRsp.getResponse();
       } catch (FormatException fe) {
          throw fe;
       } catch (Exception e) {
@@ -69,7 +71,7 @@ public class VoucherConfirmationHandler extends BaseHandler {
     * Adds the voucher confirmation request to the cache and stores an entry to the voucher in the list of existing
     * vouchers
     */
-   private void addVoucherConfirmationToCache(TenderAdvice confirmation) {
+   private void addVoucherConfirmationToCache() {
       ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords =
             SUVTestServerRunner.getTestServer().getVoucherConfirmationRecords();
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
