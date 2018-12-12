@@ -13,7 +13,6 @@ import io.electrum.suv.handler.SUVMessageHandlerFactory;
 import io.electrum.vas.model.BasicAdvice;
 import io.electrum.vas.model.BasicReversal;
 
-//TODO Implement methods correctly
 class RedemptionsResourceImpl implements IRedemptionsResource {
    private static final Logger log = LoggerFactory.getLogger(RedemptionsResourceImpl.class);
 

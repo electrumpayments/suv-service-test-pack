@@ -59,7 +59,7 @@ public class VoucherModelUtils extends SUVModelUtils {
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
 
          // Check for a response for this request
-         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getVoucherResponseRecords();
+         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getProvisionResponseRecords();
          ProvisionResponse rsp = responseRecords.get(requestKey);
          // If a response is found, add it to the detailMessage
          if (rsp != null) {
@@ -85,7 +85,7 @@ public class VoucherModelUtils extends SUVModelUtils {
          // TODO what is this here for, really don't see it being !null
          // Check for a response for this request, if found add to detailMessage
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getVoucherResponseRecords();
+         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getProvisionResponseRecords();
          ProvisionResponse rsp = responseRecords.get(requestKey);
          if (rsp != null) {
             detailMessage.setVoucher(rsp.getVoucher());
@@ -204,7 +204,7 @@ public class VoucherModelUtils extends SUVModelUtils {
                            .reversalId(reversal.getId()));
 
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getVoucherResponseRecords();
+         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getProvisionResponseRecords();
          ProvisionResponse rsp = responseRecords.get(requestKey);
          if (rsp != null) {
             detailMessage.setVoucher(rsp.getVoucher());
@@ -726,7 +726,6 @@ public class VoucherModelUtils extends SUVModelUtils {
          String voucherCode) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
 
-      // TODO Convert to switch-cases
       ErrorDetail errorDetail = new ErrorDetail().id(reversalUuid).originalId(refundUuid);
 
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =

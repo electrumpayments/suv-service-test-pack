@@ -34,24 +34,23 @@ import io.electrum.vas.model.TenderAdvice;
 public class SUVTestServer extends ResourceConfig {
 
    private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
-   // The value of the hashmap is a class in the models,
-   // can be found (with its record name pair) in the docs under params/schema for each request type.
+
    private final ConcurrentHashMap<RequestKey, ProvisionRequest> voucherProvisionRecords;
-   private final ConcurrentHashMap<RequestKey, ProvisionResponse> voucherResponseRecords; // Holds response returned to
-                                                                                          // vendor
-   // after voucher is provisioned.
+   private final ConcurrentHashMap<RequestKey, ProvisionResponse> provisionResponseRecords;
    private final ConcurrentHashMap<RequestKey, TenderAdvice> voucherConfirmationRecords;
    private final ConcurrentHashMap<RequestKey, BasicReversal> voucherReversalRecords;
-   private final ConcurrentHashMap<RequestKey, BasicAdvice> redemptionConfirmationRecords;
-   private final ConcurrentHashMap<RequestKey, BasicReversal> redemptionReversalRecords;
+
    private final ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRequestRecords;
    private final ConcurrentHashMap<RequestKey, RedemptionResponse> redemptionResponseRecords;
-   private final ConcurrentHashMap<RequestKey, BasicAdvice> refundConfirmationRecords;
-   private final ConcurrentHashMap<RequestKey, BasicReversal> refundReversalRecords;
+   private final ConcurrentHashMap<RequestKey, BasicAdvice> redemptionConfirmationRecords;
+   private final ConcurrentHashMap<RequestKey, BasicReversal> redemptionReversalRecords;
+
    private final ConcurrentHashMap<RequestKey, RefundRequest> refundRequestRecords;
    private final ConcurrentHashMap<RequestKey, RefundResponse> refundResponseRecords;
+   private final ConcurrentHashMap<RequestKey, BasicAdvice> refundConfirmationRecords;
+   private final ConcurrentHashMap<RequestKey, BasicReversal> refundReversalRecords;
 
-   private final ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers;
+   private final ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers;// records state of existing vouchers
 
    public SUVTestServer() {
       packages(SUVTestServer.class.getPackage().getName());
@@ -67,50 +66,29 @@ public class SUVTestServer extends ResourceConfig {
       register(new SUVUnrecognizedFieldViolationExceptionMapper());
 
       voucherProvisionRecords = new ConcurrentHashMap<>();
-      voucherResponseRecords = new ConcurrentHashMap<>();
+      provisionResponseRecords = new ConcurrentHashMap<>();
       voucherConfirmationRecords = new ConcurrentHashMap<>();
       voucherReversalRecords = new ConcurrentHashMap<>();
 
-      redemptionConfirmationRecords = new ConcurrentHashMap<>();
-      redemptionReversalRecords = new ConcurrentHashMap<>();
       redemptionRequestRecords = new ConcurrentHashMap<>();
       redemptionResponseRecords = new ConcurrentHashMap<>();
+      redemptionConfirmationRecords = new ConcurrentHashMap<>();
+      redemptionReversalRecords = new ConcurrentHashMap<>();
 
-      refundConfirmationRecords = new ConcurrentHashMap<>();
-      refundReversalRecords = new ConcurrentHashMap<>();
       refundRequestRecords = new ConcurrentHashMap<>();
       refundResponseRecords = new ConcurrentHashMap<>();
+      refundConfirmationRecords = new ConcurrentHashMap<>();
+      refundReversalRecords = new ConcurrentHashMap<>();
 
       confirmedExistingVouchers = new ConcurrentHashMap<>();
-
-      log.debug("Initialising new TestServer");
-   }
-
-   // TODO CodeStyle reorder methods
-   // TODO Generate setters as needed
-
-   public ConcurrentHashMap<RequestKey, ProvisionResponse> getVoucherResponseRecords() {
-      return voucherResponseRecords;
-   }
-
-   public ConcurrentHashMap<RequestKey, BasicAdvice> getRedemptionConfirmationRecords() {
-      return redemptionConfirmationRecords;
-   }
-
-   public ConcurrentHashMap<RequestKey, BasicReversal> getRedemptionReversalRecords() {
-      return redemptionReversalRecords;
-   }
-
-   public ConcurrentHashMap<RequestKey, BasicAdvice> getRefundConfirmationRecords() {
-      return refundConfirmationRecords;
-   }
-
-   public ConcurrentHashMap<RequestKey, BasicReversal> getRefundReversalRecords() {
-      return refundReversalRecords;
    }
 
    public ConcurrentHashMap<RequestKey, ProvisionRequest> getVoucherProvisionRecords() {
       return voucherProvisionRecords;
+   }
+
+   public ConcurrentHashMap<RequestKey, ProvisionResponse> getProvisionResponseRecords() {
+      return provisionResponseRecords;
    }
 
    public ConcurrentHashMap<RequestKey, TenderAdvice> getVoucherConfirmationRecords() {
@@ -121,41 +99,43 @@ public class SUVTestServer extends ResourceConfig {
       return voucherReversalRecords;
    }
 
-   // --Commented out by Inspection START (2018/12/06, 18:30):
-   // public ConcurrentHashMap<RequestKey, String> getPurchaseReferenceRecords() {
-   // return purchaseReferenceRecords;
-   // }
-   // --Commented out by Inspection STOP (2018/12/06, 18:30)
-
    public ConcurrentHashMap<RequestKey, RedemptionRequest> getRedemptionRequestRecords() {
       return redemptionRequestRecords;
-   }
-
-   public ConcurrentHashMap<RequestKey, RefundRequest> getRefundRequestRecords() {
-      return refundRequestRecords;
    }
 
    public ConcurrentHashMap<RequestKey, RedemptionResponse> getRedemptionResponseRecords() {
       return redemptionResponseRecords;
    }
 
+   public ConcurrentHashMap<RequestKey, BasicAdvice> getRedemptionConfirmationRecords() {
+      return redemptionConfirmationRecords;
+   }
+
+   public ConcurrentHashMap<RequestKey, BasicReversal> getRedemptionReversalRecords() {
+      return redemptionReversalRecords;
+   }
+
+   public ConcurrentHashMap<RequestKey, RefundRequest> getRefundRequestRecords() {
+      return refundRequestRecords;
+   }
+
    public ConcurrentHashMap<RequestKey, RefundResponse> getRefundResponseRecords() {
       return refundResponseRecords;
    }
 
-   // public ConcurrentHashMap<String, RequestKey> getVoucherCodeRequestKeyConfirmationRecords() {
-   // return voucherCodeRequestKeyConfirmationRecords;
-   // }
+   public ConcurrentHashMap<RequestKey, BasicAdvice> getRefundConfirmationRecords() {
+      return refundConfirmationRecords;
+   }
 
-   // public ConcurrentHashMap<String, RequestKey> getVoucherCodeRequestKeyRedemptionRecords() {
-   // return voucherCodeRequestKeyRedemptionRecords;
-   // }
+   public ConcurrentHashMap<RequestKey, BasicReversal> getRefundReversalRecords() {
+      return refundReversalRecords;
+   }
 
    public ConcurrentHashMap<String, VoucherState> getConfirmedExistingVouchers() {
       return confirmedExistingVouchers;
    }
 
-   // TODO Refactor
+   /** Represents the state of the voucher an assigns an ordering to the states */
    public enum VoucherState {
       CONFIRMED_PROVISIONED(0), REDEEMED(1), CONFIRMED_REDEEMED(2), REFUNDED(3);
 
@@ -178,16 +158,8 @@ public class SUVTestServer extends ResourceConfig {
 
       public MyObjectMapperProvider() {
          mapper = new ObjectMapper();
-         // mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-         // mapper.configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, true);
-         // mapper.configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, true);
-         // mapper.setPropertyNamingStrategy(LOWER_CASE_WITH_HYPHEN_STRATEGY);
-         // mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-         // DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
-         // mapper.setDateFormat(DATE_FORMAT);
          mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true); // TODO Make this fail and get
-                                                                                    // caught
+         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
          mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
          mapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
          mapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);

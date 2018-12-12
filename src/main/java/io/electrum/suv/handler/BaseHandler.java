@@ -13,7 +13,6 @@ import io.electrum.vas.Utils;
 import io.electrum.vas.model.Transaction;
 
 public abstract class BaseHandler {
-   // TODO Convert to SUVTestServer
    private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
 
    protected final String username;

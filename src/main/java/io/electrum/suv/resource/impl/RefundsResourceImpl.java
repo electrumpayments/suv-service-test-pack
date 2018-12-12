@@ -13,7 +13,6 @@ import io.electrum.suv.handler.SUVMessageHandlerFactory;
 import io.electrum.vas.model.BasicAdvice;
 import io.electrum.vas.model.BasicReversal;
 
-//TODO Implement methods correctly
 class RefundsResourceImpl implements IRefundsResource {
    private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
 

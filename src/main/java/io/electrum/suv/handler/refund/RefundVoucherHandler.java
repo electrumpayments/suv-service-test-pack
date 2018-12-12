@@ -61,7 +61,6 @@ public class RefundVoucherHandler extends BaseHandler {
          // The voucher can be Refunded
          RequestKey key = addRefundRequestToCache(refundUuid, refundRequest);
 
-         // TODO See Giftcard, should this all be done differently
          RefundResponse refundRsp = RefundModelUtils.refundRspFromReq(refundRequest);
          addRefundResponseToCache(key, refundRsp);
          validationRsp.setResponse(Response.created(uriInfo.getRequestUri()).entity(refundRsp).build());
@@ -104,8 +103,8 @@ public class RefundVoucherHandler extends BaseHandler {
     * @return the corresponding {@link RequestKey} for this entry.
     */
    private RequestKey addRefundRequestToCache(String voucherId, RefundRequest request) {
-      RequestKey key = new RequestKey(username, password, RequestKey.REFUNDS_RESOURCE, voucherId); // TODO are there
-                                                                                                   // other resources?
+      RequestKey key = new RequestKey(username, password, RequestKey.REFUNDS_RESOURCE, voucherId);
+
       ConcurrentHashMap<RequestKey, RefundRequest> voucherRefundRecords =
             SUVTestServerRunner.getTestServer().getRefundRequestRecords();
       voucherRefundRecords.put(key, request);

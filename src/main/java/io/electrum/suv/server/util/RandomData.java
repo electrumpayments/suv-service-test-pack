@@ -1,6 +1,5 @@
 package io.electrum.suv.server.util;
 
-//TODO This can be in a utils project
 class RandomData {
    public static String random09(int length) {
       StringBuilder sb = new StringBuilder();
