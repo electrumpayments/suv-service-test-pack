@@ -22,6 +22,18 @@ public class RefundConfirmationHandler extends BaseHandler {
       super(httpHeaders);
    }
 
+   /**
+    * Handle the response to a confirmRefund request.
+    *
+    * See <a href=
+    * "https://electrumpayments.github.io/suv-service-interface-docs/specification/operations/#confirmRefund">SUV
+    * Interface docs</a> for details.
+    *
+    * @param confirmation
+    *           from request body
+    * @return a {@link BasicAdvice} for this transaction or a 400 Error if there is a format error or the voucher is
+    *         already redeemed or reversed.
+    */
    public Response handle(BasicAdvice confirmation) {
       try {
          ValidationResponse validationRsp;
@@ -64,7 +76,10 @@ public class RefundConfirmationHandler extends BaseHandler {
       }
    }
 
-   private void addRefundConfirmationToCache(BasicAdvice confirmation) {
+   /**
+    * Adds the refund confirmation request to the cache and updates the voucher state in the list of existing vouchers.
+    */
+   private void addRefundConfirmationToCache() {
       ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords =
             SUVTestServerRunner.getTestServer().getRefundConfirmationRecords();
 

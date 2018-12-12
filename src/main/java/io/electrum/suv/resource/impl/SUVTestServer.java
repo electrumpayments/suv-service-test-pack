@@ -81,14 +81,6 @@ public class SUVTestServer extends ResourceConfig {
       refundRequestRecords = new ConcurrentHashMap<>();
       refundResponseRecords = new ConcurrentHashMap<>();
 
-      // This hashmap stores the relationship between purchase references and purchase request id's so a purchase
-      // reference
-      // can be used to retrieve the correlated purchase request id
-      ConcurrentHashMap<RequestKey, String> purchaseReferenceRecords = new ConcurrentHashMap<>();
-
-      // voucherCodeRequestKeyConfirmationRecords = new ConcurrentHashMap<>();
-      // voucherCodeRequestKeyRedemptionRecords = new ConcurrentHashMap<>();
-
       confirmedExistingVouchers = new ConcurrentHashMap<>();
 
       log.debug("Initialising new TestServer");

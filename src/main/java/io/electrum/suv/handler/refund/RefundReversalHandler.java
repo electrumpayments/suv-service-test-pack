@@ -22,6 +22,18 @@ public class RefundReversalHandler extends BaseHandler {
       super(httpHeaders);
    }
 
+   /**
+    * Handle the response to a reverseRefund request.
+    *
+    * See <a href=
+    * "https://electrumpayments.github.io/suv-service-interface-docs/specification/operations/#reverseRefund">SUV
+    * Interface docs</a> for details.
+    *
+    * @param reversal
+    *           from request body
+    * @return a {@link BasicReversal} for this transaction, a 400 error if the request is incorrectly formatted of a 404
+    *         error if the request referenced by the reversal cannot be found.
+    */
    public Response handle(BasicReversal reversal) {
       try {
          ValidationResponse validationRsp;
@@ -68,7 +80,11 @@ public class RefundReversalHandler extends BaseHandler {
       }
    }
 
-   private void addRefundReversalToCache(BasicReversal basicReversal) {
+   /**
+    * Check for a corresponding refund request and update the voucher's state if it exists. Add the reversal to the
+    * cache.
+    */
+   private void addRefundReversalToCache() {
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
             SUVTestServerRunner.getTestServer().getRefundReversalRecords();
       RequestKey key = new RequestKey(username, password, RequestKey.REFUNDS_RESOURCE, basicReversal.getRequestId());

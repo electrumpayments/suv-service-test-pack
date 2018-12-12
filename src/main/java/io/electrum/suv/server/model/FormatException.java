@@ -4,6 +4,7 @@ import io.electrum.suv.server.SUVFormatViolationExceptionMapper;
 
 /**
  * Custom Exception which can be thrown for custom formatting validation.
+ * 
  * @see SUVFormatViolationExceptionMapper
  */
 public class FormatException extends RuntimeException {

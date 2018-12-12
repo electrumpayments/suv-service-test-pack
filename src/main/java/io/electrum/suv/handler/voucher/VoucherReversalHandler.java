@@ -22,6 +22,20 @@ public class VoucherReversalHandler extends BaseHandler {
       super(httpHeaders);
    }
 
+   private BasicReversal reversal;
+
+   /**
+    * Handle the response to a reverseVoucher request.
+    *
+    * See <a href=
+    * "https://electrumpayments.github.io/suv-service-interface-docs/specification/operations/#reverseVoucher">SUV
+    * Interface docs</a> for details.
+    *
+    * @param reversal
+    *           from request body
+    * @return a {@link BasicReversal} for this transaction, a 400 error if the request is incorrectly formatted of a 404
+    *         error if the request referenced by the reversal cannot be found.
+    */
    public Response handle(BasicReversal reversal) {
       try {
          ValidationResponse validationRsp = new ValidationResponse(null);
@@ -35,7 +49,6 @@ public class VoucherReversalHandler extends BaseHandler {
          VoucherModelUtils.validateUuid(voucherId);
          VoucherModelUtils.validateThirdPartyIdTransactionIds(reversal.getThirdPartyIdentifiers());
 
-         // TODO check this in airtime
          validationRsp = VoucherModelUtils.canReverseVoucher(voucherId, reversalUuid, username, password);
          if (validationRsp.hasErrorResponse()) {
             if (validationRsp.getResponse().getStatus() == 404) {

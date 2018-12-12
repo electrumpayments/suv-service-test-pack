@@ -33,7 +33,15 @@ public abstract class BaseHandler {
       return Response.serverError().entity(e.getMessage()).build();
    }
 
-   protected ValidationResponse validateClientIdUsernameMatch(Transaction transaction, String uuid) {
+   /**
+    * Determine whether the basicAuth ID matches clientID in the message body
+    *
+    * @param transaction
+    *           the transaction to be checked
+    * @return a {@link ValidationResponse} describing whether the validation passed or resulted in an error
+    */
+   protected ValidationResponse validateClientIdUsernameMatch(Transaction transaction) {
+      String uuid = transaction.getId();
       if (!transaction.getClient().getId().equals(username)) {
          return new ValidationResponse(VoucherModelUtils.buildIncorrectUsernameErrorResponse(uuid, transaction.getClient(), username));
       }

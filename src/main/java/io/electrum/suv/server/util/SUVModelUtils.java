@@ -51,7 +51,7 @@ public class SUVModelUtils {
     * .transactionIdentifiers(basicAdvice.getThirdPartyIdentifiers()); }
     */
 
-   /** Create a new voucher with randomized values for ode, expiry date and instruction */
+   /** Create a new voucher with randomized values for code, expiry date and instruction */
    static Voucher createRandomizedVoucher() {
       Voucher voucher = new Voucher();
       voucher.setCode(RandomData.random09((int) ((Math.random() * 20) + 1)));
@@ -172,7 +172,11 @@ public class SUVModelUtils {
       return errorDetail;
    }
 
-   /** Confirms UUID format valid using regex (8-4-4-4-12 hexadecimal) */
+   /**
+    * Confirms UUID format valid using regex (8-4-4-4-12 hexadecimal)
+    *
+    * Throws a {@link FormatException} if it does not.
+    */
    @SuppressWarnings("Annotator")
    public static void validateUuid(String uuid) {
       if (!uuid.matches("([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}"))
@@ -180,6 +184,14 @@ public class SUVModelUtils {
                new FormatError().msg("UUID must conform to the format 8-4-4-4-12 hexadecimal values"));
    }
 
+   /**
+    * Checks that the ThirdPartyIdentifiers all contain a TransactionIdentifier.
+    *
+    * Throws a {@link FormatException} if any do not.
+    * 
+    * @param thirdPartyIdentifiers
+    *           list of ThirdPartyIdentifiers to validate
+    */
    public static void validateThirdPartyIdTransactionIds(List<ThirdPartyIdentifier> thirdPartyIdentifiers) {
       int cnt = 0;
       for (ThirdPartyIdentifier tpi : thirdPartyIdentifiers) {

@@ -27,6 +27,19 @@ public class RedeemVoucherHandler extends BaseHandler {
       return "Redeem Voucher";
    }
 
+   /**
+    * Handle the response to a redeemVoucher request.
+    *
+    * See <a href=
+    * "https://electrumpayments.github.io/suv-service-interface-docs/specification/operations/#provisionvoucher">SUV
+    * Interface docs</a> for details.
+    *
+    * @param redemptionRequest
+    *           from request body
+    * @param uriInfo
+    * @return a {@link ProvisionResponse} for this transaction or a 400 Error if there is a format error or the voucher
+    *         is already redeemed or reversed.
+    */
    public Response handle(RedemptionRequest redemptionRequest, UriInfo uriInfo) {
       try {
          ValidationResponse validationRsp = new ValidationResponse(null);
@@ -35,8 +48,8 @@ public class RedeemVoucherHandler extends BaseHandler {
          VoucherModelUtils.validateUuid(uuid);
          VoucherModelUtils.validateThirdPartyIdTransactionIds(redemptionRequest.getThirdPartyIdentifiers());
 
-         // Confirm that the basicAuth ID matches clientID in message body
-         validationRsp = validateClientIdUsernameMatch(redemptionRequest, uuid);
+
+         validationRsp = validateClientIdUsernameMatch(redemptionRequest);
          if (validationRsp.hasErrorResponse())
             return validationRsp.getResponse();
 
@@ -49,11 +62,7 @@ public class RedeemVoucherHandler extends BaseHandler {
 
          // The voucher can be redeemed and stored.
          RequestKey key = addRedemptionRequestToCache(uuid, redemptionRequest);
-         // TODO See Giftcard, should this all be done differently
-         RedemptionResponse redemptionRsp = VoucherModelUtils.redemptionRspFromReq(redemptionRequest); // TODO could
-                                                                                                       // change this to
-                                                                                                       // user
-                                                                                                       // voucherCode...?
+         RedemptionResponse redemptionRsp = VoucherModelUtils.redemptionRspFromReq(redemptionRequest);
          addRedemptionResponseToCache(key, redemptionRsp);
          validationRsp.setResponse(Response.created(uriInfo.getRequestUri()).entity(redemptionRsp).build());
 
@@ -68,11 +77,13 @@ public class RedeemVoucherHandler extends BaseHandler {
    }
 
    /**
-    * Adds the voucher redemption response to the cache and update the entry to the voucher in the list of existing
-    * vouchers //TODO documentation
+    * Check for a corresponding redemption request and update the voucher's state if it exists. Add the redemption to
+    * the cache.
     * 
-    * Must check for corresponding ReverseRedemptionRequest before Updating state of voucher so as to maintain validity
-    * of state and requests, don't update if it exists.
+    * @param key
+    *           the unique key of this response, the same the as the corresponding redemption request
+    * @param redemptionRsp
+    *           the {@link RedemptionResponse} for this request
     */
    private void addRedemptionResponseToCache(RequestKey key, RedemptionResponse redemptionRsp) {
       ConcurrentHashMap<RequestKey, RedemptionResponse> responseRecords =
@@ -89,7 +100,15 @@ public class RedeemVoucherHandler extends BaseHandler {
       }
    }
 
-   // TODO generalise addVoucherToCache(String uuid, Transaction request, ConcurrentHashMap<Object,Object> records)?
+   /**
+    * Adds the redemption request to the RedemptionRequestRecords
+    *
+    * @param requestUuid
+    *           the unique identifier for this request
+    * @param request
+    *           the redemption request to be recorded
+    * @return the corresponding {@link RequestKey} for this entry.
+    */
    private RequestKey addRedemptionRequestToCache(String requestUuid, RedemptionRequest request) {
       RequestKey key = new RequestKey(username, password, RequestKey.REDEMPTIONS_RESOURCE, requestUuid);
       ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRecords =

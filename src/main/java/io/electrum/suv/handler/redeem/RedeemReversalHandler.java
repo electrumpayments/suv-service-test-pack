@@ -22,6 +22,20 @@ public class RedeemReversalHandler extends BaseHandler {
       super(httpHeaders);
    }
 
+   private BasicReversal reversal;
+
+   /**
+    * Handle the response to a reverseRedeem request.
+    *
+    * See <a href=
+    * "https://electrumpayments.github.io/suv-service-interface-docs/specification/operations/#reverseRedeem">SUV
+    * Interface docs</a> for details.
+    *
+    * @param reversal
+    *           from request body
+    * @return a {@link BasicReversal} for this transaction, a 400 error if the request is incorrectly formatted of a 404
+    *         error if the request referenced by the reversal cannot be found.
+    */
    public Response handle(BasicReversal reversal) {
       try {
          ValidationResponse validatioRsp;
@@ -69,9 +83,8 @@ public class RedeemReversalHandler extends BaseHandler {
    }
 
    /**
-    * Must check for a corresponding redemption request to get voucher from so that vouchers state may be updated. If no
-    * corresponding redemption exists, that voucher must still exist in provision_confirmed state (this is fine) //TODO
-    * Docs
+    * Check for a corresponding redemption request and update the voucher's state if it exists. Add the reversal to the
+    * cache.
     */
    private void addRedemptionReversalToCache(BasicReversal basicReversal) {
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =

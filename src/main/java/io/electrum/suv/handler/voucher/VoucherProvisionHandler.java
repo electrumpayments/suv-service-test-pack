@@ -16,8 +16,6 @@ import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.VoucherModelUtils;
 
 public class VoucherProvisionHandler extends BaseHandler {
-   // --Commented out by Inspection (2018/12/07, 07:29):private static final Logger log =
-   // LoggerFactory.getLogger(VoucherProvisionHandler.class);
 
    public VoucherProvisionHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
@@ -63,7 +61,6 @@ public class VoucherProvisionHandler extends BaseHandler {
          // The voucher can be provisioned and stored.
          RequestKey key = addVoucherRequestToCache(uuid, provisionRequest);
 
-         // TODO See Giftcard, should this all be done differently
          ProvisionResponse provisionRsp = VoucherModelUtils.voucherRspFromReq(provisionRequest);
          addVoucherResponseToCache(key, provisionRsp);
          validationRsp.setResponse(Response.created(uriInfo.getRequestUri()).entity(provisionRsp).build());
@@ -76,7 +73,22 @@ public class VoucherProvisionHandler extends BaseHandler {
       }
    }
 
-   // Todo confirm correct function of method
+
+
+   /**
+    * Adds the voucher provision response to the VoucherResponseRecords
+    * 
+    * @param key
+    *           The unique key of this response, the same key as the corresponding VoucherRequest
+    * @param provisionRsp
+    *           The {@link ProvisionResponse} for this request
+    */
+   private void addVoucherResponseToCache(RequestKey key, ProvisionResponse provisionRsp) {
+      ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords =
+            SUVTestServerRunner.getTestServer().getVoucherResponseRecords();
+      responseRecords.put(key, provisionRsp);
+   }
+
    /**
     * Adds the voucher provision request to the VoucherProvisionRecords
     *
@@ -92,19 +104,5 @@ public class VoucherProvisionHandler extends BaseHandler {
             SUVTestServerRunner.getTestServer().getVoucherProvisionRecords();
       provisionRecords.put(key, request);
       return key;
-   }
-
-   /**
-    * Adds the voucher provision response to the VoucherResponseRecords
-    * 
-    * @param key
-    *           The unique key of this response, the same key as the corresponding VoucherRequest
-    * @param provisionRsp
-    *           The {@link ProvisionResponse} for this request
-    */
-   private void addVoucherResponseToCache(RequestKey key, ProvisionResponse provisionRsp) {
-      ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords =
-            SUVTestServerRunner.getTestServer().getVoucherResponseRecords();
-      responseRecords.put(key, provisionRsp);
    }
 }

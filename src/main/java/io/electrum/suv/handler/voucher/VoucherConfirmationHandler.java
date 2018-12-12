@@ -22,6 +22,20 @@ public class VoucherConfirmationHandler extends BaseHandler {
       super(httpHeaders);
    }
 
+   private TenderAdvice confirmation;
+
+   /**
+    * Handle the response to a confirmVoucher request.
+    *
+    * See <a href=
+    * "https://electrumpayments.github.io/suv-service-interface-docs/specification/operations/#confirmVoucher">SUV
+    * Interface docs</a> for details.
+    *
+    * @param confirmation
+    *           from request body
+    * @return a {@link ProvisionResponse} for this transaction or a 400 Error if there is a format error or the voucher
+    *         is already redeemed or reversed.
+    */
    public Response handle(TenderAdvice confirmation) {
       try {
          Response rsp;
@@ -53,13 +67,11 @@ public class VoucherConfirmationHandler extends BaseHandler {
 
    /**
     * Adds the voucher confirmation request to the cache and stores an entry to the voucher in the list of existing
-    * vouchers //TODO documentation
+    * vouchers
     */
    private void addVoucherConfirmationToCache(TenderAdvice confirmation) {
       ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords =
             SUVTestServerRunner.getTestServer().getVoucherConfirmationRecords();
-      // ConcurrentHashMap<String, RequestKey> voucherCodeRequestKeyRecords =
-      // SUVTestServerRunner.getTestServer().getVoucherCodeRequestKeyConfirmationRecords();
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
 
@@ -72,9 +84,9 @@ public class VoucherConfirmationHandler extends BaseHandler {
 
       RequestKey confirmationsKey =
             new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, voucherProvisionUuid);
+
       // quietly overwrites any existing confirmation
       confirmationRecords.put(confirmationsKey, confirmation);
-      // voucherCodeRequestKeyRecords.put(voucherCode, confirmationsKey);
       confirmedExistingVouchers.put(voucherCode, VoucherState.CONFIRMED_PROVISIONED);
    }
 

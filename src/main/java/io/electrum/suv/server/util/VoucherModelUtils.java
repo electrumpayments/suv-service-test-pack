@@ -28,23 +28,24 @@ public class VoucherModelUtils extends SUVModelUtils {
    // TODO documentation
 
    /**
-    * Determine whether a given {@link Voucher voucher} provision request is able to be completed.
+    * Determine whether a given {@link Voucher voucher} provision request is able to proceed.
     * 
     * Ensures voucher is not already provisioned or no reversal request has been received. No need to check if redeemed
     * or confirmed as those actions cannot occur on an unprovisioned voucher.
     * 
     * 
     * @param voucherId
-    *           the unique identifier of this voucher
+    *           the unique identifier of this voucher (The provision request uuid serves as the initial unique value for
+    *           a voucher until it is returned to the vendor)
     * @param username
     *           from BasicAuth
     * @param password
     *           from BasicAuth
-    * @return A 400 error response indicating the voucher could not be provisioned, null if able to provision.
+    * @return A {@Link ValidationResponse} set to no error response if the request can continue or a 400 error response
+    *         indicating the voucher could not be provisioned.
     */
    public static ValidationResponse canProvisionVoucher(String voucherId, String username, String password) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
-      ValidationResponse validationResponse = new ValidationResponse(null);
 
       ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getVoucherProvisionRecords();
       // TODO Could make requestKey part of method args
@@ -109,8 +110,9 @@ public class VoucherModelUtils extends SUVModelUtils {
     *           from BasicAuth
     * @param password
     *           from BasicAuth
-    * @return A 404 Error response if a voucher corresponding to voucherUuid cannot be found (not provisioned), a 400
-    *         Error if the voucher is already confirmed. Null if voucher can be reversed.
+    * @return A {@Link ValidationResponse} set to no error response if the request can complete, a 404 Error response if
+    *         a voucher corresponding to voucherUuid cannot be found (not provisioned) and a 400 Error if the voucher is
+    *         already confirmed.
     */
    public static ValidationResponse canReverseVoucher(
          String voucherUuid,
@@ -152,7 +154,7 @@ public class VoucherModelUtils extends SUVModelUtils {
    }
 
    /**
-    * Determine whether a given Voucher Confirmation request can be completed.
+    * Determine whether a given Voucher Confirmation request can proceed.
     *
     * Checks that there is a corresponding voucher provision request and that the provision request is not reversed.
     *
@@ -164,8 +166,8 @@ public class VoucherModelUtils extends SUVModelUtils {
     *           from BasicAuth
     * @param password
     *           from BasicAuth
-    * @return Null if the confirmation can complete, a 404 response if a corresponding request is not found, and a 400
-    *         response if the provision request has been reversed.
+    * @return A {@Link ValidationResponse} set to no error response if the confirmation can complete, a 404 response if
+    *         a corresponding request is not found, and a 400 response if the provision request has been confirmed.
     */
    public static Response canConfirmVoucher(
          String voucherUuid,
@@ -279,8 +281,7 @@ public class VoucherModelUtils extends SUVModelUtils {
    // }
    // --Commented out by Inspection STOP (2018/12/06, 18:31)
 
-   // TODO Ensure method actually does what it should do
-   /** Creates a corresponding ProvisionResponse from a ProvisionRequest */
+   /** Creates a corresponding ProvisionResponse from a ProvisionRequest. Populates the provision */
    public static ProvisionResponse voucherRspFromReq(ProvisionRequest req) throws IOException {
       ProvisionResponse voucherResponse =
             JsonUtil.deserialize(JsonUtil.serialize(req, ProvisionRequest.class), ProvisionResponse.class);
@@ -317,7 +318,7 @@ public class VoucherModelUtils extends SUVModelUtils {
    }
 
    /**
-    * Determine whether a given {@link Voucher voucher} redemption request is able to be completed.
+    * Determine whether a given {@link Voucher voucher} redemption request is able to proceed.
     * 
     * Ensures voucher is not already redeemed and has been confirmed.
     * 
@@ -338,7 +339,7 @@ public class VoucherModelUtils extends SUVModelUtils {
          String password,
          String requestUuid) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
-
+      // TODO switch
       ConcurrentHashMap<RequestKey, RedemptionRequest> requestRecords = testServer.getRedemptionRequestRecords();
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
@@ -411,6 +412,16 @@ public class VoucherModelUtils extends SUVModelUtils {
       return new ValidationResponse(null);
    }
 
+   /**
+    * Builds a redemption response for a given request.
+    *
+    * Populates the response with random identifiefers and slip data as well as the correct voucher details.
+    * 
+    * @param redemptionRequest
+    *           the request to generate a response for
+    * @return a new RedemptionResponse for this request
+    * @throws IOException
+    */
    public static RedemptionResponse redemptionRspFromReq(RedemptionRequest redemptionRequest) throws IOException {
       RedemptionResponse redemptionResponse =
             JsonUtil.deserialize(
@@ -423,7 +434,19 @@ public class VoucherModelUtils extends SUVModelUtils {
       return redemptionResponse;
    }
 
-   /** Make sure the voucher is either in a redemptionConfiromed state */
+   /**
+    * Determine whether a given {@link Voucher voucher} refund request is able to proceed.
+    *
+    * Ensures the voucher provision has not already been reversed and that the voucher is currently in a redemption
+    * confirmed state.
+    * 
+    * @param refundUuid
+    *           the unique identifier of this request.
+    * @param username
+    * @param password
+    * @param voucherCode
+    * @return
+    */
    public static ValidationResponse canRefundVoucher(
          String refundUuid,
          String username,
@@ -514,8 +537,9 @@ public class VoucherModelUtils extends SUVModelUtils {
     *           from BasicAuth
     * @param voucherCode
     *           the unique code for the voucher, used to identify it in the cache
-    * @return A 404 Error response if the redemption request was not received or the voucher, a 400 Error response if
-    *         the voucher redemption is already confirmed. Null if redemption can be reversed.
+    * @return A {@link ValidationResponse} containing a 404 Error response if the redemption request was not received or
+    *         the voucher could not be found, a 400 Error response if the voucher redemption is already confirmed. The
+    *         validation response will have no error response if redemption can be reversed.
     */
    public static ValidationResponse canReverseRedemption(
          String redemptionUuid,
@@ -670,6 +694,29 @@ public class VoucherModelUtils extends SUVModelUtils {
       return new ValidationResponse(null);
    }
 
+   /**
+    * Determine whether the corresponding {@link RefundRequest} can be reversed.
+    *
+    * Checks to ensure that the corresponding Refund Request exists. If it does, the relevant vouchers state is checked
+    * to determine whether this reversal can proceed. If the voucher is not currently in a refunded state, an
+    * appropriate error response is returned.
+    *
+    *
+    * @param refundUuid
+    *           the unique identifier of the redemptionRequest to be reversed
+    * @param reversalUuid
+    *           the unique identifier of this request
+    * @param username
+    *           from BasicAuth
+    * @param password
+    *           from BasicAuth
+    * @param voucherCode
+    *           the unique code for the voucher, used to identify it in the cache
+    * @return A {@link ValidationResponse} containing a 404 Error response if the refund request was not received or the
+    *         voucher could not be found, a 400 Error response if the voucher refund is already confirmed or a refund
+    *         has already been processed. The validationResponse will have no error response if the refund can be
+    *         reversed.
+    */
    public static ValidationResponse canReverseRefund(
          String refundUuid,
          String reversalUuid,
@@ -683,9 +730,6 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
-
-      // ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRequestRecords =
-      // testServer.getRedemptionRequestRecords();
 
       ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords = testServer.getRedemptionConfirmationRecords();
       RequestKey requestKey = new RequestKey(username, password, RequestKey.CONFIRMATIONS_RESOURCE, refundUuid);

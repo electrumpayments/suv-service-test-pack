@@ -23,6 +23,18 @@ public class RedeemConfirmationHandler extends BaseHandler {
       super(httpHeaders);
    }
 
+   /**
+    * Handle the response to a confirmRedeem request.
+    *
+    * See <a href=
+    * "https://electrumpayments.github.io/suv-service-interface-docs/specification/operations/#confirmRedeem">SUV
+    * Interface docs</a> for details.
+    *
+    * @param confirmation
+    *           from request body
+    * @return a {@link BasicAdvice} for this transaction or a 400 Error if there is a format error or the voucher is
+    *         already redeemed or reversed.
+    */
    public Response handle(BasicAdvice confirmation) {
       try {
          ValidationResponse validationRsp;
@@ -63,7 +75,10 @@ public class RedeemConfirmationHandler extends BaseHandler {
       }
    }
 
-   /** Caches a record of this redemption confirmation updates the corresponding vouchers state. */
+   /**
+    * Adds the redemption confirmation request to the cache and updates the voucher state in the list of existing
+    * vouchers.
+    */
    private void addRedemptionConfirmationToCache(BasicAdvice confirmation) {
       ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords =
             SUVTestServerRunner.getTestServer().getRedemptionConfirmationRecords();
