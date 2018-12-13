@@ -7,6 +7,7 @@ public class RequestKey {
    private String password;
    private ResourceType resourceType;
    private String uuid;
+
    public RequestKey(String username, String password, ResourceType resourceType, String uuid) {
       this.username = username;
       this.password = password;

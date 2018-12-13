@@ -6,18 +6,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.Response;
 
-import io.electrum.suv.api.models.RefundResponse;
-import io.electrum.suv.server.model.ValidationResponse;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.electrum.suv.api.models.ErrorDetail;
+import io.electrum.suv.api.models.RefundResponse;
 import io.electrum.suv.api.models.Voucher;
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.model.DetailMessage;
 import io.electrum.suv.server.model.FormatError;
 import io.electrum.suv.server.model.FormatException;
+import io.electrum.suv.server.model.ValidationResponse;
 import io.electrum.vas.model.*;
 
 //import io.electrum.airtime.api.model.ErrorDetail;
@@ -202,31 +202,38 @@ public class SUVModelUtils {
       return Response.status(400).entity(errorDetail).build();
    }
 
-    static ValidationResponse confirmReversalNotReceived(String username, String password, String requestUuid, SUVTestServer testServer, String requestType, ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords, ErrorDetail.ErrorType errorType) {
-       // Confirm reversal request did not arrive before this
+   static ValidationResponse confirmReversalNotReceived(
+         String username,
+         String password,
+         String requestUuid,
+         SUVTestServer testServer,
+         String requestType,
+         ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords,
+         ErrorDetail.ErrorType errorType) {
+      // Confirm reversal request did not arrive before this
 
-       RequestKey requestKey =
-             new RequestKey(username, password, RequestKey.ResourceType.REVERSALS_RESOURCE, requestUuid);
-       BasicReversal reversal = reversalRecords.get(requestKey);
-       if (reversal != null) {
-          ErrorDetail errorDetail =
-                buildErrorDetail(
-                      requestUuid,
-                      String.format("%s reversed.", requestType),
-                      String.format("%s reversal with UUID already processed with the associated fields.", requestType),
-                      reversal.getId(),
-                      errorType);
+      RequestKey requestKey =
+            new RequestKey(username, password, RequestKey.ResourceType.REVERSALS_RESOURCE, requestUuid);
+      BasicReversal reversal = reversalRecords.get(requestKey);
+      if (reversal != null) {
+         ErrorDetail errorDetail =
+               buildErrorDetail(
+                     requestUuid,
+                     String.format("%s reversed.", requestType),
+                     String.format("%s reversal with UUID already processed with the associated fields.", requestType),
+                     reversal.getId(),
+                     errorType);
 
-          // Check for a response for this request, if found add to detailMessage
-          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-          ConcurrentHashMap<RequestKey, RefundResponse> responseRecords =
-                testServer.getBackend().getRefundResponseRecords();
-          RefundResponse rsp = responseRecords.get(requestKey);
-          if (rsp != null) {
-             detailMessage.setVoucher(rsp.getVoucher());
-          }
-          return new ValidationResponse(Response.status(400).entity(errorDetail).build());
-       }
-       return new ValidationResponse(null);
-    }
+         // Check for a response for this request, if found add to detailMessage
+         DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+         ConcurrentHashMap<RequestKey, RefundResponse> responseRecords =
+               testServer.getBackend().getRefundResponseRecords();
+         RefundResponse rsp = responseRecords.get(requestKey);
+         if (rsp != null) {
+            detailMessage.setVoucher(rsp.getVoucher());
+         }
+         return new ValidationResponse(Response.status(400).entity(errorDetail).build());
+      }
+      return new ValidationResponse(null);
+   }
 }
