@@ -50,7 +50,7 @@ public class RefundModelUtils extends SUVModelUtils {
          String voucherCode) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
 
-      ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getBackend().getRefundReversalRecords();
+      ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getRecordStorageManager().getRefundReversalRecords();
       ValidationResponse reversalRsp =
             SUVModelUtils.confirmReversalNotReceived(
                   username,
@@ -64,7 +64,7 @@ public class RefundModelUtils extends SUVModelUtils {
          return reversalRsp;
 
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
-            SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getConfirmedExistingVouchers();
 
       ErrorDetail errorDetail;
       switch (confirmedExistingVouchers.get(voucherCode)) {
@@ -127,7 +127,7 @@ public class RefundModelUtils extends SUVModelUtils {
 
       // Confirm Voucher in Refunded state.
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
-            SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getConfirmedExistingVouchers();
 
       // No corresponding request
       if (voucherCode == null) {
@@ -188,10 +188,10 @@ public class RefundModelUtils extends SUVModelUtils {
       ErrorDetail errorDetail = new ErrorDetail().id(reversalUuid).originalId(refundUuid);
 
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
-            SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getConfirmedExistingVouchers();
 
       ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords =
-            testServer.getBackend().getRedemptionConfirmationRecords();
+            testServer.getRecordStorageManager().getRedemptionConfirmationRecords();
       RequestKey requestKey =
             new RequestKey(username, password, RequestKey.ResourceType.CONFIRMATIONS_RESOURCE, refundUuid);
       BasicAdvice confirmation = confirmationRecords.get(requestKey);

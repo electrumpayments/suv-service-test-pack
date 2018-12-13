@@ -52,7 +52,7 @@ public class RefundReversalHandler extends BaseHandler {
 
          RefundResponse refundRsp =
                SUVTestServerRunner.getTestServer()
-                     .getBackend()
+                     .getRecordStorageManager()
                      .getRefundResponseRecords()
                      .get(new RequestKey(username, password, ResourceType.REFUNDS_RESOURCE, refundUuid));
 
@@ -90,13 +90,13 @@ public class RefundReversalHandler extends BaseHandler {
     */
    private void addRefundReversalToCache() {
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
-            SUVTestServerRunner.getTestServer().getBackend().getRefundReversalRecords();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getRefundReversalRecords();
       RequestKey key = new RequestKey(username, password, ResourceType.REFUNDS_RESOURCE, reversal.getRequestId());
 
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
-            SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getConfirmedExistingVouchers();
       ConcurrentHashMap<RequestKey, RefundRequest> refundRequestRecords =
-            SUVTestServerRunner.getTestServer().getBackend().getRefundRequestRecords();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getRefundRequestRecords();
 
       RefundRequest refundRequest = refundRequestRecords.get(key);
       key.setResourceType(ResourceType.REVERSALS_RESOURCE);

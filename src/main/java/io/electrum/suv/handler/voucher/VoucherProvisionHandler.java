@@ -87,7 +87,7 @@ public class VoucherProvisionHandler extends BaseHandler {
     */
    private void addVoucherResponseToCache(RequestKey key, ProvisionResponse provisionRsp) {
       ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords =
-            SUVTestServerRunner.getTestServer().getBackend().getProvisionResponseRecords();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getProvisionResponseRecords();
       responseRecords.put(key, provisionRsp);
    }
 
@@ -103,7 +103,7 @@ public class VoucherProvisionHandler extends BaseHandler {
    private RequestKey addVoucherRequestToCache(String voucherId, ProvisionRequest request) {
       RequestKey key = new RequestKey(username, password, ResourceType.VOUCHERS_RESOURCE, voucherId);
       ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords =
-            SUVTestServerRunner.getTestServer().getBackend().getVoucherProvisionRecords();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getVoucherProvisionRecords();
       provisionRecords.put(key, request);
       return key;
    }

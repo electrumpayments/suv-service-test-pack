@@ -43,7 +43,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
 
       ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords =
-            testServer.getBackend().getVoucherProvisionRecords();
+            testServer.getRecordStorageManager().getVoucherProvisionRecords();
       ProvisionRequest originalRequest = provisionRecords.get(requestKey);
 
       // If Voucher already provisioned
@@ -54,7 +54,7 @@ public class VoucherModelUtils extends SUVModelUtils {
 
          // Check for a response for this request
          ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords =
-               testServer.getBackend().getProvisionResponseRecords();
+               testServer.getRecordStorageManager().getProvisionResponseRecords();
          ProvisionResponse rsp = responseRecords.get(requestKey);
          // If a response is found, add it to the detailMessage
          if (rsp != null) {
@@ -66,7 +66,7 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       // If voucher reversal request already received
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
-            testServer.getBackend().getVoucherReversalRecords();
+            testServer.getRecordStorageManager().getVoucherReversalRecords();
       requestKey.setResourceType(ResourceType.REVERSALS_RESOURCE);
       BasicReversal reversal = reversalRecords.get(requestKey);
       if (reversal != null) {
@@ -78,11 +78,12 @@ public class VoucherModelUtils extends SUVModelUtils {
                      reversal.getId(),
                      ErrorType.VOUCHER_ALREADY_REVERSED);
 
-         // TODO what is this here for, really don't see it being !null
-         // Check for a response for this request, if found add to detailMessage
+         // This occurs in the case that a provisionRequest is received, reversed and then sent again. Not tested for in
+         // Postman Tests
+         // Check for a response for a request with this uuid, if found add to detailMessage
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
          ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords =
-               testServer.getBackend().getProvisionResponseRecords();
+               testServer.getRecordStorageManager().getProvisionResponseRecords();
          ProvisionResponse rsp = responseRecords.get(requestKey);
          if (rsp != null) {
             detailMessage.setVoucher(rsp.getVoucher());
@@ -119,7 +120,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       ErrorDetail errorDetail = new ErrorDetail().id(confirmationUuid).originalId(voucherUuid);
       // Confirm Voucher provisioned
       ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords =
-            testServer.getBackend().getVoucherProvisionRecords();
+            testServer.getRecordStorageManager().getVoucherProvisionRecords();
 
       if (!isVoucherProvisioned(voucherUuid, provisionRecords, username, password)) {
          errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
@@ -132,7 +133,7 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       // check it's not reversed
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
-            testServer.getBackend().getVoucherReversalRecords();
+            testServer.getRecordStorageManager().getVoucherReversalRecords();
       RequestKey requestKey = new RequestKey(username, password, ResourceType.REVERSALS_RESOURCE, voucherUuid);
       BasicReversal reversal = reversalRecords.get(requestKey);
       if (reversal != null) {
@@ -145,7 +146,7 @@ public class VoucherModelUtils extends SUVModelUtils {
 
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
          ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords =
-               testServer.getBackend().getProvisionResponseRecords();
+               testServer.getRecordStorageManager().getProvisionResponseRecords();
          ProvisionResponse rsp = responseRecords.get(requestKey);
          if (rsp != null) {
             detailMessage.setVoucher(rsp.getVoucher());
@@ -184,7 +185,7 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       // Confirm Voucher provisioned
       ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords =
-            testServer.getBackend().getVoucherProvisionRecords();
+            testServer.getRecordStorageManager().getVoucherProvisionRecords();
       if (!isVoucherProvisioned(voucherUuid, provisionRecords, username, password)) {
          errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No voucher req.")
@@ -196,7 +197,7 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       // check it's not confirmed
       ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords =
-            testServer.getBackend().getVoucherConfirmationRecords();
+            testServer.getRecordStorageManager().getVoucherConfirmationRecords();
       RequestKey requestKey = new RequestKey(username, password, ResourceType.CONFIRMATIONS_RESOURCE, voucherUuid);
       TenderAdvice confirmation = confirmationRecords.get(requestKey);
       if (confirmation != null) {

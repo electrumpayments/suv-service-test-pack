@@ -54,7 +54,7 @@ public class RefundConfirmationHandler extends BaseHandler {
          // Check that there is actually a corresponding refund request
          RefundResponse refundRsp =
                SUVTestServerRunner.getTestServer()
-                     .getBackend()
+                     .getRecordStorageManager()
                      .getRefundResponseRecords()
                      .get(new RequestKey(username, password, ResourceType.REFUNDS_RESOURCE, refundUuid));
 
@@ -85,10 +85,10 @@ public class RefundConfirmationHandler extends BaseHandler {
     */
    private void addRefundConfirmationToCache() {
       ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords =
-            SUVTestServerRunner.getTestServer().getBackend().getRefundConfirmationRecords();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getRefundConfirmationRecords();
 
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
-            SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getConfirmedExistingVouchers();
 
       RequestKey confirmationsKey =
             new RequestKey(username, password, ResourceType.CONFIRMATIONS_RESOURCE, confirmation.getRequestId());

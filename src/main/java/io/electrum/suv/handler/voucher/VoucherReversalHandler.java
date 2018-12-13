@@ -70,7 +70,7 @@ public class VoucherReversalHandler extends BaseHandler {
 
    private void addVoucherReversalToCache() {
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
-            SUVTestServerRunner.getTestServer().getBackend().getVoucherReversalRecords();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getVoucherReversalRecords();
       RequestKey reversalKey =
             new RequestKey(username, password, ResourceType.REVERSALS_RESOURCE, reversal.getRequestId());
       reversalRecords.put(reversalKey, reversal);

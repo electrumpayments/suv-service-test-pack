@@ -89,11 +89,11 @@ public class RedeemVoucherHandler extends BaseHandler {
     */
    private void addRedemptionResponseToCache(RequestKey key, RedemptionResponse redemptionRsp) {
       ConcurrentHashMap<RequestKey, RedemptionResponse> responseRecords =
-            SUVTestServerRunner.getTestServer().getBackend().getRedemptionResponseRecords();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getRedemptionResponseRecords();
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
-            SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getConfirmedExistingVouchers();
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
-            SUVTestServerRunner.getTestServer().getBackend().getRedemptionReversalRecords();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getRedemptionReversalRecords();
 
       BasicReversal basicReversal = reversalRecords.get(key);
       responseRecords.put(key, redemptionRsp);
@@ -114,7 +114,7 @@ public class RedeemVoucherHandler extends BaseHandler {
    private RequestKey addRedemptionRequestToCache(String requestUuid, RedemptionRequest request) {
       RequestKey key = new RequestKey(username, password, ResourceType.REDEMPTIONS_RESOURCE, requestUuid);
       ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRecords =
-            SUVTestServerRunner.getTestServer().getBackend().getRedemptionRequestRecords();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getRedemptionRequestRecords();
 
       redemptionRecords.put(key, request);
 

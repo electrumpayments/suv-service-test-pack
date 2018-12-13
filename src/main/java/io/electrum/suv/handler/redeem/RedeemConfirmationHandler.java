@@ -53,7 +53,7 @@ public class RedeemConfirmationHandler extends BaseHandler {
 
          RedemptionResponse redemptionRsp =
                SUVTestServerRunner.getTestServer()
-                     .getBackend()
+                     .getRecordStorageManager()
                      .getRedemptionResponseRecords()
                      .get(new RequestKey(username, password, ResourceType.REDEMPTIONS_RESOURCE, redemptionUuid));
          if (redemptionRsp == null)
@@ -84,10 +84,10 @@ public class RedeemConfirmationHandler extends BaseHandler {
     */
    private void addRedemptionConfirmationToCache(BasicAdvice confirmation) {
       ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords =
-            SUVTestServerRunner.getTestServer().getBackend().getRedemptionConfirmationRecords();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getRedemptionConfirmationRecords();
 
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
-            SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getConfirmedExistingVouchers();
 
       RequestKey confirmationsKey =
             new RequestKey(username, password, ResourceType.CONFIRMATIONS_RESOURCE, confirmation.getRequestId());

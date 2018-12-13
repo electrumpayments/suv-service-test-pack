@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
-import io.electrum.suv.server.model.Backend;
+import io.electrum.suv.server.model.RecordStorageManager;
 import io.electrum.suv.server.model.ResetRequest;
 import io.electrum.suv.server.model.ResetRequest.Acknowledgments;
 import io.electrum.suv.server.model.ResetRequest.Declarations;
@@ -34,9 +34,9 @@ public class ResetHandler extends BaseHandler {
             return Response.status(400).entity(new ResetResponse().outcome(Outcomes.NO_DEC)).build();
          }
 
-         Backend backend = SUVTestServerRunner.getTestServer().getBackend();
-         if (backend.doRecordsForUserExist(username, password)) {
-            backend.reset(username, password);
+         RecordStorageManager recordStorageManager = SUVTestServerRunner.getTestServer().getRecordStorageManager();
+         if (recordStorageManager.doRecordsForUserExist(username, password)) {
+            recordStorageManager.reset(username, password);
          } else {
             return Response.status(400).entity(new ResetResponse().outcome(Outcomes.UNKNOWN_USER)).build();
          }

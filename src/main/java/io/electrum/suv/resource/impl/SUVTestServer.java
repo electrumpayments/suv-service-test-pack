@@ -24,12 +24,12 @@ import io.dropwizard.jersey.validation.Validators;
 import io.electrum.suv.server.SUVFormatViolationExceptionMapper;
 import io.electrum.suv.server.SUVHibernateViolationExceptionMapper;
 import io.electrum.suv.server.SUVUnrecognizedFieldViolationExceptionMapper;
-import io.electrum.suv.server.model.Backend;
+import io.electrum.suv.server.model.RecordStorageManager;
 
 public class SUVTestServer extends ResourceConfig {
 
    private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
-   private Backend backend;
+   private RecordStorageManager recordStorageManager;
 
    public SUVTestServer() {
       packages(SUVTestServer.class.getPackage().getName());
@@ -44,11 +44,11 @@ public class SUVTestServer extends ResourceConfig {
       register(new SUVFormatViolationExceptionMapper());
       register(new SUVUnrecognizedFieldViolationExceptionMapper());
 
-      backend = new Backend();
+      recordStorageManager = new RecordStorageManager();
    }
 
-   public Backend getBackend() {
-      return backend;
+   public RecordStorageManager getRecordStorageManager() {
+      return recordStorageManager;
    }
 
    /** Represents the state of the voucher an assigns an ordering to the states */

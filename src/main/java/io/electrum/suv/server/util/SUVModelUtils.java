@@ -74,7 +74,6 @@ public class SUVModelUtils {
       return slipData;
    }
 
-   // todo why randomise these instead of using the ones sent by the requests?
    /**
     * Updates a given {@link Transaction transaction} with randomized 3rd party IDs. Inserts placeholder settlement
     * entity if transaction does not include one.
@@ -227,7 +226,7 @@ public class SUVModelUtils {
          // Check for a response for this request, if found add to detailMessage
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
          ConcurrentHashMap<RequestKey, RefundResponse> responseRecords =
-               testServer.getBackend().getRefundResponseRecords();
+               testServer.getRecordStorageManager().getRefundResponseRecords();
          RefundResponse rsp = responseRecords.get(requestKey);
          if (rsp != null) {
             detailMessage.setVoucher(rsp.getVoucher());

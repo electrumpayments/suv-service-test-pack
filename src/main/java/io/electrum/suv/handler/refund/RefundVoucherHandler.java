@@ -85,9 +85,9 @@ public class RefundVoucherHandler extends BaseHandler {
     */
    private void addRefundResponseToCache(RequestKey key, RefundResponse refundResponse) {
       ConcurrentHashMap<RequestKey, RefundResponse> refundResponseRecords =
-            SUVTestServerRunner.getTestServer().getBackend().getRefundResponseRecords();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getRefundResponseRecords();
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
-            SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getConfirmedExistingVouchers();
 
       refundResponseRecords.put(key, refundResponse);
       confirmedExistingVouchers.put(voucherCode, SUVTestServer.VoucherState.REFUNDED);
@@ -107,7 +107,7 @@ public class RefundVoucherHandler extends BaseHandler {
       RequestKey key = new RequestKey(username, password, ResourceType.REFUNDS_RESOURCE, voucherId);
 
       ConcurrentHashMap<RequestKey, RefundRequest> voucherRefundRecords =
-            SUVTestServerRunner.getTestServer().getBackend().getRefundRequestRecords();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getRefundRequestRecords();
       voucherRefundRecords.put(key, request);
       return key;
    }

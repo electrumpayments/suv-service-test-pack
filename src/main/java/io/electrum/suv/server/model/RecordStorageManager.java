@@ -11,7 +11,7 @@ import io.electrum.vas.model.BasicReversal;
 import io.electrum.vas.model.TenderAdvice;
 
 //TODO could be abstract
-public class Backend {
+public class RecordStorageManager {
    private final ConcurrentHashMap<RequestKey, ProvisionRequest> voucherProvisionRecords;
    private final ConcurrentHashMap<RequestKey, ProvisionResponse> provisionResponseRecords;
    private final ConcurrentHashMap<RequestKey, TenderAdvice> voucherConfirmationRecords;
@@ -30,7 +30,7 @@ public class Backend {
    private final ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers;// records state of
                                                                                                  // existing vouchers
 
-   public Backend() {
+   public RecordStorageManager() {
       voucherProvisionRecords = new ConcurrentHashMap<>();
       provisionResponseRecords = new ConcurrentHashMap<>();
       voucherConfirmationRecords = new ConcurrentHashMap<>();
