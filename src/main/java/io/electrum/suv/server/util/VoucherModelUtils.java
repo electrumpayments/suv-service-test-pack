@@ -48,7 +48,7 @@ public class VoucherModelUtils extends SUVModelUtils {
    public static ValidationResponse canProvisionVoucher(String voucherId, String username, String password) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
 
-      ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getVoucherProvisionRecords();
+      ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getBackend().getVoucherProvisionRecords();
       // TODO Could make requestKey part of method args
       RequestKey requestKey = new RequestKey(username, password, ResourceType.VOUCHERS_RESOURCE, voucherId);
       ProvisionRequest originalRequest = provisionRecords.get(requestKey);
@@ -60,7 +60,7 @@ public class VoucherModelUtils extends SUVModelUtils {
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
 
          // Check for a response for this request
-         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getProvisionResponseRecords();
+         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getBackend().getProvisionResponseRecords();
          ProvisionResponse rsp = responseRecords.get(requestKey);
          // If a response is found, add it to the detailMessage
          if (rsp != null) {
@@ -71,7 +71,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       }
 
       // If voucher reversal request already received
-      ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getVoucherReversalRecords();
+      ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getBackend().getVoucherReversalRecords();
       requestKey = new RequestKey(username, password, ResourceType.REVERSALS_RESOURCE, voucherId);
       BasicReversal reversal = reversalRecords.get(requestKey);
       if (reversal != null) {
@@ -86,7 +86,7 @@ public class VoucherModelUtils extends SUVModelUtils {
          // TODO what is this here for, really don't see it being !null
          // Check for a response for this request, if found add to detailMessage
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getProvisionResponseRecords();
+         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getBackend().getProvisionResponseRecords();
          ProvisionResponse rsp = responseRecords.get(requestKey);
          if (rsp != null) {
             detailMessage.setVoucher(rsp.getVoucher());
@@ -126,7 +126,7 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       // TODO Normalise these validation methods to be more similar (this)
       // Confirm Voucher provisioned
-      ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getVoucherProvisionRecords();
+      ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getBackend().getVoucherProvisionRecords();
       if (!isVoucherProvisioned(voucherUuid, provisionRecords, username, password)) {
          errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No voucher req.")
@@ -137,7 +137,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       } // TODO extract this to confirmVoucherRedeemed() returns response code or null
 
       // check it's not confirmed
-      ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords = testServer.getVoucherConfirmationRecords();
+      ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords = testServer.getBackend().getVoucherConfirmationRecords();
       RequestKey requestKey = new RequestKey(username, password, ResourceType.CONFIRMATIONS_RESOURCE, voucherUuid);
       TenderAdvice confirmation = confirmationRecords.get(requestKey);
       if (confirmation != null) {
@@ -182,7 +182,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       // TODO Extract method
       // TODO Normalise these validation methods to be more similar (this)
       // Confirm Voucher provisioned
-      ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getVoucherProvisionRecords();
+      ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getBackend().getVoucherProvisionRecords();
       if (!isVoucherProvisioned(voucherUuid, provisionRecords, username, password)) {
          errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No voucher req.")
@@ -193,7 +193,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       }
 
       // check it's not reversed
-      ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getVoucherReversalRecords();
+      ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getBackend().getVoucherReversalRecords();
       RequestKey requestKey = new RequestKey(username, password, ResourceType.REVERSALS_RESOURCE, voucherUuid);
       BasicReversal reversal = reversalRecords.get(requestKey);
       if (reversal != null) {
@@ -205,7 +205,7 @@ public class VoucherModelUtils extends SUVModelUtils {
                            .reversalId(reversal.getId()));
 
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getProvisionResponseRecords();
+         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getBackend().getProvisionResponseRecords();
          ProvisionResponse rsp = responseRecords.get(requestKey);
          if (rsp != null) {
             detailMessage.setVoucher(rsp.getVoucher());
@@ -342,9 +342,9 @@ public class VoucherModelUtils extends SUVModelUtils {
          String requestUuid) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
       // TODO switch
-      ConcurrentHashMap<RequestKey, RedemptionRequest> requestRecords = testServer.getRedemptionRequestRecords();
+      ConcurrentHashMap<RequestKey, RedemptionRequest> requestRecords = testServer.getBackend().getRedemptionRequestRecords();
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
-            SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
+            SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
 
       // If voucher provision not yet confirmed
       if (confirmedExistingVouchers.get(voucherCode) == null) {
@@ -359,7 +359,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       }
 
       // Confirm reversal request did not arrive before this
-      ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getRedemptionReversalRecords();
+      ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getBackend().getRedemptionReversalRecords();
       RequestKey requestKey = new RequestKey(username, password, ResourceType.REVERSALS_RESOURCE, requestUuid);
       BasicReversal reversal = reversalRecords.get(requestKey);
       if (reversal != null) {
@@ -373,7 +373,7 @@ public class VoucherModelUtils extends SUVModelUtils {
 
          // Check for a response for this request, if found add to detailMessage
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-         ConcurrentHashMap<RequestKey, RefundResponse> responseRecords = testServer.getRefundResponseRecords();
+         ConcurrentHashMap<RequestKey, RefundResponse> responseRecords = testServer.getBackend().getRefundResponseRecords();
          RefundResponse rsp = responseRecords.get(requestKey);
          if (rsp != null) {
             detailMessage.setVoucher(rsp.getVoucher());
@@ -402,7 +402,7 @@ public class VoucherModelUtils extends SUVModelUtils {
 
             // Check for a response for this request
             ConcurrentHashMap<RequestKey, RedemptionResponse> responseRecords =
-                  testServer.getRedemptionResponseRecords();
+                  testServer.getBackend().getRedemptionResponseRecords();
             RedemptionResponse rsp = responseRecords.get(key);
             if (rsp != null) {
                detailMessage.setVoucher(rsp.getVoucher()); // TODO confirm this is !null
@@ -457,7 +457,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
 
       // Confirm reversal request did not arrive before this
-      ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getRefundReversalRecords();
+      ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getBackend().getRefundReversalRecords();
       RequestKey requestKey = new RequestKey(username, password, ResourceType.REVERSALS_RESOURCE, refundUuid);
       BasicReversal reversal = reversalRecords.get(requestKey);
       if (reversal != null) {
@@ -471,7 +471,7 @@ public class VoucherModelUtils extends SUVModelUtils {
 
          // Check for a response for this request, if found add to detailMessage
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-         ConcurrentHashMap<RequestKey, RefundResponse> responseRecords = testServer.getRefundResponseRecords();
+         ConcurrentHashMap<RequestKey, RefundResponse> responseRecords = testServer.getBackend().getRefundResponseRecords();
          RefundResponse rsp = responseRecords.get(requestKey);
          if (rsp != null) {
             detailMessage.setVoucher(rsp.getVoucher());
@@ -480,7 +480,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       }
 
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
-            SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
+            SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
 
       ErrorDetail errorDetail;
       switch (confirmedExistingVouchers.get(voucherCode)) {
@@ -552,7 +552,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
       ErrorDetail errorDetail = new ErrorDetail().id(reversalUuid).originalId(redemptionUuid);
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
-            SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
+            SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
 
       if (voucherCode == null) {
          errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
@@ -567,7 +567,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       case REDEEMED:
          return new ValidationResponse(null);
       case CONFIRMED_REDEEMED:
-         ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords = testServer.getRedemptionConfirmationRecords();
+         ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords = testServer.getBackend().getRedemptionConfirmationRecords();
          RequestKey requestKey = new RequestKey(username, password, ResourceType.CONFIRMATIONS_RESOURCE, redemptionUuid);
          BasicAdvice confirmation = confirmationRecords.get(requestKey);
 
@@ -617,7 +617,7 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       // TODO Extract method
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
-            SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
+            SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
 
       if (voucherCode == null) {
          errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
@@ -668,7 +668,7 @@ public class VoucherModelUtils extends SUVModelUtils {
       // TODO Normalise these validation methods to be more similar (this)
       // Confirm Voucher in Refunded state.
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
-            SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
+            SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
 
       // No corresponding request
       if (voucherCode == null) {
@@ -730,9 +730,9 @@ public class VoucherModelUtils extends SUVModelUtils {
       ErrorDetail errorDetail = new ErrorDetail().id(reversalUuid).originalId(refundUuid);
 
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
-            SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
+            SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
 
-      ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords = testServer.getRedemptionConfirmationRecords();
+      ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords = testServer.getBackend().getRedemptionConfirmationRecords();
       RequestKey requestKey = new RequestKey(username, password, ResourceType.CONFIRMATIONS_RESOURCE, refundUuid);
       BasicAdvice confirmation = confirmationRecords.get(requestKey);
 
