@@ -37,7 +37,6 @@ public class SUVTestServer extends ResourceConfig {
    private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
    private Backend backend;
 
-//TODO extract storage to new class
    public SUVTestServer() {
       packages(SUVTestServer.class.getPackage().getName());
 

@@ -3,7 +3,6 @@ package io.electrum.suv.server.util;
 import java.util.Objects;
 
 public class RequestKey {
-   // TODO Enum?
    public enum ResourceType {
       VOUCHERS_RESOURCE("vouchers"),
       REVERSALS_RESOURCE("reversals"),

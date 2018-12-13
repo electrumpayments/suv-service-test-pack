@@ -25,9 +25,6 @@ import io.electrum.vas.model.TenderAdvice;
 public class VoucherModelUtils extends SUVModelUtils {
    private static final Logger log = LoggerFactory.getLogger(VoucherModelUtils.class);
 
-   // TODO confirm correct function
-   // TODO documentation
-
    /**
     * Determine whether a given {@link Voucher voucher} provision request is able to proceed.
     * 

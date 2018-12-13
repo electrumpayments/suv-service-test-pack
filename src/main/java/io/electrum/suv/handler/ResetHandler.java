@@ -42,7 +42,6 @@ public class ResetHandler extends BaseHandler {
          {
             backend.reset(username,password);
          }
-          //TODO iterate over storage and remove anything relating to the username/password combo
          else
          {
             return Response.status(400).entity(new ResetResponse().outcome(Outcomes.UNKNOWN_USER)).build();
