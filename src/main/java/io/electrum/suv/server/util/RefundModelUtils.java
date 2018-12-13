@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.ws.rs.core.Response;
 
 import io.electrum.suv.api.models.ErrorDetail;
+import io.electrum.suv.api.models.ErrorDetail.ErrorType;
 import io.electrum.suv.api.models.RefundRequest;
 import io.electrum.suv.api.models.RefundResponse;
 import io.electrum.suv.api.models.Voucher;
@@ -49,30 +50,18 @@ public class RefundModelUtils extends SUVModelUtils {
          String voucherCode) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
 
-      // Confirm reversal request did not arrive before this
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getBackend().getRefundReversalRecords();
-      RequestKey requestKey =
-            new RequestKey(username, password, RequestKey.ResourceType.REVERSALS_RESOURCE, refundUuid);
-      BasicReversal reversal = reversalRecords.get(requestKey);
-      if (reversal != null) {
-         ErrorDetail errorDetail =
-               buildErrorDetail(
-                     refundUuid,
-                     "Refund reversed.",
-                     "Refund reversal with UUID already processed with the associated fields.",
-                     reversal.getId(),
-                     ErrorDetail.ErrorType.REFUND_ALREADY_REVERSED);
-
-         // Check for a response for this request, if found add to detailMessage
-         DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-         ConcurrentHashMap<RequestKey, RefundResponse> responseRecords =
-               testServer.getBackend().getRefundResponseRecords();
-         RefundResponse rsp = responseRecords.get(requestKey);
-         if (rsp != null) {
-            detailMessage.setVoucher(rsp.getVoucher());
-         }
-         return new ValidationResponse(Response.status(400).entity(errorDetail).build());
-      }
+      ValidationResponse reversalRsp =
+            SUVModelUtils.confirmReversalNotReceived(
+                  username,
+                  password,
+                  refundUuid,
+                  testServer,
+                  "Refund",
+                  reversalRecords,
+                  ErrorType.REFUND_ALREADY_REVERSED);
+      if (reversalRsp.hasErrorResponse())
+         return reversalRsp;
 
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
@@ -86,8 +75,8 @@ public class RefundModelUtils extends SUVModelUtils {
                      "Voucher not refundable",
                      "The voucher is currently in a non-refundable state. Only vouchers for which "
                            + "redemption confirmation message have been received may be refunded.",
-                     null, // TODO update message
-                     ErrorDetail.ErrorType.VOUCHER_NOT_REDEEMED);
+                     null,
+                     ErrorType.VOUCHER_NOT_REDEEMED);
          return new ValidationResponse(Response.status(400).entity(errorDetail).build());
 
       case REDEEMED:
@@ -97,7 +86,7 @@ public class RefundModelUtils extends SUVModelUtils {
                      "Voucher Redemption unconfirmed",
                      "There is a current redemption request for this voucher pending confirmation. Cannot refund in the current state.",
                      null,
-                     ErrorDetail.ErrorType.REDEMPTION_NOT_CONFIRMED);
+                     ErrorType.REDEMPTION_NOT_CONFIRMED);
          return new ValidationResponse(Response.status(400).entity(errorDetail).build());
 
       // case CONFIRMED_REDEEMED: Handled by default so as not to duplicate code
@@ -109,7 +98,7 @@ public class RefundModelUtils extends SUVModelUtils {
                      "Voucher refund pending",
                      "There is a current refund request for this voucher pending confirmation. Cannot refund in the current state.",
                      null,
-                     ErrorDetail.ErrorType.VOUCHER_ALREADY_REFUNDED);
+                     ErrorType.VOUCHER_ALREADY_REFUNDED);
          return new ValidationResponse(Response.status(400).entity(errorDetail).build());
       default:
          return new ValidationResponse(null);
@@ -136,15 +125,13 @@ public class RefundModelUtils extends SUVModelUtils {
    public static ValidationResponse canConfirmRefund(String refundUuid, String confirmationUuid, String voucherCode) {
       ErrorDetail errorDetail = new ErrorDetail().id(confirmationUuid).originalId(refundUuid);
 
-      // TODO Extract method
-      // TODO Normalise these validation methods to be more similar (this)
       // Confirm Voucher in Refunded state.
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
             SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
 
       // No corresponding request
       if (voucherCode == null) {
-         errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
+         errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No Refund Request")
                .detailMessage(
                      new DetailMessage()
@@ -153,7 +140,7 @@ public class RefundModelUtils extends SUVModelUtils {
       }
 
       if (confirmedExistingVouchers.get(voucherCode) != SUVTestServer.VoucherState.REFUNDED) {
-         errorDetail.errorType(ErrorDetail.ErrorType.VOUCHER_NOT_REFUNDED)
+         errorDetail.errorType(ErrorType.VOUCHER_NOT_REFUNDED)
                .errorMessage("Refund Confirmation not performed")
                .detailMessage(
                      new DetailMessage().freeString(
@@ -161,7 +148,6 @@ public class RefundModelUtils extends SUVModelUtils {
                                  "The voucher referenced in the Refund Request to which this Refund Confirmation pertains is not currently in the refunded state. "
                                        + "The Voucher is currently in a %s state.",
                                  confirmedExistingVouchers.get(voucherCode).name())));
-         // .voucherId(redemptionUuid)); TODO Removed this, didn't make sense to duplicate information
          return new ValidationResponse(Response.status(400).entity(errorDetail).build());
       }
 
@@ -212,7 +198,7 @@ public class RefundModelUtils extends SUVModelUtils {
 
       // No corresponding refund request
       if (voucherCode == null) {
-         errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
+         errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No Refund Request")
                .detailMessage(new DetailMessage().freeString("No Refund Request located for given Refund UUID."));
          return new ValidationResponse(Response.status(404).entity(errorDetail).build());
@@ -221,7 +207,7 @@ public class RefundModelUtils extends SUVModelUtils {
       switch (confirmedExistingVouchers.get(voucherCode)) {
 
       case CONFIRMED_PROVISIONED:
-         errorDetail.errorType(ErrorDetail.ErrorType.REFUND_ALREADY_CONFIRMED)
+         errorDetail.errorType(ErrorType.REFUND_ALREADY_CONFIRMED)
                .errorMessage("Refund confirmed")
                .detailMessage(
                      new DetailMessage()
@@ -230,7 +216,7 @@ public class RefundModelUtils extends SUVModelUtils {
          return new ValidationResponse(Response.status(400).entity(errorDetail).build());
 
       case CONFIRMED_REDEEMED:
-         errorDetail.errorType(ErrorDetail.ErrorType.REDEMPTION_ALREADY_CONFIRMED)
+         errorDetail.errorType(ErrorType.REDEMPTION_ALREADY_CONFIRMED)
                .errorMessage("Redemption confirmed.")
                .detailMessage(
                      new DetailMessage().freeString(

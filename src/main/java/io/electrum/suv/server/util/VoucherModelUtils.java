@@ -117,12 +117,10 @@ public class VoucherModelUtils extends SUVModelUtils {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
 
       ErrorDetail errorDetail = new ErrorDetail().id(confirmationUuid).originalId(voucherUuid);
-
-      // TODO Extract method
-      // TODO Normalise these validation methods to be more similar (this)
       // Confirm Voucher provisioned
       ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords =
             testServer.getBackend().getVoucherProvisionRecords();
+
       if (!isVoucherProvisioned(voucherUuid, provisionRecords, username, password)) {
          errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No voucher req.")
@@ -184,7 +182,6 @@ public class VoucherModelUtils extends SUVModelUtils {
 
       ErrorDetail errorDetail = new ErrorDetail().id(reversalUuid).originalId(voucherUuid);
 
-      // TODO Normalise these validation methods to be more similar (this)
       // Confirm Voucher provisioned
       ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords =
             testServer.getBackend().getVoucherProvisionRecords();
@@ -195,7 +192,7 @@ public class VoucherModelUtils extends SUVModelUtils {
                      new DetailMessage().freeString("No VoucherRequest located for given voucherUuid.")
                            .voucherId(voucherUuid));
          return new ValidationResponse(Response.status(404).entity(errorDetail).build());
-      } // TODO extract this to confirmVoucherRedeemed() returns response code or null
+      }
 
       // check it's not confirmed
       ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords =
@@ -225,7 +222,6 @@ public class VoucherModelUtils extends SUVModelUtils {
       if (req.getVoucher() == null)
          voucherResponse.setVoucher(createRandomizedVoucher());
       voucherResponse.setSlipData(createRandomizedSlipData());
-      // voucherResponse.setResponseProduct(req.getProduct().name("TalkALot").type(Product.ProductType.AIRTIME_FIXED));
       return voucherResponse;
    }
 

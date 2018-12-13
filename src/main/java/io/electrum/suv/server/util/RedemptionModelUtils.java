@@ -5,7 +5,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.Response;
 
-import io.electrum.suv.api.models.*;
+import io.electrum.suv.api.models.ErrorDetail;
+import io.electrum.suv.api.models.ErrorDetail.ErrorType;
+import io.electrum.suv.api.models.RedemptionRequest;
+import io.electrum.suv.api.models.RedemptionResponse;
+import io.electrum.suv.api.models.Voucher;
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.DetailMessage;
@@ -51,35 +55,23 @@ public class RedemptionModelUtils {
                      "Voucher not confirmed.",
                      "Voucher confirmation for this voucher has not been processed. Cannot redeem unconfirmed vouchers.",
                      null,
-                     ErrorDetail.ErrorType.VOUCHER_NOT_REDEEMABLE);
+                     ErrorType.VOUCHER_NOT_REDEEMABLE);
          return new ValidationResponse(Response.status(400).entity(errorDetail).build());
       }
 
-      // Confirm reversal request did not arrive before this
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
             testServer.getBackend().getRedemptionReversalRecords();
-      RequestKey requestKey =
-            new RequestKey(username, password, RequestKey.ResourceType.REVERSALS_RESOURCE, requestUuid);
-      BasicReversal reversal = reversalRecords.get(requestKey);
-      if (reversal != null) {
-         ErrorDetail errorDetail =
-               SUVModelUtils.buildErrorDetail(
-                     requestUuid,
-                     "Redemption reversed.",
-                     "Redemption reversal with UUID already processed with the associated fields.",
-                     reversal.getId(),
-                     ErrorDetail.ErrorType.REDEMPTION_ALREADY_REVERSED);
-
-         // Check for a response for this request, if found add to detailMessage
-         DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-         ConcurrentHashMap<RequestKey, RefundResponse> responseRecords =
-               testServer.getBackend().getRefundResponseRecords();
-         RefundResponse rsp = responseRecords.get(requestKey);
-         if (rsp != null) {
-            detailMessage.setVoucher(rsp.getVoucher());
-         }
-         return new ValidationResponse(Response.status(400).entity(errorDetail).build());
-      }
+      ValidationResponse reversalRsp =
+            SUVModelUtils.confirmReversalNotReceived(
+                  username,
+                  password,
+                  requestUuid,
+                  testServer,
+                  "Redemption",
+                  reversalRecords,
+                  ErrorType.REDEMPTION_ALREADY_REVERSED);
+      if (reversalRsp.hasErrorResponse())
+         return reversalRsp;
 
       // If no redemptionRequests have been recorded, the voucher cannot fail the test of having already been redeemed.
       if (requestRecords.size() != 0) {
@@ -93,8 +85,8 @@ public class RedemptionModelUtils {
                         requestUuid,
                         "Duplicate Redemption Requests",
                         "A Redemption Request for that voucher has already been received.",
-                        null, // TODO Reintroduce mapping to retrieve this
-                        ErrorDetail.ErrorType.VOUCHER_ALREADY_REDEEMED);
+                        null,
+                        ErrorType.VOUCHER_ALREADY_REDEEMED);
 
             DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
 
@@ -142,7 +134,7 @@ public class RedemptionModelUtils {
             SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
 
       if (voucherCode == null) {
-         errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
+         errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No Redemption Request")
                .detailMessage(
                      new DetailMessage().freeString(
@@ -151,7 +143,7 @@ public class RedemptionModelUtils {
       }
 
       if (confirmedExistingVouchers.get(voucherCode) != SUVTestServer.VoucherState.REDEEMED) {
-         errorDetail.errorType(ErrorDetail.ErrorType.VOUCHER_NOT_REDEEMED)
+         errorDetail.errorType(ErrorType.VOUCHER_NOT_REDEEMED)
                .errorMessage("Redemption Confirmation not performed")
                .detailMessage(
                      new DetailMessage().freeString(
@@ -200,7 +192,7 @@ public class RedemptionModelUtils {
             SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
 
       if (voucherCode == null) {
-         errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
+         errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No Redemption Request")
                .detailMessage(
                      new DetailMessage().freeString(
@@ -218,7 +210,7 @@ public class RedemptionModelUtils {
                new RequestKey(username, password, RequestKey.ResourceType.CONFIRMATIONS_RESOURCE, redemptionUuid);
          BasicAdvice confirmation = confirmationRecords.get(requestKey);
 
-         errorDetail.errorType(ErrorDetail.ErrorType.REDEMPTION_ALREADY_CONFIRMED)
+         errorDetail.errorType(ErrorType.REDEMPTION_ALREADY_CONFIRMED)
                .errorMessage("Redemption confirmed.")
                .detailMessage(
                      new DetailMessage().freeString(
@@ -228,7 +220,7 @@ public class RedemptionModelUtils {
                            .reversalId(reversalUuid));
          return new ValidationResponse(Response.status(400).entity(errorDetail).build());
       default:
-         errorDetail.errorType(ErrorDetail.ErrorType.UNABLE_TO_LOCATE_RECORD)
+         errorDetail.errorType(ErrorType.UNABLE_TO_LOCATE_RECORD)
                .errorMessage("No Redemption Request")
                .detailMessage(
                      new DetailMessage().freeString(
