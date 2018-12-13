@@ -1,6 +1,6 @@
 REST server for testing a client implementation of the [suv-service-interface](https://github.com/electrumpayments/suv-service-interface).
 
-## Testing a Server(TODO)
+## Testing a Server
 Testing a server implementation can be achieved using [this](https://github.com/electrumpayments/suv-service-test-pack/tree/master/test/postman) Postman (Collection v2) REST test pack.
 These tests consist of correctly formatted JSON messages that validate server responses. Tests may also consist of a message flow in which multiple related messages are sent sequentially to the server to test handling of state-full interactions (such as requests and confirmations).  
 
@@ -29,7 +29,7 @@ Note that that tests may be run individually from the main Postman view where te
 	`newman run Airtime.postman_collection.json -e localhost.postman_environment.json`
 3. This will run all tests against an Airtime Service server implementation hosted on localhost:8080 and provide a basic breakdown of which tests passed and failed.
 
-##Testing a Client (Not yet, assumptions made)
+##Testing a Client
 To test a client implementation an instance of this test server is provided at: https://suv-service-test-pack.herokuapp.com. 
 Messages sent to this server via the urls described in the [suv-service-interface](https://github.com/electrumpayments/suv-service-interface) will be
 validated and responded to with mocked up voucher data.
