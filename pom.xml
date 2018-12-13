@@ -7,7 +7,7 @@
     <version>1.0.0</version>
     <packaging>jar</packaging>
     <name>SUV Test Pack</name>
-    <description>Server and Postman scripts to test Airtime Service Interface implementaitons</description>
+    <description>Server and Postman scripts to test SUV Service Interface implementations</description>
     <url>https://electrumpayments.github.io/suv-service-test-pack</url>
     <licenses>
         <license>
@@ -41,7 +41,7 @@
         <swagger-maven-plugin-version>3.1.3</swagger-maven-plugin-version>
         <slf4j-version>1.7.5</slf4j-version>
         <logback-version>1.0.13</logback-version>
-        <airtime-version>5.8.1</airtime-version>
+        <suv-version>1.2.0</suv-version>
         <service-interface-base-version>3.13.0</service-interface-base-version>
         <electrum.dependency.dropwizard-jersey.version>1.1.2</electrum.dependency.dropwizard-jersey.version>
     </properties>
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>io.electrum</groupId>
             <artifactId>suv-service-interface</artifactId>
-            <version>1.2.1-SNAPSHOT</version>
+            <version>1.2.0</version>
         </dependency>
 
         <dependency>
@@ -292,6 +292,9 @@
                         <goals>
                             <goal>jar</goal>
                         </goals>
+                        <configuration>
+                            <failOnError>false</failOnError>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
