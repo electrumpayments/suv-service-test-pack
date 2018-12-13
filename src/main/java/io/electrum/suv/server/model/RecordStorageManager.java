@@ -10,7 +10,6 @@ import io.electrum.vas.model.BasicAdvice;
 import io.electrum.vas.model.BasicReversal;
 import io.electrum.vas.model.TenderAdvice;
 
-//TODO could be abstract
 public class RecordStorageManager {
    private final ConcurrentHashMap<RequestKey, ProvisionRequest> voucherProvisionRecords;
    private final ConcurrentHashMap<RequestKey, ProvisionResponse> provisionResponseRecords;

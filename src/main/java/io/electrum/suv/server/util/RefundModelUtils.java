@@ -26,7 +26,6 @@ public class RefundModelUtils extends SUVModelUtils {
       updateWithRandomizedIdentifiers(refundResponse);
       refundResponse.setSlipData(createRandomizedSlipData());
 
-      // TODO Confirm not needed to populate more fields (optional)
       return refundResponse;
    }
 
