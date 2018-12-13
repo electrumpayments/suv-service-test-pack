@@ -5,7 +5,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.Response;
 
-import io.electrum.suv.server.util.RequestKey.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,19 +34,15 @@ public class VoucherModelUtils extends SUVModelUtils {
     * @param voucherId
     *           the unique identifier of this voucher (The provision request uuid serves as the initial unique value for
     *           a voucher until it is returned to the vendor)
-    * @param username
-    *           from BasicAuth
-    * @param password
-    *           from BasicAuth
+    * @param requestKey
     * @return A {@Link ValidationResponse} set to no error response if the request can continue or a 400 error response
     *         indicating the voucher could not be provisioned.
     */
-   public static ValidationResponse canProvisionVoucher(String voucherId, String username, String password) {
+   public static ValidationResponse canProvisionVoucher(String voucherId, RequestKey requestKey) {
       final SUVTestServer testServer = SUVTestServerRunner.getTestServer();
 
-      ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords = testServer.getBackend().getVoucherProvisionRecords();
-      // TODO Could make requestKey part of method args
-      RequestKey requestKey = new RequestKey(username, password, ResourceType.VOUCHERS_RESOURCE, voucherId);
+      ConcurrentHashMap<RequestKey, ProvisionRequest> provisionRecords =
+            testServer.getBackend().getVoucherProvisionRecords();
       ProvisionRequest originalRequest = provisionRecords.get(requestKey);
 
       // If Voucher already provisioned
@@ -57,7 +52,8 @@ public class VoucherModelUtils extends SUVModelUtils {
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
 
          // Check for a response for this request
-         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getBackend().getProvisionResponseRecords();
+         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords =
+               testServer.getBackend().getProvisionResponseRecords();
          ProvisionResponse rsp = responseRecords.get(requestKey);
          // If a response is found, add it to the detailMessage
          if (rsp != null) {
@@ -68,8 +64,9 @@ public class VoucherModelUtils extends SUVModelUtils {
       }
 
       // If voucher reversal request already received
-      ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords = testServer.getBackend().getVoucherReversalRecords();
-      requestKey = new RequestKey(username, password, ResourceType.REVERSALS_RESOURCE, voucherId);
+      ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
+            testServer.getBackend().getVoucherReversalRecords();
+      requestKey.setResourceType(ResourceType.REVERSALS_RESOURCE);
       BasicReversal reversal = reversalRecords.get(requestKey);
       if (reversal != null) {
          ErrorDetail errorDetail =
@@ -83,7 +80,8 @@ public class VoucherModelUtils extends SUVModelUtils {
          // TODO what is this here for, really don't see it being !null
          // Check for a response for this request, if found add to detailMessage
          DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
-         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords = testServer.getBackend().getProvisionResponseRecords();
+         ConcurrentHashMap<RequestKey, ProvisionResponse> responseRecords =
+               testServer.getBackend().getProvisionResponseRecords();
          ProvisionResponse rsp = responseRecords.get(requestKey);
          if (rsp != null) {
             detailMessage.setVoucher(rsp.getVoucher());

@@ -55,7 +55,10 @@ public class VoucherProvisionHandler extends BaseHandler {
             return validationRsp.getResponse();
 
          // Confirm voucher not already provisioned or reversed.
-         validationRsp = VoucherModelUtils.canProvisionVoucher(uuid, username, password);
+         validationRsp =
+               VoucherModelUtils.canProvisionVoucher(
+                     uuid,
+                     new RequestKey(username, password, ResourceType.VOUCHERS_RESOURCE, uuid));
          if (validationRsp.hasErrorResponse())
             return validationRsp.getResponse();
 
