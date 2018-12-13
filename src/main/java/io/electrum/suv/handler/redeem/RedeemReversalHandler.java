@@ -12,6 +12,7 @@ import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.model.ValidationResponse;
+import io.electrum.suv.server.util.RedemptionModelUtils;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.RequestKey.ResourceType;
 import io.electrum.suv.server.util.VoucherModelUtils;
@@ -51,7 +52,8 @@ public class RedeemReversalHandler extends BaseHandler {
          VoucherModelUtils.validateThirdPartyIdTransactionIds(reversal.getThirdPartyIdentifiers());
 
          RedemptionResponse redemptionRsp =
-               SUVTestServerRunner.getTestServer().getBackend()
+               SUVTestServerRunner.getTestServer()
+                     .getBackend()
                      .getRedemptionResponseRecords()
                      .get(new RequestKey(username, password, ResourceType.REDEMPTIONS_RESOURCE, redemptionUuid));
 
@@ -62,7 +64,7 @@ public class RedeemReversalHandler extends BaseHandler {
             voucherCode = redemptionRsp.getVoucher().getCode();
 
          validationRsp =
-               VoucherModelUtils.canReverseRedemption(redemptionUuid, reversalUuid, username, password, voucherCode);
+               RedemptionModelUtils.canReverseRedemption(redemptionUuid, reversalUuid, username, password, voucherCode);
          if (validationRsp.hasErrorResponse()) {
             if (validationRsp.getResponse().getStatus() == 404) {
                // make sure to record the reversal in case we get the request late.

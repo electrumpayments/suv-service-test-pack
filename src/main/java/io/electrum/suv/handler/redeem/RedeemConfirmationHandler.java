@@ -11,6 +11,7 @@ import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.model.ValidationResponse;
+import io.electrum.suv.server.util.RedemptionModelUtils;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.RequestKey.ResourceType;
 import io.electrum.suv.server.util.VoucherModelUtils;
@@ -51,7 +52,8 @@ public class RedeemConfirmationHandler extends BaseHandler {
          VoucherModelUtils.validateThirdPartyIdTransactionIds(confirmation.getThirdPartyIdentifiers());
 
          RedemptionResponse redemptionRsp =
-               SUVTestServerRunner.getTestServer().getBackend()
+               SUVTestServerRunner.getTestServer()
+                     .getBackend()
                      .getRedemptionResponseRecords()
                      .get(new RequestKey(username, password, ResourceType.REDEMPTIONS_RESOURCE, redemptionUuid));
          if (redemptionRsp == null)
@@ -59,7 +61,7 @@ public class RedeemConfirmationHandler extends BaseHandler {
          else
             voucherCode = redemptionRsp.getVoucher().getCode();
 
-         validationRsp = VoucherModelUtils.canConfirmRedemption(redemptionUuid, confirmationUuid, voucherCode);
+         validationRsp = RedemptionModelUtils.canConfirmRedemption(redemptionUuid, confirmationUuid, voucherCode);
          if (validationRsp.hasErrorResponse()) {
             return validationRsp.getResponse();
          }

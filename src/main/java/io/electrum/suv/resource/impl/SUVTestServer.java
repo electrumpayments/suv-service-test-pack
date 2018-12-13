@@ -3,12 +3,10 @@ package io.electrum.suv.resource.impl;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
-import io.electrum.suv.server.model.Backend;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
@@ -23,14 +21,10 @@ import com.fasterxml.jackson.datatype.joda.JodaModule;
 import io.dropwizard.jersey.validation.DropwizardConfiguredValidator;
 import io.dropwizard.jersey.validation.HibernateValidationFeature;
 import io.dropwizard.jersey.validation.Validators;
-import io.electrum.suv.api.models.*;
 import io.electrum.suv.server.SUVFormatViolationExceptionMapper;
 import io.electrum.suv.server.SUVHibernateViolationExceptionMapper;
 import io.electrum.suv.server.SUVUnrecognizedFieldViolationExceptionMapper;
-import io.electrum.suv.server.util.RequestKey;
-import io.electrum.vas.model.BasicAdvice;
-import io.electrum.vas.model.BasicReversal;
-import io.electrum.vas.model.TenderAdvice;
+import io.electrum.suv.server.model.Backend;
 
 public class SUVTestServer extends ResourceConfig {
 
@@ -56,7 +50,6 @@ public class SUVTestServer extends ResourceConfig {
    public Backend getBackend() {
       return backend;
    }
-
 
    /** Represents the state of the voucher an assigns an ordering to the states */
    public enum VoucherState {

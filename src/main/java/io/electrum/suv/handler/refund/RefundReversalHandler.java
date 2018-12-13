@@ -12,6 +12,7 @@ import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.model.ValidationResponse;
+import io.electrum.suv.server.util.RefundModelUtils;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.RequestKey.ResourceType;
 import io.electrum.suv.server.util.VoucherModelUtils;
@@ -61,7 +62,7 @@ public class RefundReversalHandler extends BaseHandler {
          else
             voucherCode = refundRsp.getVoucher().getCode();
 
-         validationRsp = VoucherModelUtils.canReverseRefund(refundUuid, reversalUuid, username, password, voucherCode);
+         validationRsp = RefundModelUtils.canReverseRefund(refundUuid, reversalUuid, username, password, voucherCode);
          if (validationRsp.hasErrorResponse()) {
             if (validationRsp.getResponse().getStatus() == 404) {
                // make sure to record the reversal in case we get the request late.

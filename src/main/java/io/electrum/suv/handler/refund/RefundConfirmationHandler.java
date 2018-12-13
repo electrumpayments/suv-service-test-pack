@@ -11,6 +11,7 @@ import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.model.ValidationResponse;
+import io.electrum.suv.server.util.RefundModelUtils;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.RequestKey.ResourceType;
 import io.electrum.suv.server.util.VoucherModelUtils;
@@ -52,7 +53,8 @@ public class RefundConfirmationHandler extends BaseHandler {
 
          // Check that there is actually a corresponding refund request
          RefundResponse refundRsp =
-               SUVTestServerRunner.getTestServer().getBackend()
+               SUVTestServerRunner.getTestServer()
+                     .getBackend()
                      .getRefundResponseRecords()
                      .get(new RequestKey(username, password, ResourceType.REFUNDS_RESOURCE, refundUuid));
 
@@ -61,7 +63,7 @@ public class RefundConfirmationHandler extends BaseHandler {
          else
             voucherCode = refundRsp.getVoucher().getCode();
 
-         validationRsp = VoucherModelUtils.canConfirmRefund(refundUuid, confirmationUuid, voucherCode);
+         validationRsp = RefundModelUtils.canConfirmRefund(refundUuid, confirmationUuid, voucherCode);
          if (validationRsp.hasErrorResponse()) {
             return validationRsp.getResponse();
          }

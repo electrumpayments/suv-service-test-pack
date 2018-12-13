@@ -54,7 +54,7 @@ public class RefundVoucherHandler extends BaseHandler {
             return validationRsp.getResponse();
 
          // Confirm voucher not already provisioned or reversed.
-         validationRsp = VoucherModelUtils.canRefundVoucher(refundUuid, username, password, voucherCode);
+         validationRsp = RefundModelUtils.canRefundVoucher(refundUuid, username, password, voucherCode);
          if (validationRsp.hasErrorResponse()) {
             return validationRsp.getResponse();
          }

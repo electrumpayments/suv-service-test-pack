@@ -17,30 +17,6 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(description = "The outcome of the reset request.")
 public class ResetResponse {
 
-   /**
-    * Reset outcomes.
-    */
-   public enum Outcomes {
-      EMPTY_REQUEST("No ResetRequest received in POST body."),
-      SUCCESSFUL("Reset successful - all data has been reset for the specified user."),
-      NO_ACK("The certainty of data loss was not acknowledged. Please acknowledge it to reset the test server."),
-      NO_DEC("The intent to reset all test data was not declared. Please declare it to reset the test server."),
-      SERVER_ERROR("There was an error while trying to reset user data. Please contact Electrum if this eror persists."),
-      UNKNOWN_USER("The Test Server was unable to locate any records associated with this user to reset. Please confirm HTTP Basic Auth credentials used or continue testing with different credentials.");
-
-      private String value;
-
-      Outcomes(String value) {
-         this.value = value;
-      }
-
-      @Override
-      @JsonValue
-      public String toString() {
-         return String.valueOf(value);
-      }
-   }
-
    private Outcomes outcome = null;
 
    public ResetResponse outcome(Outcomes outcome) {
@@ -50,7 +26,7 @@ public class ResetResponse {
 
    /**
     * The outcome of the reset request.
-    * 
+    *
     * @return acknowledgement
     **/
    @ApiModelProperty(required = true, value = "The outcome of the reset request.")
@@ -89,5 +65,29 @@ public class ResetResponse {
       sb.append("    outcome: ").append(Utils.toIndentedString(outcome)).append("\n");
       sb.append("}");
       return sb.toString();
+   }
+
+   /**
+    * Reset outcomes.
+    */
+   public enum Outcomes {
+      EMPTY_REQUEST("No ResetRequest received in POST body."),
+      SUCCESSFUL("Reset successful - all data has been reset for the specified user."),
+      NO_ACK("The certainty of data loss was not acknowledged. Please acknowledge it to reset the test server."),
+      NO_DEC("The intent to reset all test data was not declared. Please declare it to reset the test server."),
+      SERVER_ERROR("There was an error while trying to reset user data. Please contact Electrum if this eror persists."),
+      UNKNOWN_USER("The Test Server was unable to locate any records associated with this user to reset. Please confirm HTTP Basic Auth credentials used or continue testing with different credentials.");
+
+      private String value;
+
+      Outcomes(String value) {
+         this.value = value;
+      }
+
+      @Override
+      @JsonValue
+      public String toString() {
+         return String.valueOf(value);
+      }
    }
 }

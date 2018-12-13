@@ -14,6 +14,7 @@ import io.electrum.suv.resource.impl.SUVTestServer.VoucherState;
 import io.electrum.suv.server.SUVTestServerRunner;
 import io.electrum.suv.server.model.FormatException;
 import io.electrum.suv.server.model.ValidationResponse;
+import io.electrum.suv.server.util.RedemptionModelUtils;
 import io.electrum.suv.server.util.RequestKey;
 import io.electrum.suv.server.util.RequestKey.ResourceType;
 import io.electrum.suv.server.util.VoucherModelUtils;
@@ -56,14 +57,14 @@ public class RedeemVoucherHandler extends BaseHandler {
 
          // Confirm voucher not already provisioned or reversed.
          String voucherCode = redemptionRequest.getVoucher().getCode();
-         validationRsp = VoucherModelUtils.canRedeemVoucher(voucherCode, username, password, uuid);
+         validationRsp = RedemptionModelUtils.canRedeemVoucher(voucherCode, username, password, uuid);
          if (validationRsp.hasErrorResponse()) {
             return validationRsp.getResponse();
          }
 
          // The voucher can be redeemed and stored.
          RequestKey key = addRedemptionRequestToCache(uuid, redemptionRequest);
-         RedemptionResponse redemptionRsp = VoucherModelUtils.redemptionRspFromReq(redemptionRequest);
+         RedemptionResponse redemptionRsp = RedemptionModelUtils.redemptionRspFromReq(redemptionRequest);
          addRedemptionResponseToCache(key, redemptionRsp);
          validationRsp.setResponse(Response.created(uriInfo.getRequestUri()).entity(redemptionRsp).build());
 

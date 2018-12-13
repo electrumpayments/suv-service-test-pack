@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import io.electrum.suv.resource.impl.SUVTestServer;
 import io.electrum.suv.server.model.ValidationResponse;
-import io.electrum.suv.server.util.VoucherModelUtils;
+import io.electrum.suv.server.util.SUVModelUtils;
 import io.electrum.vas.Utils;
 import io.electrum.vas.model.Transaction;
 
@@ -43,7 +43,7 @@ public abstract class BaseHandler {
       String uuid = transaction.getId();
       if (!transaction.getClient().getId().equals(username)) {
          return new ValidationResponse(
-               VoucherModelUtils.buildIncorrectUsernameErrorResponse(uuid, transaction.getClient(), username));
+               SUVModelUtils.buildIncorrectUsernameErrorResponse(uuid, transaction.getClient(), username));
       }
       return new ValidationResponse(null);
    }

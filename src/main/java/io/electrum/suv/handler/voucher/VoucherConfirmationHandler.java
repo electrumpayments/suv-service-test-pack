@@ -78,7 +78,8 @@ public class VoucherConfirmationHandler extends BaseHandler {
             SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
 
       ProvisionResponse provisionRsp =
-            SUVTestServerRunner.getTestServer().getBackend()
+            SUVTestServerRunner.getTestServer()
+                  .getBackend()
                   .getProvisionResponseRecords()
                   .get(new RequestKey(username, password, ResourceType.VOUCHERS_RESOURCE, voucherProvisionUuid));
 

@@ -17,44 +17,6 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(description = "A request to reset user data in the Test Server.")
 public class ResetRequest {
 
-   /**
-    * Recognised acknowledgments.
-    */
-   public enum Acknowledgments {
-      TRUE("TRUE"), FALSE("FALSE");
-
-      private String value;
-
-      Acknowledgments(String value) {
-         this.value = value;
-      }
-
-      @Override
-      @JsonValue
-      public String toString() {
-         return String.valueOf(value);
-      }
-   }
-
-   /**
-    * Recognised declarations.
-    */
-   public enum Declarations {
-      TRUE("TRUE"), FALSE("FALSE");
-
-      private String value;
-
-      Declarations(String value) {
-         this.value = value;
-      }
-
-      @Override
-      @JsonValue
-      public String toString() {
-         return String.valueOf(value);
-      }
-   }
-
    private Acknowledgments acknowledgement = Acknowledgments.FALSE;
    private Declarations declaration = Declarations.FALSE;
 
@@ -65,7 +27,7 @@ public class ResetRequest {
 
    /**
     * An acknowledgement that all user data will be lost.
-    * 
+    *
     * @return acknowledgement
     **/
    @ApiModelProperty(required = true, value = "An acknowledgement that all user data will be lost.")
@@ -86,7 +48,7 @@ public class ResetRequest {
 
    /**
     * A declaration to reset user data.
-    * 
+    *
     * @return declaration
     **/
    @ApiModelProperty(required = true, value = "A declaration to reset user data.")
@@ -127,5 +89,43 @@ public class ResetRequest {
       sb.append("    resetUserData: ").append(Utils.toIndentedString(declaration)).append("\n");
       sb.append("}");
       return sb.toString();
+   }
+
+   /**
+    * Recognised acknowledgments.
+    */
+   public enum Acknowledgments {
+      TRUE("TRUE"), FALSE("FALSE");
+
+      private String value;
+
+      Acknowledgments(String value) {
+         this.value = value;
+      }
+
+      @Override
+      @JsonValue
+      public String toString() {
+         return String.valueOf(value);
+      }
+   }
+
+   /**
+    * Recognised declarations.
+    */
+   public enum Declarations {
+      TRUE("TRUE"), FALSE("FALSE");
+
+      private String value;
+
+      Declarations(String value) {
+         this.value = value;
+      }
+
+      @Override
+      @JsonValue
+      public String toString() {
+         return String.valueOf(value);
+      }
    }
 }

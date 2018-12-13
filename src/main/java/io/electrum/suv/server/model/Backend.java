@@ -110,6 +110,7 @@ public class Backend {
 
    /**
     * Determines whether the username, password pair is present in any records on the server.
+    * 
     * @param username
     * @param password
     * @return true if any record of this username and password is present, false otherwise.
@@ -127,7 +128,9 @@ public class Backend {
    }
 
    /**
-    * Removes all records, requests, or repsonses; which reference this username, password pair. <em>This cannot be undone</em>
+    * Removes all records, requests, or repsonses; which reference this username, password pair. <em>This cannot be
+    * undone</em>
+    * 
     * @param username
     * @param password
     */

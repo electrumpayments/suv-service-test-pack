@@ -3,26 +3,10 @@ package io.electrum.suv.server.util;
 import java.util.Objects;
 
 public class RequestKey {
-   public enum ResourceType {
-      VOUCHERS_RESOURCE("vouchers"),
-      REVERSALS_RESOURCE("reversals"),
-      CONFIRMATIONS_RESOURCE("confirmations"),
-      REDEMPTIONS_RESOURCE("redemptions"),
-      REFUNDS_RESOURCE("refunds");
-
-      private String value;
-
-      ResourceType(String value) {
-         this.value = value;
-      }
-
-   }
-
    private String username;
    private String password;
    private ResourceType resourceType;
    private String uuid;
-
    public RequestKey(String username, String password, ResourceType resourceType, String uuid) {
       this.username = username;
       this.password = password;
@@ -86,6 +70,21 @@ public class RequestKey {
    @Override
    public String toString() {
       return username + "|" + password + "|" + resourceType + "|" + uuid;
+   }
+
+   public enum ResourceType {
+      VOUCHERS_RESOURCE("vouchers"),
+      REVERSALS_RESOURCE("reversals"),
+      CONFIRMATIONS_RESOURCE("confirmations"),
+      REDEMPTIONS_RESOURCE("redemptions"),
+      REFUNDS_RESOURCE("refunds");
+
+      private String value;
+
+      ResourceType(String value) {
+         this.value = value;
+      }
+
    }
 
 }

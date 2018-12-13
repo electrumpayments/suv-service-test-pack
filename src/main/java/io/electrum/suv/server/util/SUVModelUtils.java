@@ -3,6 +3,8 @@ package io.electrum.suv.server.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
+
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,34 +100,6 @@ public class SUVModelUtils {
       transaction.setSettlementEntity(settlementEntity);
    }
 
-   /*
-    * protected static Amounts createRandomizedAmounts() { return new
-    * Amounts().approvedAmount(createRandomizedAmount()).feeAmount(createRandomizedAmount()); }
-    * 
-    * private static LedgerAmount createRandomizedAmount() { return new LedgerAmount().currency("710")
-    * .amount(Long.parseLong(RandomData.random09((int) ((Math.random() * 2) + 1)))); }
-    * 
-    * public static Response buildIncorrectUsernameErrorResponse( String objectId, Institution client, String username,
-    * ErrorDetail.RequestType requestType) {
-    * 
-    * ErrorDetail errorDetail = buildErrorDetail( objectId, "Incorrect username",
-    * "The HTTP Basic Authentication username (" + username + ") is not the same as the value in the Client.Id field ("
-    * + client.getId() + ").", null, requestType, ErrorDetail.ErrorType.FORMAT_ERROR);
-    * 
-    * DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage(); detailMessage.setClient(client);
-    * 
-    * return Response.status(400).entity(errorDetail).build(); }
-    * 
-    * public static ErrorDetail buildInconsistentIdErrorDetail( String pathId, String objectId, String originalMsgId,
-    * ErrorDetail.RequestType requestType) { ErrorDetail errorDetail = buildErrorDetail( objectId,
-    * "String inconsistent", "The ID path parameter is not the same as the object's ID.", originalMsgId, requestType,
-    * ErrorDetail.ErrorType.FORMAT_ERROR);
-    * 
-    * DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage(); detailMessage.setPathId(pathId);
-    * 
-    * return errorDetail; }
-    */
-
    /** Builds an {@link ErrorDetail} for duplicate UUID errors */
    static ErrorDetail buildDuplicateUuidErrorDetail(
          String objectId,
@@ -203,4 +177,25 @@ public class SUVModelUtils {
       }
    }
 
+   /**
+    * Builds a 400 error response indicating the BasicAuth username is inconsistent with the username in the body of the
+    * request.
+    */
+   public static Response buildIncorrectUsernameErrorResponse(String objectId, Institution client, String username) {
+
+      ErrorDetail errorDetail =
+            buildErrorDetail(
+                  objectId,
+                  "Incorrect username",
+                  "The HTTP Basic Authentication username (" + username
+                        + ") is not the same as the value in the Client.Id field (" + client.getId() + ").",
+                  null,
+
+                  ErrorDetail.ErrorType.AUTHENTICATION_ERROR);
+
+      DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+      detailMessage.setClient(client);
+
+      return Response.status(400).entity(errorDetail).build();
+   }
 }

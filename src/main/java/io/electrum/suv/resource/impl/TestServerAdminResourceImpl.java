@@ -9,13 +9,13 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.*;
 
-import io.electrum.suv.handler.SUVMessageHandlerFactory;
-import io.electrum.suv.server.model.ResetRequest;
-import io.electrum.suv.server.model.ResetResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.electrum.suv.api.utils.Paths;
+import io.electrum.suv.handler.SUVMessageHandlerFactory;
+import io.electrum.suv.server.model.ResetRequest;
+import io.electrum.suv.server.model.ResetResponse;
 import io.swagger.annotations.*;
 
 /**
@@ -26,8 +26,8 @@ import io.swagger.annotations.*;
 @Produces({ "application/json" })
 @Api(description = "the SUV API")
 public class TestServerAdminResourceImpl {
-   static TestServerAdminResourceImpl instance = null;
    private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class);
+   static TestServerAdminResourceImpl instance = null;
 
    protected TestServerAdminResourceImpl getResourceImplementation() {
       if (instance == null) {
