@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
+import io.electrum.suv.server.model.Backend;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
@@ -34,24 +35,9 @@ import io.electrum.vas.model.TenderAdvice;
 public class SUVTestServer extends ResourceConfig {
 
    private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
+   private Backend backend;
 
-   private final ConcurrentHashMap<RequestKey, ProvisionRequest> voucherProvisionRecords;
-   private final ConcurrentHashMap<RequestKey, ProvisionResponse> provisionResponseRecords;
-   private final ConcurrentHashMap<RequestKey, TenderAdvice> voucherConfirmationRecords;
-   private final ConcurrentHashMap<RequestKey, BasicReversal> voucherReversalRecords;
-
-   private final ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRequestRecords;
-   private final ConcurrentHashMap<RequestKey, RedemptionResponse> redemptionResponseRecords;
-   private final ConcurrentHashMap<RequestKey, BasicAdvice> redemptionConfirmationRecords;
-   private final ConcurrentHashMap<RequestKey, BasicReversal> redemptionReversalRecords;
-
-   private final ConcurrentHashMap<RequestKey, RefundRequest> refundRequestRecords;
-   private final ConcurrentHashMap<RequestKey, RefundResponse> refundResponseRecords;
-   private final ConcurrentHashMap<RequestKey, BasicAdvice> refundConfirmationRecords;
-   private final ConcurrentHashMap<RequestKey, BasicReversal> refundReversalRecords;
-
-   private final ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers;// records state of existing vouchers
-
+//TODO extract storage to new class
    public SUVTestServer() {
       packages(SUVTestServer.class.getPackage().getName());
 
@@ -65,75 +51,13 @@ public class SUVTestServer extends ResourceConfig {
       register(new SUVFormatViolationExceptionMapper());
       register(new SUVUnrecognizedFieldViolationExceptionMapper());
 
-      voucherProvisionRecords = new ConcurrentHashMap<>();
-      provisionResponseRecords = new ConcurrentHashMap<>();
-      voucherConfirmationRecords = new ConcurrentHashMap<>();
-      voucherReversalRecords = new ConcurrentHashMap<>();
-
-      redemptionRequestRecords = new ConcurrentHashMap<>();
-      redemptionResponseRecords = new ConcurrentHashMap<>();
-      redemptionConfirmationRecords = new ConcurrentHashMap<>();
-      redemptionReversalRecords = new ConcurrentHashMap<>();
-
-      refundRequestRecords = new ConcurrentHashMap<>();
-      refundResponseRecords = new ConcurrentHashMap<>();
-      refundConfirmationRecords = new ConcurrentHashMap<>();
-      refundReversalRecords = new ConcurrentHashMap<>();
-
-      confirmedExistingVouchers = new ConcurrentHashMap<>();
+      backend = new Backend();
    }
 
-   public ConcurrentHashMap<RequestKey, ProvisionRequest> getVoucherProvisionRecords() {
-      return voucherProvisionRecords;
+   public Backend getBackend() {
+      return backend;
    }
 
-   public ConcurrentHashMap<RequestKey, ProvisionResponse> getProvisionResponseRecords() {
-      return provisionResponseRecords;
-   }
-
-   public ConcurrentHashMap<RequestKey, TenderAdvice> getVoucherConfirmationRecords() {
-      return voucherConfirmationRecords;
-   }
-
-   public ConcurrentHashMap<RequestKey, BasicReversal> getVoucherReversalRecords() {
-      return voucherReversalRecords;
-   }
-
-   public ConcurrentHashMap<RequestKey, RedemptionRequest> getRedemptionRequestRecords() {
-      return redemptionRequestRecords;
-   }
-
-   public ConcurrentHashMap<RequestKey, RedemptionResponse> getRedemptionResponseRecords() {
-      return redemptionResponseRecords;
-   }
-
-   public ConcurrentHashMap<RequestKey, BasicAdvice> getRedemptionConfirmationRecords() {
-      return redemptionConfirmationRecords;
-   }
-
-   public ConcurrentHashMap<RequestKey, BasicReversal> getRedemptionReversalRecords() {
-      return redemptionReversalRecords;
-   }
-
-   public ConcurrentHashMap<RequestKey, RefundRequest> getRefundRequestRecords() {
-      return refundRequestRecords;
-   }
-
-   public ConcurrentHashMap<RequestKey, RefundResponse> getRefundResponseRecords() {
-      return refundResponseRecords;
-   }
-
-   public ConcurrentHashMap<RequestKey, BasicAdvice> getRefundConfirmationRecords() {
-      return refundConfirmationRecords;
-   }
-
-   public ConcurrentHashMap<RequestKey, BasicReversal> getRefundReversalRecords() {
-      return refundReversalRecords;
-   }
-
-   public ConcurrentHashMap<String, VoucherState> getConfirmedExistingVouchers() {
-      return confirmedExistingVouchers;
-   }
 
    /** Represents the state of the voucher an assigns an ordering to the states */
    public enum VoucherState {

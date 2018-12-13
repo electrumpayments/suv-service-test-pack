@@ -73,12 +73,12 @@ public class VoucherConfirmationHandler extends BaseHandler {
     */
    private void addVoucherConfirmationToCache() {
       ConcurrentHashMap<RequestKey, TenderAdvice> confirmationRecords =
-            SUVTestServerRunner.getTestServer().getVoucherConfirmationRecords();
+            SUVTestServerRunner.getTestServer().getBackend().getVoucherConfirmationRecords();
       ConcurrentHashMap<String, VoucherState> confirmedExistingVouchers =
-            SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
+            SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
 
       ProvisionResponse provisionRsp =
-            SUVTestServerRunner.getTestServer()
+            SUVTestServerRunner.getTestServer().getBackend()
                   .getProvisionResponseRecords()
                   .get(new RequestKey(username, password, ResourceType.VOUCHERS_RESOURCE, voucherProvisionUuid));
 

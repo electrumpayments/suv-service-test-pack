@@ -51,7 +51,7 @@ public class RedeemConfirmationHandler extends BaseHandler {
          VoucherModelUtils.validateThirdPartyIdTransactionIds(confirmation.getThirdPartyIdentifiers());
 
          RedemptionResponse redemptionRsp =
-               SUVTestServerRunner.getTestServer()
+               SUVTestServerRunner.getTestServer().getBackend()
                      .getRedemptionResponseRecords()
                      .get(new RequestKey(username, password, ResourceType.REDEMPTIONS_RESOURCE, redemptionUuid));
          if (redemptionRsp == null)
@@ -82,10 +82,10 @@ public class RedeemConfirmationHandler extends BaseHandler {
     */
    private void addRedemptionConfirmationToCache(BasicAdvice confirmation) {
       ConcurrentHashMap<RequestKey, BasicAdvice> confirmationRecords =
-            SUVTestServerRunner.getTestServer().getRedemptionConfirmationRecords();
+            SUVTestServerRunner.getTestServer().getBackend().getRedemptionConfirmationRecords();
 
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
-            SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
+            SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
 
       RequestKey confirmationsKey =
             new RequestKey(username, password, ResourceType.CONFIRMATIONS_RESOURCE, confirmation.getRequestId());

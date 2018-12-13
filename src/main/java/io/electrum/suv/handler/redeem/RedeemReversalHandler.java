@@ -51,7 +51,7 @@ public class RedeemReversalHandler extends BaseHandler {
          VoucherModelUtils.validateThirdPartyIdTransactionIds(reversal.getThirdPartyIdentifiers());
 
          RedemptionResponse redemptionRsp =
-               SUVTestServerRunner.getTestServer()
+               SUVTestServerRunner.getTestServer().getBackend()
                      .getRedemptionResponseRecords()
                      .get(new RequestKey(username, password, ResourceType.REDEMPTIONS_RESOURCE, redemptionUuid));
 
@@ -90,13 +90,13 @@ public class RedeemReversalHandler extends BaseHandler {
     */
    private void addRedemptionReversalToCache() {
       ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords =
-            SUVTestServerRunner.getTestServer().getRedemptionReversalRecords();
+            SUVTestServerRunner.getTestServer().getBackend().getRedemptionReversalRecords();
       RequestKey key = new RequestKey(username, password, ResourceType.REDEMPTIONS_RESOURCE, reversal.getRequestId());
 
       ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
-            SUVTestServerRunner.getTestServer().getConfirmedExistingVouchers();
+            SUVTestServerRunner.getTestServer().getBackend().getConfirmedExistingVouchers();
       ConcurrentHashMap<RequestKey, RedemptionRequest> redemptionRequestRecords =
-            SUVTestServerRunner.getTestServer().getRedemptionRequestRecords();
+            SUVTestServerRunner.getTestServer().getBackend().getRedemptionRequestRecords();
 
       RedemptionRequest redemptionRequest = redemptionRequestRecords.get(key);
       key.setResourceType(ResourceType.REVERSALS_RESOURCE);

@@ -4690,63 +4690,9 @@
 							"name": "Provision Request with specified voucher",
 							"event": [
 								{
-									"listen": "test",
-									"script": {
-										"id": "d6075876-1928-4c82-bb48-1eeadf8635ae",
-										"exec": [
-											"tests[\"Status code is 201\"] = responseCode.code === 201;",
-											"",
-											"var jsonData = JSON.parse(responseBody);",
-											"tests[\"Voucher ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"requestId\");",
-											"",
-											"tests[\"TimeStamp format correct\"] = new Date(jsonData.time);",
-											"",
-											"var voucher = jsonData.voucher;",
-											"tests[\"Voucher present\"] = voucher !== null;",
-											"tests[\"Voucher code present\"] = voucher.code !== null;",
-											"",
-											"var originator = jsonData.originator;",
-											"tests[\"Originator present\"] = originator !== null;",
-											"tests[\"Originator Merchant present\"] = originator.merchant !== null;",
-											"tests[\"Originator Institution present\"] = originator.institution !== null;",
-											"tests[\"Originator terminal echoed\"] = originator.terminalId === postman.getEnvironmentVariable(\"termId\");",
-											"",
-											"var merchant = originator.merchant;",
-											"tests[\"Merchant ID echoed\"] = merchant.merchantId === postman.getEnvironmentVariable(\"merchantId\");",
-											"tests[\"Merchant type echoed\"] = merchant.merchantType === postman.getEnvironmentVariable(\"merchantType\");",
-											"tests[\"Merchant name present\"] = merchant.merchantName !== null;",
-											"",
-											"var merchantName = merchant.merchantName;",
-											"tests[\"Merchant Name echoed\"] = merchantName.name === postman.getEnvironmentVariable(\"merchantName\");",
-											"tests[\"Merchant City echoed\"] = merchantName.city === postman.getEnvironmentVariable(\"merchantCity\");",
-											"tests[\"Merchant Region echoed\"] = merchantName.region === postman.getEnvironmentVariable(\"merchantRegion\");",
-											"tests[\"Merchant Country echoed\"] = merchantName.country === postman.getEnvironmentVariable(\"merchantCountry\");",
-											"",
-											"var originatorInst = originator.institution;",
-											"tests[\"Originator institution present\"] = originatorInst !== null;",
-											"tests[\"Originator institution ID echoed\"] = originatorInst.id === postman.getEnvironmentVariable(\"originatorInstId\");",
-											"tests[\"Originator institution name echoed\"] = originatorInst.name === postman.getEnvironmentVariable(\"originatorInstName\");",
-											"",
-											"var settlementEntity = jsonData.settlementEntity;",
-											"tests[\"Settlement Entity institution present\"] = settlementEntity !== null;",
-											"tests[\"Settlement Entity institution ID present\"] = settlementEntity.id !== null;",
-											"tests[\"Settlement Entity institution name present\"] = settlementEntity.name !== null;",
-											"",
-											"var receiver = jsonData.receiver;",
-											"tests[\"Receiver institution present\"] = receiver !== null;",
-											"tests[\"Receiver institution ID present\"] = receiver.id !== null;",
-											"tests[\"Receiver institution name present\"] = receiver.name !== null;",
-											"",
-											"var thirdPartyIndentifiers = jsonData.thirdPartyIndentifiers;",
-											"tests[\"Third Party Indentifiers present\"] = thirdPartyIndentifiers !== null;"
-										],
-										"type": "text/javascript"
-									}
-								},
-								{
 									"listen": "prerequest",
 									"script": {
-										"id": "e5cb42d2-9385-49de-9de8-67a90cb25838",
+										"id": "75c17c63-2fba-4244-83e1-ce9090977ef8",
 										"exec": [
 											"function _p8(s) {",
 											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
@@ -4759,6 +4705,7 @@
 											"",
 											"var requestId = uuid();",
 											"postman.setEnvironmentVariable(\"requestId\", requestId);",
+											"postman.setEnvironmentVariable(\"specificVoucherCode\", Math.floor(Math.random()*100000).toString())",
 											"",
 											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
 											"",
@@ -4770,6 +4717,19 @@
 											"",
 											"var dateTime = new Date().toISOString();",
 											"postman.setEnvironmentVariable(\"timestamp\", dateTime);"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "8b7d5d80-2ba0-4539-9ea0-5871ffb4a5db",
+										"exec": [
+											"tests[\"Status code is 201\"] = responseCode.code === 201;",
+											"",
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"voucherCode is unchanged\"] = jsonData.voucher.code === postman.getEnvironmentVariable(\"specificVoucherCode\");"
 										],
 										"type": "text/javascript"
 									}
@@ -4810,7 +4770,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ]\n}"
+									"raw": "{\n    \"id\": \"{{requestId}}\",\n    \"time\": \"{{timestamp}}\",\n    \"originator\": {\n        \"merchant\": {\n            \"merchantType\": \"{{merchantType}}\",\n            \"merchantId\": \"{{merchantId}}\",\n            \"merchantName\": {\n                \"name\": \"{{merchantName}}\",\n                \"city\": \"{{merchantCity}}\",\n                \"region\": \"{{merchantRegion}}\",\n                \"country\": \"{{merchantCountry}}\"\n            }\n        },\n        \"terminalId\": \"{{termId}}\",\n        \"institution\": {\n            \"id\": \"{{originatorInstId}}\",\n            \"name\": \"{{originatorInstName}}\"\n        }\n    },\n    \"client\": {\n        \"id\": \"{{clientInstId}}\",\n        \"name\": \"{{clientInstName}}\"\n    },\n    \"receiver\": {\n        \"id\": \"{{receiverInstId}}\",\n        \"name\": \"{{receiverInstName}}\"\n    },\n    \"thirdPartyIdentifiers\" : [\n        {\n            \"institutionId\": \"{{originatorInstId}}\",\n            \"transactionIdentifier\": \"{{originatorRef}}\"\n        },\n        {\n            \"institutionId\": \"{{clientInstId}}\",\n            \"transactionIdentifier\": \"{{clientRef}}\"\n        }\n    ],\n     \"voucher\": {\n        \"code\": \"{{specificVoucherCode}}\",\n        \"expiryDate\": \"2018-12-12T06:54:57.774Z\",\n        \"redeemInstructions\": [\n            \"To redeem your voucher\",\n            \"enter the USSD code below:\",\n            \"*999*<pin>#\"\n        ]\n    }\n}"
 								},
 								"url": {
 									"raw": "{{host}}/suv/{{version}}/vouchers",
@@ -19072,6 +19032,52 @@
 					"_postman_isSubFolder": true
 				}
 			]
+		},
+		{
+			"name": "Reset Request",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{clientInstId}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"userDataWillBeLost\": \"TRUE\",\n\t\"resetUserData\": \"TRUE\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/suv/{{version}}/testServerAdmin/reset",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"suv",
+						"{{version}}",
+						"testServerAdmin",
+						"reset"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
