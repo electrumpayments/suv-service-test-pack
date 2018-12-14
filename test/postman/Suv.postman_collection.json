@@ -4799,7 +4799,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "dd8631d6-bc19-4793-81b0-265fd5aabcf3",
+										"id": "1af6ab76-b652-4043-bce7-0da2c721acde",
 										"exec": [
 											"tests[\"Status code is 201\"] = responseCode.code === 201;",
 											"",
@@ -4816,7 +4816,10 @@
 											"postman.setEnvironmentVariable(\"thirdPartyTranRef3\", thirdPartyIds[2].transactionIdentifier);",
 											"",
 											"postman.setEnvironmentVariable(\"thirdPartyId4\", thirdPartyIds[3].institutionId);",
-											"postman.setEnvironmentVariable(\"thirdPartyTranRef4\", thirdPartyIds[3].transactionIdentifier);"
+											"postman.setEnvironmentVariable(\"thirdPartyTranRef4\", thirdPartyIds[3].transactionIdentifier);",
+											"",
+											"postman.setEnvironmentVariable(\"voucherCode\", jsonData.voucher.code);",
+											"postman.setEnvironmentVariable(\"voucherExpiry\", jsonData.voucher.expiryDate);"
 										],
 										"type": "text/javascript"
 									}
@@ -4824,7 +4827,7 @@
 								{
 									"listen": "prerequest",
 									"script": {
-										"id": "b6f268de-acbb-48e5-8056-339bc385e153",
+										"id": "95b050eb-d278-4351-938d-bf6a018eecc4",
 										"exec": [
 											"function _p8(s) {",
 											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
@@ -5015,55 +5018,27 @@
 							"name": "Reprovision request",
 							"event": [
 								{
-									"listen": "test",
+									"listen": "prerequest",
 									"script": {
-										"id": "dd8631d6-bc19-4793-81b0-265fd5aabcf3",
+										"id": "b27fd006-faf4-4186-8a3f-a7ea122ca89a",
 										"exec": [
-											"tests[\"Status code is 201\"] = responseCode.code === 201;",
-											"",
-											"var jsonData = JSON.parse(responseBody);",
-											"",
-											"var thirdPartyIds = jsonData.thirdPartyIdentifiers",
-											"postman.setEnvironmentVariable(\"thirdPartyId1\", thirdPartyIds[0].institutionId);",
-											"postman.setEnvironmentVariable(\"thirdPartyTranRef1\", thirdPartyIds[0].transactionIdentifier);",
-											"",
-											"postman.setEnvironmentVariable(\"thirdPartyId2\", thirdPartyIds[1].institutionId);",
-											"postman.setEnvironmentVariable(\"thirdPartyTranRef2\", thirdPartyIds[1].transactionIdentifier);",
-											"",
-											"postman.setEnvironmentVariable(\"thirdPartyId3\", thirdPartyIds[2].institutionId);",
-											"postman.setEnvironmentVariable(\"thirdPartyTranRef3\", thirdPartyIds[2].transactionIdentifier);",
-											"",
-											"postman.setEnvironmentVariable(\"thirdPartyId4\", thirdPartyIds[3].institutionId);",
-											"postman.setEnvironmentVariable(\"thirdPartyTranRef4\", thirdPartyIds[3].transactionIdentifier);"
+											""
 										],
 										"type": "text/javascript"
 									}
 								},
 								{
-									"listen": "prerequest",
+									"listen": "test",
 									"script": {
-										"id": "b6f268de-acbb-48e5-8056-339bc385e153",
+										"id": "9d5b609f-927f-4981-bd91-07ee0a6e9723",
 										"exec": [
-											"function _p8(s) {",
-											"       var p = (Math.random().toString(16)+\"000000000\").substr(2,8);",
-											"       return s ? \"-\" + p.substr(0,4) + \"-\" + p.substr(4,4) : p ;",
-											"   }",
+											"tests[\"Status code is 400\"] = responseCode.code === 400;",
 											"",
-											"function uuid() {",
-											"   ",
-											"   return _p8() + _p8(true) + _p8(true) + _p8();",
-											"}",
-											"",
-											"var uuidLast4 = requestId.substr(requestId.length-4, 4);",
-											"",
-											"postman.setEnvironmentVariable(\"originatorRef\", (\"orig\"+uuidLast4).toUpperCase());",
-											"postman.setEnvironmentVariable(\"clientRef\", (\"clnt\"+uuidLast4).toUpperCase());",
-											"postman.setEnvironmentVariable(\"settlementEntityRef\", (\"seEn\"+uuidLast4).toUpperCase());",
-											"postman.setEnvironmentVariable(\"receiverRef\", (\"receiver\"+uuidLast4).toUpperCase());",
-											"",
-											"var dateTime = new Date().toISOString();",
-											"postman.setEnvironmentVariable(\"timestamp\", dateTime);",
-											"postman.setEnvironmentVariable(\"requestTime\", dateTime);"
+											"var jsonData = JSON.parse(responseBody);",
+											"tests[\"Error type is DUPLICATE_RECORD\"] = jsonData.errorType === \"DUPLICATE_RECORD\";",
+											"tests[\"No original ID returned\"] = (\"originalId\" in jsonData) === false;",
+											"tests[\"Request ID returned\"] = jsonData.id === postman.getEnvironmentVariable(\"requestId\");",
+											"tests[\"voucherCode returned\"] = jsonData.detailMessage.voucher.code === postman.getEnvironmentVariable(\"voucherCode\");"
 										],
 										"type": "text/javascript"
 									}
