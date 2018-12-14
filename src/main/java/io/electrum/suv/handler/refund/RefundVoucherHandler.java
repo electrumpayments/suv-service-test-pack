@@ -1,73 +1,113 @@
 package io.electrum.suv.handler.refund;
 
-import io.electrum.suv.api.models.*;
-import io.electrum.suv.handler.BaseHandler;
-import io.electrum.suv.server.SUVTestServerRunner;
-import io.electrum.suv.server.util.RefundModelUtils;
-import io.electrum.suv.server.util.RequestKey;
-import io.electrum.suv.server.util.VoucherModelUtils;
-import org.apache.commons.lang3.NotImplementedException;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.util.concurrent.ConcurrentHashMap;
+
+import io.electrum.suv.api.models.RefundRequest;
+import io.electrum.suv.api.models.RefundResponse;
+import io.electrum.suv.handler.BaseHandler;
+import io.electrum.suv.resource.impl.SUVTestServer;
+import io.electrum.suv.server.SUVTestServerRunner;
+import io.electrum.suv.server.model.FormatException;
+import io.electrum.suv.server.model.ValidationResponse;
+import io.electrum.suv.server.util.RefundModelUtils;
+import io.electrum.suv.server.util.RequestKey;
+import io.electrum.suv.server.util.RequestKey.ResourceType;
+import io.electrum.suv.server.util.VoucherModelUtils;
 
 public class RefundVoucherHandler extends BaseHandler {
-   private String uuid;
+   private String voucherCode;
 
    public RefundVoucherHandler(HttpHeaders httpHeaders) {
       super(httpHeaders);
    }
 
+   /**
+    * Handle the response to a provisionVoucher request.
+    *
+    * See <a href=
+    * "https://electrumpayments.github.io/suv-service-interface-docs/specification/operations/#provisionvoucher">SUV
+    * Interface docs</a> for details.
+    *
+    * @param refundRequest
+    *           from request body
+    * @param uriInfo
+    * @return a {@link RefundResponse} for this transaction or a 400 Error if there is a format error or the voucher is
+    *         already redeemed or reversed.
+    */
    public Response handle(RefundRequest refundRequest, UriInfo uriInfo) {
       try {
-         Response rsp;
+         ValidationResponse validationRsp;
+         String refundUuid = refundRequest.getId();
+         voucherCode = refundRequest.getVoucher().getCode();
 
-         uuid = refundRequest.getId();
-         if (!VoucherModelUtils.isValidUuid(uuid)) {
-            return VoucherModelUtils.buildInvalidUuidErrorResponse(
-                  uuid,
-                  refundRequest.getClient(),
-                  username,
-                  ErrorDetail.ErrorType.FORMAT_ERROR);
-         }
+         // Validate uuid format in code until it can be ported to hibernate in the interface
+         VoucherModelUtils.validateUuid(refundUuid);
+         VoucherModelUtils.validateThirdPartyIdTransactionIds(refundRequest.getThirdPartyIdentifiers());
 
          // Confirm that the basicAuth ID matches clientID in message body
-         Response validUsernameRsp = validateClientIdUsernameMatch(refundRequest,uuid);
-         if(validUsernameRsp != null) return validUsernameRsp;
+         validationRsp = validateClientIdUsernameMatch(refundRequest);
+         if (validationRsp.hasErrorResponse())
+            return validationRsp.getResponse();
 
          // Confirm voucher not already provisioned or reversed.
-         rsp = VoucherModelUtils.canRefundVoucher(uuid, username, password);
-         if (rsp != null) {
-            return rsp;
+         validationRsp = RefundModelUtils.canRefundVoucher(refundUuid, username, password, voucherCode);
+         if (validationRsp.hasErrorResponse()) {
+            return validationRsp.getResponse();
          }
 
          // The voucher can be Refunded
-         RequestKey key = addVoucherRefundToCache(uuid, refundRequest);
+         RequestKey key = addRefundRequestToCache(refundUuid, refundRequest);
 
-         // TODO See Giftcard, should this all be done differently
          RefundResponse refundRsp = RefundModelUtils.refundRspFromReq(refundRequest);
          addRefundResponseToCache(key, refundRsp);
-         rsp = Response.created(uriInfo.getRequestUri()).entity(refundRsp).build();
-         return rsp;
+         validationRsp.setResponse(Response.created(uriInfo.getRequestUri()).entity(refundRsp).build());
 
+         return validationRsp.getResponse();
+
+      } catch (FormatException fe) {
+         throw fe;
       } catch (Exception e) {
          return logAndBuildException(e);
       }
    }
 
-   private void addRefundResponseToCache(RequestKey key, RefundResponse request) {
+   /**
+    * Adds the refund response to the RefundResponseRecords
+    *
+    * @param key
+    *           The unique key of this response, the same key as the corresponding RefundRequest
+    * @param refundResponse
+    *           The {@link RefundResponse} for this refundResponse
+    */
+   private void addRefundResponseToCache(RequestKey key, RefundResponse refundResponse) {
       ConcurrentHashMap<RequestKey, RefundResponse> refundResponseRecords =
-            SUVTestServerRunner.getTestServer().getRefundResponseRecords();
-      refundResponseRecords.put(key, request);
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getRefundResponseRecords();
+      ConcurrentHashMap<String, SUVTestServer.VoucherState> confirmedExistingVouchers =
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getConfirmedExistingVouchers();
+
+      refundResponseRecords.put(key, refundResponse);
+      confirmedExistingVouchers.put(voucherCode, SUVTestServer.VoucherState.REFUNDED);
+
    }
 
-   private RequestKey addVoucherRefundToCache(String voucherId, RefundRequest request) {
-      RequestKey key = new RequestKey(username, password, RequestKey.REFUNDS_RESOURCE, voucherId); // TODO are there
-                                                                                                   // other resources?
+   /**
+    * Adds the voucher refund request to the RefundRequestRecords
+    *
+    * @param voucherId
+    *           the unique identifier for this request
+    * @param request
+    *           the refund request to be recorded
+    * @return the corresponding {@link RequestKey} for this entry.
+    */
+   private RequestKey addRefundRequestToCache(String voucherId, RefundRequest request) {
+      RequestKey key = new RequestKey(username, password, ResourceType.REFUNDS_RESOURCE, voucherId);
+
       ConcurrentHashMap<RequestKey, RefundRequest> voucherRefundRecords =
-            SUVTestServerRunner.getTestServer().getVoucherRefundRecords();
+            SUVTestServerRunner.getTestServer().getRecordStorageManager().getRefundRequestRecords();
       voucherRefundRecords.put(key, request);
       return key;
    }

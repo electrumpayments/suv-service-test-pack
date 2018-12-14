@@ -2,35 +2,33 @@ package io.electrum.suv.server.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.Response;
 
-import io.electrum.suv.api.models.ErrorDetail;
-import io.electrum.suv.api.models.Voucher;
-import io.electrum.suv.resource.impl.SUVTestServer;
-import io.electrum.suv.server.model.FormatError;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.electrum.suv.api.models.ErrorDetail;
+import io.electrum.suv.api.models.RefundResponse;
+import io.electrum.suv.api.models.Voucher;
+import io.electrum.suv.resource.impl.SUVTestServer;
+import io.electrum.suv.server.model.DetailMessage;
+import io.electrum.suv.server.model.FormatError;
+import io.electrum.suv.server.model.FormatException;
+import io.electrum.suv.server.model.ValidationResponse;
+import io.electrum.vas.model.*;
+
 //import io.electrum.airtime.api.model.ErrorDetail;
 //import io.electrum.airtime.api.model.Voucher;
-import io.electrum.suv.server.model.DetailMessage;
-import io.electrum.vas.model.Amounts;
-import io.electrum.vas.model.BasicAdvice;
-import io.electrum.vas.model.BasicAdviceResponse;
-import io.electrum.vas.model.Institution;
-import io.electrum.vas.model.LedgerAmount;
-import io.electrum.vas.model.SlipData;
-import io.electrum.vas.model.SlipLine;
-import io.electrum.vas.model.ThirdPartyIdentifier;
-import io.electrum.vas.model.Transaction;
 
+@SuppressWarnings("Annotator")
 public class SUVModelUtils {
-   protected static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
+   private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
 
-   protected static List<String> redeemInstructions = new ArrayList<>();
-   protected static List<SlipLine> messageLines = new ArrayList<>();
+   private static final List<String> redeemInstructions = new ArrayList<>();
+   private static final List<SlipLine> messageLines = new ArrayList<>();
 
    static {
       redeemInstructions.add("To redeem your voucher");
@@ -58,8 +56,8 @@ public class SUVModelUtils {
     * .transactionIdentifiers(basicAdvice.getThirdPartyIdentifiers()); }
     */
 
-   /** Create a new voucher with randomized values for ode, expiry date and instruction */
-   protected static Voucher createRandomizedVoucher() {
+   /** Create a new voucher with randomized values for code, expiry date and instruction */
+   static Voucher createRandomizedVoucher() {
       Voucher voucher = new Voucher();
       voucher.setCode(RandomData.random09((int) ((Math.random() * 20) + 1)));
       voucher.setExpiryDate(new DateTime());
@@ -70,13 +68,12 @@ public class SUVModelUtils {
    }
 
    /** Returns a new randomized {@link SlipData} with message lines populated. */
-   protected static SlipData createRandomizedSlipData() {
+   static SlipData createRandomizedSlipData() {
       SlipData slipData = new SlipData();
       slipData.setMessageLines(messageLines);
       return slipData;
    }
 
-   // todo why randomise these instead of using the ones sent by the requests?
    /**
     * Updates a given {@link Transaction transaction} with randomized 3rd party IDs. Inserts placeholder settlement
     * entity if transaction does not include one.
@@ -84,7 +81,7 @@ public class SUVModelUtils {
     * @param transaction
     *           to be updated
     */
-   protected static void updateWithRandomizedIdentifiers(Transaction transaction) {
+   static void updateWithRandomizedIdentifiers(Transaction transaction) {
       List<ThirdPartyIdentifier> thirdPartyIds = transaction.getThirdPartyIdentifiers();
       Institution settlementEntity = transaction.getSettlementEntity();
       if (settlementEntity == null) {
@@ -105,36 +102,8 @@ public class SUVModelUtils {
       transaction.setSettlementEntity(settlementEntity);
    }
 
-   /*
-    * protected static Amounts createRandomizedAmounts() { return new
-    * Amounts().approvedAmount(createRandomizedAmount()).feeAmount(createRandomizedAmount()); }
-    * 
-    * private static LedgerAmount createRandomizedAmount() { return new LedgerAmount().currency("710")
-    * .amount(Long.parseLong(RandomData.random09((int) ((Math.random() * 2) + 1)))); }
-    * 
-    * public static Response buildIncorrectUsernameErrorResponse( String objectId, Institution client, String username,
-    * ErrorDetail.RequestType requestType) {
-    * 
-    * ErrorDetail errorDetail = buildErrorDetail( objectId, "Incorrect username",
-    * "The HTTP Basic Authentication username (" + username + ") is not the same as the value in the Client.Id field ("
-    * + client.getId() + ").", null, requestType, ErrorDetail.ErrorType.FORMAT_ERROR);
-    * 
-    * DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage(); detailMessage.setClient(client);
-    * 
-    * return Response.status(400).entity(errorDetail).build(); }
-    * 
-    * public static ErrorDetail buildInconsistentIdErrorDetail( String pathId, String objectId, String originalMsgId,
-    * ErrorDetail.RequestType requestType) { ErrorDetail errorDetail = buildErrorDetail( objectId,
-    * "String inconsistent", "The ID path parameter is not the same as the object's ID.", originalMsgId, requestType,
-    * ErrorDetail.ErrorType.FORMAT_ERROR);
-    * 
-    * DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage(); detailMessage.setPathId(pathId);
-    * 
-    * return errorDetail; }
-    */
-
    /** Builds an {@link ErrorDetail} for duplicate UUID errors */
-   public static ErrorDetail buildDuplicateErrorDetail(
+   static ErrorDetail buildDuplicateUuidErrorDetail(
          String objectId,
          String originalMsgId,
          // ErrorDetail.RequestType requestType,
@@ -144,7 +113,7 @@ public class SUVModelUtils {
             buildErrorDetail(
                   objectId,
                   "Duplicate UUID.",
-                  "Request with UUID already processed with the associated fields.",
+                  "Request with ID already processed with the associated fields.",
                   originalMsgId,
                   // requestType,
                   ErrorDetail.ErrorType.DUPLICATE_RECORD);
@@ -158,7 +127,7 @@ public class SUVModelUtils {
    }
 
    /** Builds a new error detail (including a detail message) from specific messages. */
-   public static ErrorDetail buildErrorDetail(
+   static ErrorDetail buildErrorDetail(
          String objectId,
          String errorMessage,
          String detailMessageFreeString,
@@ -179,10 +148,91 @@ public class SUVModelUtils {
       return errorDetail;
    }
 
-   // TODO Do we validate for uuid format?
-   /** Confirms UUID format valid using regex (8-4-4-4-12 hexadecimal) */
-   public static boolean isValidUuid(String uuid) {
-      return uuid.matches("([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}");
+   /**
+    * Confirms UUID format valid using regex (8-4-4-4-12 hexadecimal)
+    *
+    * Throws a {@link FormatException} if it does not.
+    */
+   @SuppressWarnings("Annotator")
+   public static void validateUuid(String uuid) {
+      if (!uuid.matches("([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}"))
+         throw new FormatException(
+               new FormatError().msg("UUID must conform to the format 8-4-4-4-12 hexadecimal values"));
    }
 
+   /**
+    * Checks that the ThirdPartyIdentifiers all contain a TransactionIdentifier.
+    *
+    * Throws a {@link FormatException} if any do not.
+    * 
+    * @param thirdPartyIdentifiers
+    *           list of ThirdPartyIdentifiers to validate
+    */
+   public static void validateThirdPartyIdTransactionIds(List<ThirdPartyIdentifier> thirdPartyIdentifiers) {
+      int cnt = 0;
+      for (ThirdPartyIdentifier tpi : thirdPartyIdentifiers) {
+         if (tpi.getTransactionIdentifier() == null)
+            throw new FormatException(
+                  new FormatError()
+                        .msg(String.format("thirdPartyIdentifiers[%d].transactionIdentifier may not be null", cnt)));
+         cnt++;
+      }
+   }
+
+   /**
+    * Builds a 400 error response indicating the BasicAuth username is inconsistent with the username in the body of the
+    * request.
+    */
+   public static Response buildIncorrectUsernameErrorResponse(String objectId, Institution client, String username) {
+
+      ErrorDetail errorDetail =
+            buildErrorDetail(
+                  objectId,
+                  "Incorrect username",
+                  "The HTTP Basic Authentication username (" + username
+                        + ") is not the same as the value in the Client.Id field (" + client.getId() + ").",
+                  null,
+
+                  ErrorDetail.ErrorType.AUTHENTICATION_ERROR);
+
+      DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+      detailMessage.setClient(client);
+
+      return Response.status(400).entity(errorDetail).build();
+   }
+
+   static ValidationResponse confirmReversalNotReceived(
+         String username,
+         String password,
+         String requestUuid,
+         SUVTestServer testServer,
+         String requestType,
+         ConcurrentHashMap<RequestKey, BasicReversal> reversalRecords,
+         ErrorDetail.ErrorType errorType) {
+      // Confirm reversal request did not arrive before this
+
+      RequestKey requestKey =
+            new RequestKey(username, password, RequestKey.ResourceType.REVERSALS_RESOURCE, requestUuid);
+      BasicReversal reversal = reversalRecords.get(requestKey);
+      if (reversal != null) {
+         ErrorDetail errorDetail =
+               buildErrorDetail(
+                     requestUuid,
+                     String.format("%s reversed.", requestType),
+                     String.format("%s reversal with UUID already processed with the associated fields.", requestType),
+                     reversal.getId(),
+                     errorType);
+
+         // Check for a response for this request, if found add to detailMessage
+         DetailMessage detailMessage = (DetailMessage) errorDetail.getDetailMessage();
+         ConcurrentHashMap<RequestKey, RefundResponse> responseRecords =
+               testServer.getRecordStorageManager().getRefundResponseRecords();
+         RefundResponse rsp = responseRecords.get(requestKey);
+         if (rsp != null) {
+            detailMessage.setVoucher(rsp.getVoucher());
+         }
+         return new ValidationResponse(Response.status(400).entity(errorDetail).build());
+      }
+      return new ValidationResponse(null);
+   }
 }

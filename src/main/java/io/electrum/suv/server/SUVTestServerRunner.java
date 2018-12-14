@@ -17,7 +17,7 @@ import io.electrum.suv.resource.impl.SUVTestServer;
 
 public class SUVTestServerRunner {
 
-   private static Logger log_logger = LoggerFactory.getLogger("io.electrum.suv.server.log");
+   private static final Logger log_logger = LoggerFactory.getLogger("io.electrum.suv.server.log");
 
    private static SUVTestServer testServer;
 
@@ -28,7 +28,7 @@ public class SUVTestServerRunner {
          startSUVTestServer(args[0]);
    }
 
-   public static void startSUVTestServer(String port) throws Exception {
+   private static void startSUVTestServer(String port) throws Exception {
 
       log_logger.info("---- STARTING SUV SERVER ----");
 
@@ -75,7 +75,7 @@ public class SUVTestServerRunner {
          ConstraintSecurityHandler sh = new ConstraintSecurityHandler();
          // sh.addConstraintMapping(cm);
 
-         testServer = new SUVTestServer();
+         testServer = new SUVTestServer(); // This is unique
          ServletContainer servletContainer = new ServletContainer(testServer);
          ServletHolder servletHolder = new ServletHolder(servletContainer);
          ServletContextHandler context = new ServletContextHandler();

@@ -1,7 +1,6 @@
 package io.electrum.suv.server.util;
 
-//TODO Should this be repeated in each project
-public class RandomData {
+class RandomData {
    public static String random09(int length) {
       StringBuilder sb = new StringBuilder();
       for (int i = 0; i < length; i++) {
@@ -12,7 +11,7 @@ public class RandomData {
       return sb.toString();
    }
 
-   public static String randomaz(int length) {
+   private static String randomaz(int length) {
       StringBuilder sb = new StringBuilder();
       for (int i = 0; i < length; i++) {
          sb.append((int) (Math.random() * 27 + 'a'));
@@ -21,7 +20,7 @@ public class RandomData {
       return sb.toString();
    }
 
-   public static String randomAZ(int length) {
+   private static String randomAZ(int length) {
       StringBuilder sb = new StringBuilder();
       for (int i = 0; i < length; i++) {
          sb.append((char) (Math.random() * 27 + 'A'));
@@ -33,7 +32,7 @@ public class RandomData {
    public static String random09azAZ(int length) {
       StringBuilder sb = new StringBuilder();
       for (int i = 0; i < length; i++) {
-         switch ((int) Math.random() * 3) {
+         switch ((int) (Math.random() * 3)) {
          case 0:
             sb.append(random09(1));
             break;
@@ -52,7 +51,7 @@ public class RandomData {
    public static String random09AZ(int length) {
       StringBuilder sb = new StringBuilder();
       for (int i = 0; i < length; i++) {
-         switch ((int) Math.random() * 2) {
+         switch ((int) (Math.random() * 2)) {
          case 0:
             sb.append(random09(1));
             break;

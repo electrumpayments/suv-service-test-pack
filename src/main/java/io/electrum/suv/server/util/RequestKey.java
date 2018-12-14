@@ -2,21 +2,13 @@ package io.electrum.suv.server.util;
 
 import java.util.Objects;
 
-
 public class RequestKey {
-   //TODO Enum?
-   public static final String VOUCHERS_RESOURCE = "vouchers";
-   public static final String REVERSALS_RESOURCE = "reversals";
-   public static final String CONFIRMATIONS_RESOURCE = "confirmations";
-   public static final String REDEMPTIONS_RESOURCE = "redemptions";
-   public static final String REFUNDS_RESOURCE = "refunds";
-
    private String username;
    private String password;
-   private String resourceType;
+   private ResourceType resourceType;
    private String uuid;
 
-   public RequestKey(String username, String password, String resourceType, String uuid) {
+   public RequestKey(String username, String password, ResourceType resourceType, String uuid) {
       this.username = username;
       this.password = password;
       this.resourceType = resourceType;
@@ -39,11 +31,11 @@ public class RequestKey {
       this.password = password;
    }
 
-   public String getResourceType() {
+   public ResourceType getResourceType() {
       return resourceType;
    }
 
-   public void setResourceType(String resourceType) {
+   public void setResourceType(ResourceType resourceType) {
       this.resourceType = resourceType;
    }
 
@@ -78,15 +70,22 @@ public class RequestKey {
 
    @Override
    public String toString() {
-      StringBuilder sb = new StringBuilder();
-      sb.append(username);
-      sb.append("|");
-      sb.append(password);
-      sb.append("|");
-      sb.append(resourceType);
-      sb.append("|");
-      sb.append(uuid);
-      return sb.toString();
+      return username + "|" + password + "|" + resourceType + "|" + uuid;
+   }
+
+   public enum ResourceType {
+      VOUCHERS_RESOURCE("vouchers"),
+      REVERSALS_RESOURCE("reversals"),
+      CONFIRMATIONS_RESOURCE("confirmations"),
+      REDEMPTIONS_RESOURCE("redemptions"),
+      REFUNDS_RESOURCE("refunds");
+
+      private String value;
+
+      ResourceType(String value) {
+         this.value = value;
+      }
+
    }
 
 }

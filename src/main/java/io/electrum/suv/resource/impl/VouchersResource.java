@@ -1,13 +1,11 @@
 package io.electrum.suv.resource.impl;
 
+import javax.ws.rs.Path;
+
 import io.electrum.suv.api.IVouchersResource;
 import io.electrum.suv.api.utils.Paths;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.Authorization;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.ws.rs.Path;
 
 @Path(Paths.BASE_PATH)
 @Api(description = "the SUV API", authorizations = { @Authorization("httpBasic") })

@@ -1,0 +1,48 @@
+{
+  "id": "ca487760-974c-8313-a27d-1d728c54e6fd",
+  "time": "2018-12-07T10:03:03.504Z",
+  "originator": {
+    "merchant": {
+      "merchantType": "4444",
+      "merchantId": "merchant1234567",
+      "merchantName": {
+        "name": "Buy Stuff Shop",
+        "city": "Cape Town",
+        "region": "WP",
+        "country": "ZA"
+      }
+    },
+    "terminalId": "term0001",
+    "institution": {
+      "id": "11111111",
+      "name": "Buy Stuff Shop"
+    }
+  },
+  "client": {
+    "id": "22222222",
+    "name": "TransAcquire Co"
+  },
+  "receiver": {
+    "id": "44444444",
+    "name": "MobiTalk"
+  },
+  "thirdPartyIdentifiers": [
+    {
+      "institutionId": "11111111",
+      "transactionIdentifier": "ORIGBDB8"
+    },
+    {
+      "institutionId": "22222222",
+      "transactionIdentifier": "CLNTBDB8"
+    }
+  ],
+  "voucher": {
+    "code": "5",
+    "expiryDate": "2018-12-07T10:02:58.737Z",
+    "redeemInstructions": [
+      "To redeem your voucher",
+      "enter the USSD code below:",
+      "*999*<pin>#"
+    ]
+  }
+}

@@ -48,4 +48,8 @@ public class SUVMessageHandlerFactory {
    public static VoucherReversalHandler getVoucherReversalHandler(HttpHeaders httpHeaders) {
       return new VoucherReversalHandler(httpHeaders);
    }
+
+   public static ResetHandler getResetHandler(HttpHeaders httpHeaders) {
+      return new ResetHandler(httpHeaders);
+   }
 }

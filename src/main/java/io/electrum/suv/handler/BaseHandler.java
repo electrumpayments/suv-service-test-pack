@@ -6,18 +6,17 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.electrum.suv.api.models.ErrorDetail;
 import io.electrum.suv.resource.impl.SUVTestServer;
-import io.electrum.suv.server.util.VoucherModelUtils;
+import io.electrum.suv.server.model.ValidationResponse;
+import io.electrum.suv.server.util.SUVModelUtils;
 import io.electrum.vas.Utils;
 import io.electrum.vas.model.Transaction;
 
 public abstract class BaseHandler {
-   // TODO Convert to SUVTestServer
    private static final Logger log = LoggerFactory.getLogger(SUVTestServer.class.getPackage().getName());
 
-   protected String username;
-   protected String password;
+   protected final String username;
+   protected final String password;
 
    protected BaseHandler(HttpHeaders httpHeaders) {
       String authString = Utils.getBasicAuthString(httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION));
@@ -33,15 +32,20 @@ public abstract class BaseHandler {
       return Response.serverError().entity(e.getMessage()).build();
    }
 
-   protected Response validateClientIdUsernameMatch(Transaction transaction, String uuid) {
+   /**
+    * Determine whether the basicAuth ID matches clientID in the message body
+    *
+    * @param transaction
+    *           the transaction to be checked
+    * @return a {@link ValidationResponse} describing whether the validation passed or resulted in an error
+    */
+   protected ValidationResponse validateClientIdUsernameMatch(Transaction transaction) {
+      String uuid = transaction.getId();
       if (!transaction.getClient().getId().equals(username)) {
-         return VoucherModelUtils.buildIncorrectUsernameErrorResponse(
-               uuid,
-               transaction.getClient(),
-               username,
-               ErrorDetail.ErrorType.AUTHENTICATION_ERROR);
+         return new ValidationResponse(
+               SUVModelUtils.buildIncorrectUsernameErrorResponse(uuid, transaction.getClient(), username));
       }
-      return null;
+      return new ValidationResponse(null);
    }
 
    protected abstract String getRequestName();
