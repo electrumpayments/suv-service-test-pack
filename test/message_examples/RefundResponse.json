@@ -1,0 +1,86 @@
+{
+  "id": "27a89ae0-3ba2-4c87-8850-a316cc87cef9",
+  "time": "2018-12-07T10:04:42.382Z",
+  "originator": {
+    "institution": {
+      "id": "11111111",
+      "name": "Buy Stuff Shop"
+    },
+    "terminalId": "term0001",
+    "merchant": {
+      "merchantType": "4444",
+      "merchantId": "merchant1234567",
+      "merchantName": {
+        "name": "Buy Stuff Shop",
+        "city": "Cape Town",
+        "region": "WP",
+        "country": "ZA"
+      }
+    }
+  },
+  "client": {
+    "id": "22222222",
+    "name": "TransAcquire Co"
+  },
+  "settlementEntity": {
+    "id": "33333333",
+    "name": "TransactionsRUs"
+  },
+  "receiver": {
+    "id": "44444444",
+    "name": "MobiTalk"
+  },
+  "thirdPartyIdentifiers": [
+    {
+      "institutionId": "11111111",
+      "transactionIdentifier": "ORIG75A5"
+    },
+    {
+      "institutionId": "22222222",
+      "transactionIdentifier": "CLNT75A5"
+    },
+    {
+      "institutionId": "33333333",
+      "transactionIdentifier": "H"
+    },
+    {
+      "institutionId": "44444444",
+      "transactionIdentifier": "0L4RW17C8O9B5677"
+    }
+  ],
+  "slipData": {
+    "messageLines": [
+      {
+        "text": "For any queries please",
+        "fontWidthScaleFactor": 1,
+        "fontHeightScaleFactor": 1,
+        "line": false,
+        "cut": false
+      },
+      {
+        "text": "contact your network",
+        "fontWidthScaleFactor": 1,
+        "fontHeightScaleFactor": 1,
+        "line": false,
+        "cut": false
+      },
+      {
+        "text": "operator.",
+        "fontWidthScaleFactor": 1,
+        "fontHeightScaleFactor": 1,
+        "line": false,
+        "cut": false
+      }
+    ],
+    "slipWidth": 0
+  },
+  "voucher": {
+    "code": "91846225275582274774",
+    "expiryDate": "2018-12-07T10:04:27.967Z",
+    "redeemInstructions": [
+      "To redeem your voucher",
+      "enter the USSD code below:",
+      "*999*<pin>#"
+    ]
+  }
+}
