@@ -1,11 +1,13 @@
 version: 2
 jobs:
-  build-and-release:
+  build-and-test:
     docker:
       - image: 813968012009.dkr.ecr.us-east-1.amazonaws.com/circleci-openjdk8-8u162
         aws_auth:
           aws_access_key_id: $AWS_ACCESS_KEY_ID
           aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
+    # The below is required because of https://discuss.circleci.com/t/circle-working-directory-doesnt-expand/17007
+    working_directory: /home/circleci/project
     steps:
       - checkout
       - restore_cache:
@@ -13,69 +15,66 @@ jobs:
           keys:
             - v1-maven-{{ .Branch }}-{{ checksum "pom.xml" }}
             - v1-maven-{{ .Branch }}
-      - run:
-          name: Download dependencies
-          command: mvn dependency:resolve-plugins dependency:go-offline -B -Dstyle.color=always
+      - run: mvn dependency:resolve-plugins dependency:go-offline -B -Dstyle.color=always
       - save_cache:
           paths:
-            - ~/.m2/repository
+            - ~/.m2
           key: v1-maven-{{ .Branch }}-{{ checksum "pom.xml" }}
+      - setup_remote_docker
       - run:
-          name: Validate release type
-          command: /electrum/bin/validateReleaseType.sh
+          name: Build, run, and test
+          command: /electrum/bin/postmanTestJava.sh Suv
       - run:
-          name: Compile, Test, and Release
-          command: /electrum/bin/simpleTestAndReleaseJava.sh
-      - run:
-          name: Release failed! Revert any release steps that might have been taken
-          command: /electrum/bin/revertReleaseJava.sh
-          when: on_fail
-      - run:
-          name: Save test results
+          name: Save docker image for persisting
           command: |
-            mkdir -p ~/tests/
-            if [ -d target/surefire-reports ]; then mkdir -p ~/tests/surefire/; cp target/surefire-reports/*.xml ~/tests/surefire/; fi
-            if [ -d target/failsafe-reports ]; then mkdir -p ~/tests/failsafe/; cp target/failsafe-reports/*.xml ~/tests/failsafe/; fi
-          when: always
-      - store_test_results:
-          path: ~/tests
-      - store_artifacts:
-          path: ~/tests
-          destination: tests
-      - store_artifacts:
-          path: log
-          destination: log
-      - store_artifacts:
-          path: logs
-          destination: logs
-      - store_artifacts:
-          path: release
-          destination: release
-  code-coverage-report:
+            mkdir -p workspace
+            docker save -o workspace/test-server-image.tar $CIRCLE_PROJECT_REPONAME
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - test-server-image.tar
+  deploy:
     docker:
-      - image: 813968012009.dkr.ecr.us-east-1.amazonaws.com/circleci-openjdk8-8u162
-        aws_auth:
-          aws_access_key_id: $AWS_ACCESS_KEY_ID
-          aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
+      - image: circleci/openjdk:8u162-jdk-stretch
+    environment:
+      HEROKU_APP: suv-service-test-pack
+      DOCKER_REPONAME: electrum/suv-test-server
     steps:
       - checkout
-      - restore_cache:
-          # if you ever need to invalidate the cache, simply bump the version number
-          keys:
-            - v1-maven-{{ .Branch }}-{{ checksum "pom.xml" }}
-            - v1-maven-{{ .Branch }}
       - run:
-          name: Generate code coverage report
-          command: mvn cobertura:cobertura -B -Dstyle.color=always
-      - store_artifacts:
-          path: target/site/cobertura
-          destination: coverage
+          name: Setup Heroku
+          command: |
+            echo 'machine git.heroku.com
+              login $HEROKU_LOGIN
+              password $HEROKU_API_KEY' > ~/.netrc
+            echo 'VerifyHostKeyDNS yes
+                  StrictHostKeyChecking no' > ~/.ssh/config
+      - run:
+          name: Deploy Master to Heroku
+          command: |
+            git push git@heroku.com:$HEROKU_APP.git master
+      - attach_workspace:
+          at: workspace
+      - run:
+          name: Export service interface version
+          command: |
+            echo "export TAG=$(mvn -q -Dexec.executable=echo -Dexec.args='${suv-version}' --non-recursive exec:exec | cut -c1)" >> $BASH_ENV
+      - setup_remote_docker
+      - run:
+          name: Deploy image to Docker Hub
+          command: |
+            docker load < workspace/test-server-image.tar
+            # tag with major version of underlying service interface
+            docker tag $CIRCLE_PROJECT_REPONAME $DOCKER_REPONAME:$TAG
+            echo $DOCKERHUB_PWD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+            docker push $DOCKER_REPONAME:$TAG
   build-with-latest-deps:
     docker:
       - image: 813968012009.dkr.ecr.us-east-1.amazonaws.com/circleci-openjdk8-8u162
         aws_auth:
           aws_access_key_id: $AWS_ACCESS_KEY_ID
           aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
+    working_directory: /home/circleci/project
     steps:
       - checkout
       - restore_cache:
@@ -86,9 +85,10 @@ jobs:
       - run:
           name: Update pom with latest Electrum deps
           command: /electrum/bin/updatePomWithLatestDeps.sh
+      - setup_remote_docker
       - run:
           name: Test, but only if any Electrum dependencies changed
-          command: /electrum/bin/testWithUpdatedDepsJava.sh
+          command: /electrum/bin/postmanTestWithUpdatedDepsJava.sh Suv
       - run:
           name: Notify success to slack
           command: /electrum/bin/notifySlackDepBuildSucceeded.sh
@@ -97,84 +97,20 @@ jobs:
           name: Notify failure to slack
           command: /electrum/bin/notifySlackDepBuildFailed.sh
           when: on_fail
-      - run:
-          name: Save test results
-          command: |
-            mkdir -p ~/tests/
-            if [ -d target/surefire-reports ]; then mkdir -p ~/tests/surefire/; cp target/surefire-reports/*.xml ~/tests/surefire/; fi
-            if [ -d target/failsafe-reports ]; then mkdir -p ~/tests/failsafe/; cp target/failsafe-reports/*.xml ~/tests/failsafe/; fi
-          when: always
-      - store_test_results:
-          path: ~/tests
-      - store_artifacts:
-          path: ~/tests
-          destination: tests
-      - store_artifacts:
-          path: log
-          destination: log
-      - store_artifacts:
-          path: logs
-          destination: logs
-  tests-for-test-server:
-    docker:
-      - image: 813968012009.dkr.ecr.us-east-1.amazonaws.com/circleci-openjdk8-8u162
-        aws_auth:
-          aws_access_key_id: $AWS_ACCESS_KEY_ID
-          aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
-    steps:
-      - checkout
-      - restore_cache:
-          # if you ever need to invalidate the cache, simply bump the version number
-          keys:
-            - v1-maven-{{ .Branch }}-{{ checksum "pom.xml" }}
-            - v1-maven-{{ .Branch }}
-      - setup_remote_docker:   # (2)
-          docker_layer_caching: true # (3)
-      - run:
-          name: Compile service for the Test server Docker container
-          command: mvn clean install -B -Dstyle.color=always
-      - run:
-          name: Build the Test Server Docker container
-          command: docker build -t=$CIRCLE_PROJECT_REPONAME ./target
-      - run:
-          name: Run the Test Server Service in the Docker Container
-          command: docker run -d -p 8080:8080 --name test-server-container $CIRCLE_PROJECT_REPONAME
-      - run:
-          name: Run postman tests from the collection against the docker test server service
-          command: docker exec test-server-container newman run test/Suv.postman_collection.json -e test/localhost.postman_environment.json
-  deploy-to-heroku:
-    machine:
-        enabled: true
-    environment:
-      HEROKU_APP: suv-service-test-pack
-    steps:
-      - checkout
-      - restore_cache:
-          # if you ever need to invalidate the cache, simply bump the version number
-          keys:
-            - v1-maven-{{ .Branch }}-{{ checksum "pom.xml" }}
-            - v1-maven-{{ .Branch }}
-      - run:
-          name: Deploy Master to Heroku
-          command: |
-            git push https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP.git master
 
 workflows:
   version: 2
   commit:
     jobs:
-      - build-and-release:
+      - build-and-test:
           context: java
-      - tests-for-test-server:
-          context: java
-      - code-coverage-report:
+      - deploy:
           context: java
           requires:
-            - build-and-release
-      - deploy-to-heroku:
-          context: java
-          requires:
-            - tests-for-test-server
+            - build-and-test
+          filters:
+            branches:
+              only: master
   nightly:
     jobs:
       - build-with-latest-deps:
