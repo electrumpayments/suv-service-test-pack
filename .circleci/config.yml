@@ -2,10 +2,10 @@ version: 2
 jobs:
   build-and-test:
     docker:
-      - image: 813968012009.dkr.ecr.us-east-1.amazonaws.com/circleci-openjdk8-8u162
-        aws_auth:
-          aws_access_key_id: $AWS_ACCESS_KEY_ID
-          aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
+      - image: ${ARTIFACTORY_DOCKER_URL}/circleci-openjdk
+        auth:
+          username: $ARTIFACTORY_READER_USERNAME
+          password: $ARTIFACTORY_READER_PASSWORD
     # The below is required because of https://discuss.circleci.com/t/circle-working-directory-doesnt-expand/17007
     working_directory: /home/circleci/project
     steps:
